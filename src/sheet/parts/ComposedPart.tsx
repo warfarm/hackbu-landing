@@ -144,13 +144,16 @@ export function ComposedPart() {
       <Entry
         name="QuestionsSection"
         path="src/components/sections/QuestionsSection.tsx"
-        use="Three questions newcomers actually ask, as a description list."
+        use="FAQ disclosures newcomers actually ask."
       >
-        <NoProps>The three questions are a const array inside the file.</NoProps>
+        <NoProps>
+          The questions are a const array inside the file; one panel opens at a
+          time.
+        </NoProps>
         <Block title="As rendered">
           <Stage
             label="QuestionsSection — on cloud"
-            note="RevealGroup as='dl', with each RevealItem wrapping a <dt>/<dd> pair."
+            note="RevealGroup of disclosure rows; each question is a button that toggles its answer."
           >
             <QuestionsSection />
           </Stage>
@@ -159,7 +162,8 @@ export function ComposedPart() {
           <Caption>
             This is the section whose <b>SectionHeader</b> has no lede — the
             questions are the content, and a paragraph introducing them would
-            only delay them.
+            only delay them. Answers stay collapsed until opened so eight items
+            stay scannable.
           </Caption>
         </Block>
       </Entry>
@@ -170,7 +174,7 @@ export function ComposedPart() {
         use="The last content section: the organisers’ address and the workshop archive, both as display-sized links."
       >
         <NoProps>
-          Reads CONTACT_EMAIL and RESOURCES_URL from src/lib/links.ts.
+          Reads CONTACT_EMAIL and ORGANIZERS_PATH from src/lib/links.ts.
         </NoProps>
         <Block title="As rendered">
           <Stage

@@ -182,3 +182,132 @@ export const SPONSORS_PHOTO = sponsorsPhoto(
   768,
   'Students around a workshop table with laptops, talking with a mentor, winter campus visible through the windows.',
 )
+
+/* -------------------------------------------------------------------------- */
+/* Campus landmarks (TreeHacks-style side décor)                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Binghamton Library Tower / carillon — flat cartoon cutout for the landing
+ * side landmark (TreeHacks-style). Transparent PNG/WebP/AVIF; JPG is a cloud
+ * flat for fallbacks. Source in `public/artwork/landmarks/`.
+ */
+export const CLOCK_TOWER = {
+  png: '/artwork/landmarks/clock-tower.png',
+  webp: '/artwork/landmarks/clock-tower.webp',
+  avif: '/artwork/landmarks/clock-tower.avif',
+  jpg: '/artwork/landmarks/clock-tower.jpg',
+  width: 266,
+  height: 1059,
+  alt: 'Cartoon illustration of the Binghamton University clock tower.',
+} as const
+
+/* -------------------------------------------------------------------------- */
+/* Organizer portraits                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Headshots on the Organizers page. Sources live in `public/artwork/organizers/`.
+ *
+ * Drop a JPG for each person using the filenames below, run `npm run images`
+ * (writes AVIF + WebP beside each JPG), then pass `true` as the third argument
+ * to `organizerPhoto(...)` for that entry. Until then the page shows a muted
+ * frost placeholder so missing files never 404 in the browser.
+ *
+ * Expected files (portrait ~4:5, any reasonable resolution — 800×1000 is fine):
+ *   matthew-ham.jpg
+ *   samuel-yu.jpg
+ *   carinna-lee.jpg
+ *   daniel-zheng.jpg
+ *   gianni-zaccarelli.jpg
+ *   joseph-costa.jpg
+ *   tianna-balkam.jpg
+ *   zak-sujkovic.jpg
+ *   hewitt-wang.jpg
+ *   rijaa-zaidi.jpg
+ *   raymond-chen.jpg
+ *
+ * Group photo (already shipped):
+ *   team.jpg
+ */
+function organizerPhoto(file: string, alt: string, ready = false): {
+  jpg: string
+  webp: string
+  avif: string
+  width: number
+  height: number
+  alt: string
+  ready: boolean
+} {
+  const base = `/artwork/organizers/${file}`
+  return {
+    jpg: `${base}.jpg`,
+    webp: `${base}.webp`,
+    avif: `${base}.avif`,
+    /** Placeholder intrinsic size — replace with real dimensions when cropping. */
+    width: 800,
+    height: 1000,
+    alt,
+    ready,
+  }
+}
+
+/** Group photo beside the organizers intro — always ready once team.jpg ships. */
+export const ORGANIZERS_TEAM_PHOTO = {
+  jpg: '/artwork/organizers/team.jpg',
+  webp: '/artwork/organizers/team.webp',
+  avif: '/artwork/organizers/team.avif',
+  width: 1024,
+  height: 758,
+  alt:
+    'HackBU organizers posing together at a group outing, standing in front of an orange backdrop.',
+} as const
+
+export const ORGANIZER_PHOTOS = {
+  'matthew-ham': organizerPhoto(
+    'matthew-ham',
+    'Portrait of Matthew Ham, HackBU President.',
+  ),
+  'samuel-yu': organizerPhoto(
+    'samuel-yu',
+    'Portrait of Samuel Yu, HackBU Vice President of Communications.',
+  ),
+  'carinna-lee': organizerPhoto(
+    'carinna-lee',
+    'Portrait of Carinna Lee, HackBU Vice President of Outreach.',
+  ),
+  'daniel-zheng': organizerPhoto(
+    'daniel-zheng',
+    'Portrait of Daniel Zheng, HackBU Vice President of Software.',
+  ),
+  'gianni-zaccarelli': organizerPhoto(
+    'gianni-zaccarelli',
+    'Portrait of Gianni Zaccarelli, HackBU Vice President of Logistics.',
+  ),
+  'joseph-costa': organizerPhoto(
+    'joseph-costa',
+    'Portrait of Joseph Costa, HackBU Vice President of Event Planning.',
+  ),
+  'tianna-balkam': organizerPhoto(
+    'tianna-balkam',
+    'Portrait of Tianna Balkam, HackBU organizer.',
+  ),
+  'zak-sujkovic': organizerPhoto(
+    'zak-sujkovic',
+    'Portrait of Zak Sujkovic, HackBU organizer.',
+  ),
+  'hewitt-wang': organizerPhoto(
+    'hewitt-wang',
+    'Portrait of Hewitt Wang, HackBU organizer.',
+  ),
+  'rijaa-zaidi': organizerPhoto(
+    'rijaa-zaidi',
+    'Portrait of Rijaa Zaidi, HackBU organizer.',
+  ),
+  'raymond-chen': organizerPhoto(
+    'raymond-chen',
+    'Portrait of Raymond Chen, HackBU organizer.',
+  ),
+} as const
+
+export type OrganizerPhoto = (typeof ORGANIZER_PHOTOS)[keyof typeof ORGANIZER_PHOTOS]

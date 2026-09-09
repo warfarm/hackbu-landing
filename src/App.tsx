@@ -2,6 +2,7 @@ import { domAnimation, LazyMotion } from 'motion/react'
 import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
 import { SnowdriftDivider } from './components/SnowdriftDivider'
+import { ScrollTwistLogo } from './components/ScrollTwistLogo'
 import { AboutSection } from './components/sections/AboutSection'
 import { GetInvolvedSection } from './components/sections/GetInvolvedSection'
 import { QuestionsSection } from './components/sections/QuestionsSection'
@@ -44,6 +45,7 @@ export default function App() {
         </a>
 
         <SiteHeader homeHref="#top" />
+        <ScrollTwistLogo />
 
         {/*
          * `tabIndex={-1}` so the skip link above actually moves focus.

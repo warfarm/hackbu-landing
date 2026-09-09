@@ -1,7 +1,11 @@
 import { Eyebrow, Section, SectionHeader } from '../../Layout'
 import { ExternalLink, LINK_ON_CLOUD } from '../../ExternalLink'
 import { Reveal, RevealGroup, RevealItem } from '../../Reveal'
-import { GOOGLE_CALENDAR_URL, ICAL_URL } from '../../../lib/links'
+import {
+  GOOGLE_CALENDAR_EMBED_URL,
+  GOOGLE_CALENDAR_URL,
+  ICAL_URL,
+} from '../../../lib/links'
 
 const LINK_CLASSES =
   'font-display text-display-md font-semibold underline underline-offset-8 ' +
@@ -12,11 +16,23 @@ export function CalendarSection() {
     <Section id="calendar" labelledBy="calendar-title" className="bg-cloud">
       <Reveal>
         <SectionHeader
-          eyebrow="Add to your calendar"
+          eyebrow="Calendar"
           titleId="calendar-title"
-          title="Stay up to date on our events."
-          lede="We provide an iCalendar link you can add to your calendar. Times and locations may change; check the feed for the latest."
+          title="See what’s coming up."
+          lede="Weekly workshops and special events live on the HackBU calendar. Times and locations may change — check here for the latest."
         />
+      </Reveal>
+
+      <Reveal delay={0.1}>
+        <div className="border-frost mt-12 overflow-hidden rounded-2xl border bg-cloud">
+          <iframe
+            title="HackBU event calendar"
+            src={GOOGLE_CALENDAR_EMBED_URL}
+            className="block h-[32rem] w-full sm:h-[40rem]"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
       </Reveal>
 
       <RevealGroup className="mt-12 grid gap-10 sm:grid-cols-2">
@@ -26,10 +42,10 @@ export function CalendarSection() {
             href={GOOGLE_CALENDAR_URL}
             className={`${LINK_CLASSES} mt-4 inline-block`}
           >
-            For Google Calendar
+            Add to Google Calendar
           </ExternalLink>
           <p className="text-caption text-pine/90 mt-4">
-            Adds the HackBU calendar to your Google account.
+            Subscribe so events show up in your Google account.
           </p>
         </RevealItem>
 
@@ -39,7 +55,7 @@ export function CalendarSection() {
             href={ICAL_URL}
             className={`${LINK_CLASSES} mt-4 inline-block`}
           >
-            For other calendars
+            Add with iCalendar
           </ExternalLink>
           <p className="text-caption text-pine/90 mt-4">
             Works with Apple Calendar, Outlook, and other apps that take an .ics

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 /**
  * The deployed origin, for the absolute URLs in the public pages' social
  * preview (`index.html`'s `og:url` and `og:image`, and the `og:image` on
- * `about|schedule|sponsors|hackathons.html` — scrapers do not resolve a
+ * `about|schedule|sponsors|hackathons|organizers.html` — scrapers do not resolve a
  * relative one).
  *
  * Vercel sets `VERCEL_PROJECT_PRODUCTION_URL` on every build to the project's
@@ -90,13 +90,13 @@ const PRELOADED_FONTS = [
  * the end of the head, so the three font requests are queued ahead of the
  * request that would otherwise have to complete before they could start.
  *
- * Every entry but `components.html`. The five public pages all set their body
+ * Every entry but `components.html`. The six public pages all set their body
  * copy in Inter 400/500 above the fold and their headings in Fraunces 600, and
  * each is a plausible cold first visit — an inbound link to `/about` or
  * `/schedule` has exactly the same problem `index.html` had. The component
  * sheet is excluded because it is internal, is `noindex`, and is never a cold
  * first visit that matters. The three faces are the same three assets on every
- * page, so the hints cost nothing beyond the five head tags themselves.
+ * page, so the hints cost nothing beyond the six head tags themselves.
  */
 function fontPreload(): Plugin {
   let base = '/'
@@ -134,9 +134,9 @@ function fontPreload(): Plugin {
 }
 
 /**
- * Serve `/about`, `/schedule`, `/sponsors`, `/hackathons` and `/components`
- * without the `.html` suffix in `vite dev`, matching the Vercel rewrites in
- * vercel.json.
+ * Serve `/about`, `/schedule`, `/sponsors`, `/hackathons`, `/organizers` and
+ * `/components` without the `.html` suffix in `vite dev`, matching the Vercel
+ * rewrites in vercel.json.
  */
 function cleanHtmlUrls(): Plugin {
   const rewrites: Record<string, string> = {
@@ -148,6 +148,8 @@ function cleanHtmlUrls(): Plugin {
     '/sponsors/': '/sponsors.html',
     '/hackathons': '/hackathons.html',
     '/hackathons/': '/hackathons.html',
+    '/organizers': '/organizers.html',
+    '/organizers/': '/organizers.html',
     '/components': '/components.html',
     '/components/': '/components.html',
   }
@@ -167,13 +169,14 @@ function cleanHtmlUrls(): Plugin {
 }
 
 /**
- * Six entry points, six pages:
+ * Seven entry points, seven pages:
  *
  *   index.html       the landing page          -> dist/index.html
  *   about.html       the About us page         -> dist/about.html
  *   schedule.html    the schedule page         -> dist/schedule.html
  *   sponsors.html    the sponsors page         -> dist/sponsors.html
  *   hackathons.html  the hackathons page       -> dist/hackathons.html
+ *   organizers.html  the organizers page       -> dist/organizers.html
  *   components.html  the component sheet       -> dist/components.html
  *
  * They share the component tree, so Rollup hoists what they all import into a
@@ -248,6 +251,7 @@ export default defineConfig({
         schedule: fileURLToPath(new URL('./schedule.html', import.meta.url)),
         sponsors: fileURLToPath(new URL('./sponsors.html', import.meta.url)),
         hackathons: fileURLToPath(new URL('./hackathons.html', import.meta.url)),
+        organizers: fileURLToPath(new URL('./organizers.html', import.meta.url)),
         components: fileURLToPath(new URL('./components.html', import.meta.url)),
       },
       output: { manualChunks },

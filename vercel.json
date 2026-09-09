@@ -37,6 +37,14 @@
       "destination": "/hackathons.html"
     },
     {
+      "source": "/organizers",
+      "destination": "/organizers.html"
+    },
+    {
+      "source": "/organizers/",
+      "destination": "/organizers.html"
+    },
+    {
       "source": "/components",
       "destination": "/components.html"
     },

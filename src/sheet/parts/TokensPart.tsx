@@ -57,7 +57,7 @@ const TOKENS: readonly Token[] = [
     name: 'cloud',
     hex: '#F7F5EE',
     swatch: 'bg-cloud',
-    role: 'The page ground, and the label colour on a brick button.',
+    role: 'The page ground, and the label colour on a pine button.',
     usage: 'Body background, header bar, every content section, the drift shapes.',
   },
   {
@@ -72,8 +72,8 @@ const TOKENS: readonly Token[] = [
     name: 'brick',
     hex: '#A2593A',
     swatch: 'bg-brick',
-    role: 'The only interactive accent. A brick surface means “join the Discord”.',
-    usage: 'The button fill, and the hover colour for links on cloud. Nothing else.',
+    role: 'Warm hover accent on the Discord button (pine at rest).',
+    usage: 'Discord button hover, and the hover colour for links on cloud.',
   },
   {
     name: 'stone',
@@ -86,9 +86,9 @@ const TOKENS: readonly Token[] = [
     name: 'pine',
     hex: '#3C5C48',
     swatch: 'bg-pine',
-    role: 'All text, all focus rings, and the button’s hover fill.',
+    role: 'All text, all focus rings, and the Discord button fill.',
     usage:
-      'Every piece of copy on the page; pine/90 for secondary text; the one focus-ring colour.',
+      'Every piece of copy on the page; pine/90 for secondary text; the one focus-ring colour; solid Discord buttons.',
   },
   {
     name: 'haze',
@@ -312,11 +312,11 @@ export function TokensPart() {
 
         <Block title="The rule that keeps this palette honest">
           <Rule>
-            brick is the page’s only interactive colour, and pine is its only
-            text colour. Every accessibility decision downstream — the two link
-            treatments, the single focus-ring tone, the retirement of haze —
-            follows from holding those two lines rather than from tuning
-            individual pairs.
+            pine is the page’s text colour and the Discord button fill; brick is
+            the warm hover on that button. Every accessibility decision
+            downstream — the two link treatments, the single focus-ring tone, the
+            retirement of haze — follows from holding those lines rather than
+            from tuning individual pairs.
           </Rule>
         </Block>
       </Entry>

@@ -48,9 +48,8 @@ type ExternalLinkProps = {
 
 /**
  * The club's own domain. Everything in `src/lib/links.ts` is either a page on
- * it (the three nav destinations, the eight footer pages, the resources archive
- * and the mailing-list form) or a third-party service (Discord, GitHub,
- * LinkedIn, Facebook, Twitter). One hostname test separates the two.
+ * it (in-site pages, the mailing-list form) or a third-party service (Discord,
+ * GitHub, LinkedIn, Facebook, Twitter). One hostname test separates the two.
  */
 const SITE_HOSTNAME = 'hackbu.org'
 
@@ -85,9 +84,9 @@ function isSameSite(href: string): boolean {
  * Two behaviours, picked by `isSameSite(href)` and by nothing else:
  *
  *   **hackbu.org** — navigates in place. No `target`, no notice. Eight footer
- *   pages, three nav destinations, the resources archive and the mailing-list
- *   form are all the club's own site; a new tab for them buys nothing and
- *   leaves the reader with a pile of windows onto one site (P4-1).
+ *   pages, nav destinations and the mailing-list form are all the club's own
+ *   site; a new tab for them buys nothing and leaves the reader with a pile of
+ *   windows onto one site (P4-1).
  *
  *   **everything else** — keeps `target="_blank"` with the `rel` hardening,
  *   and now says so. WCAG technique G201 asks that a new window be announced

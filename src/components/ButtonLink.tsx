@@ -2,16 +2,12 @@ import type { ReactNode } from 'react'
 import { ExternalLink } from './ExternalLink'
 
 /**
- * The page's only button treatment: solid brick, reserved for the Discord
+ * The page's only button treatment: solid pine, reserved for the Discord
  * conversion action. Size is the only thing that varies.
  *
- * brick is the single accent in the palette, so a button on screen always means
- * "join the Discord" — which is why there is one treatment and not a set. (A
- * `secondary` outlined-pine variant was declared here for supporting actions.
- * The finished page has none: every button is the Discord CTA, and the mailing
- * list, the resources archive and the nav are all text links. It went unused
- * through every phase and is gone; a second treatment can come back with the
- * second kind of action that needs it.)
+ * pine is the site's primary green (text, focus rings, controls), so the
+ * button reads as HackBU rather than a separate terracotta accent. Hover
+ * swaps to brick — the one warm accent — for a clear pressed/hover change.
  */
 type Size = 'sm' | 'md' | 'lg'
 
@@ -20,14 +16,10 @@ type Size = 'sm' | 'md' | 'lg'
  * against is whatever surrounds the button, not the button itself. Every button
  * on the page now sits on cloud or frost, where a pine ring reads at 6.83:1 and
  * 5.76:1 respectively — so one ring colour covers the whole page.
- *
- * (A `light` variant existed for the hero CTA, whose ring had to clear the pine
- * legibility scrim. That CTA now sits on cloud with the rest of the hero copy,
- * and the scrim went with it, leaving nothing that needs the second tone.)
  */
 const BASE =
-  'inline-flex items-center justify-center gap-2 rounded-full font-medium ' +
-  'bg-brick text-cloud hover:bg-pine ' +
+  'inline-flex items-center justify-center gap-2 rounded-lg font-medium ' +
+  'bg-pine text-cloud hover:bg-brick ' +
   'focus-visible:outline-pine focus-visible:outline-2 focus-visible:outline-offset-2'
 
 const SIZES: Record<Size, string> = {

@@ -1,7 +1,7 @@
 import { Eyebrow, Section, SectionHeader } from '../Layout'
 import { ExternalLink, LINK_ON_CLOUD, MailLink } from '../ExternalLink'
 import { Reveal, RevealGroup, RevealItem } from '../Reveal'
-import { CONTACT_EMAIL, RESOURCES_URL } from '../../lib/links'
+import { CONTACT_EMAIL, ORGANIZERS_PATH } from '../../lib/links'
 
 /* This section is on cloud, so brick is the hover. */
 const LINK_CLASSES =
@@ -10,7 +10,7 @@ const LINK_CLASSES =
 
 /**
  * "Contact" — the quiet landing at the bottom of the page: one email address
- * and a pointer at the resources archive, nothing else competing.
+ * and a pointer at the organizers, nothing else competing.
  */
 export function ContactSection() {
   return (
@@ -37,16 +37,15 @@ export function ContactSection() {
         </RevealItem>
 
         <RevealItem>
-          <Eyebrow>If you want a head start</Eyebrow>
+          <Eyebrow>Meet the team</Eyebrow>
           <ExternalLink
-            href={RESOURCES_URL}
+            href={ORGANIZERS_PATH}
             className={`${LINK_CLASSES} mt-4 inline-block`}
           >
-            Workshop resources
+            Organizers
           </ExternalLink>
           <p className="text-caption text-pine/90 mt-4">
-            Material from past workshops, in case you’d like a look before you
-            show up.
+            Who runs the workshops and the hackathon.
           </p>
         </RevealItem>
       </RevealGroup>

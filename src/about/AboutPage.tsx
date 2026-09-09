@@ -5,7 +5,7 @@ import { SnowdriftDivider } from '../components/SnowdriftDivider'
 import { Eyebrow, Section, SectionHeader } from '../components/Layout'
 import { Reveal } from '../components/Reveal'
 import { ExternalLink, LINK_ON_CLOUD } from '../components/ExternalLink'
-import { ABOUT_PATH, RESOURCES_URL } from '../lib/links'
+import { ABOUT_PATH, SCHEDULE_URL } from '../lib/links'
 import { ABOUT_PHOTOS } from '../lib/images'
 
 /**
@@ -23,7 +23,7 @@ import { ABOUT_PHOTOS } from '../lib/images'
  * tree and hydration has nothing to disagree about.
  */
 
-const RESOURCES_LINK = `${LINK_ON_CLOUD} underline underline-offset-4`
+const INLINE_LINK = `${LINK_ON_CLOUD} underline underline-offset-4`
 
 const PHOTO =
   'mx-auto aspect-[4/3] w-full max-w-sm md:max-w-none md:aspect-[3/4] lg:aspect-[4/5]'
@@ -136,12 +136,11 @@ export function AboutPage() {
                 lede="Many HackBU members have no programming experience."
               />
               <p className="text-lede text-pine mt-5 max-w-2xl">
-                We recommend attending our weekly workshops, but also take a look
-                at our{' '}
-                <ExternalLink href={RESOURCES_URL} className={RESOURCES_LINK}>
-                  resources page
-                </ExternalLink>{' '}
-                which will point you in the right direction. We’re happy to help!
+                We recommend attending our{' '}
+                <ExternalLink href={SCHEDULE_URL} className={INLINE_LINK}>
+                  weekly workshops
+                </ExternalLink>
+                . We’re happy to help!
               </p>
             </Reveal>
           </Section>

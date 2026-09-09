@@ -40,13 +40,8 @@ export function AboutSection() {
             id="about-title"
             className="font-display text-display-lg text-pine mt-4 font-semibold text-balance"
           >
-            HackBU exists to foster a community of individuals who solve
-            problems through the innovative use of technology.
+            Binghamton’s Premier Hackathon
           </h1>
-          <p className="text-lede text-pine mt-5">
-            We host weekly development workshops and hold our own hackathon
-            yearly.
-          </p>
         </header>
       </Reveal>
 

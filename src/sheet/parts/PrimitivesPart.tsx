@@ -13,7 +13,7 @@ import { Wordmark } from '../../components/Wordmark'
 import { SnowdriftDivider } from '../../components/SnowdriftDivider'
 import { Reveal, RevealGroup, RevealItem } from '../../components/Reveal'
 import { usePrefersReducedMotion } from '../../lib/motion'
-import { CONTACT_EMAIL, DISCORD_URL, RESOURCES_URL } from '../../lib/links'
+import { CONTACT_EMAIL, DISCORD_URL, ORGANIZERS_PATH } from '../../lib/links'
 
 /**
  * Part 2 — the standalone primitives, in isolation, with every variant.
@@ -151,12 +151,15 @@ function ButtonEntry() {
       <Block title="States">
         <ul className="border-frost text-body text-pine border-t">
           <li className="border-frost border-b py-3">
-            <b>Rest</b> — <span className="text-pine/90">bg-brick, text-cloud, fully rounded.</span>
+            <b>Rest</b> —{' '}
+            <span className="text-pine/90">
+              bg-pine, text-cloud, rounded-lg.
+            </span>
           </li>
           <li className="border-frost border-b py-3">
             <b>Hover</b> —{' '}
             <span className="text-pine/90">
-              the fill turns pine. Hover one above to see it; it is a colour
+              the fill turns brick. Hover one above to see it; it is a colour
               swap, not a transition — nothing in this project animates on
               hover.
             </span>
@@ -171,16 +174,13 @@ function ButtonEntry() {
         </ul>
       </Block>
 
-      <Block title="Why there is only one treatment">
+      <Block title="Why the ring stays one colour">
         <Rule>
           The ring is drawn at <b>outline-offset-2</b>, so what it has to stand
           out against is the surface around the button, not the button. Every
           button on the page sits on cloud or frost, where a pine ring measures
-          6.83:1 and 5.76:1 — one ring colour covers the whole page, and the{' '}
-          <b>light</b> variant that existed for the old hero CTA went with the
-          hero copy. A <b>secondary</b> outlined-pine variant was declared too
-          and never used: every button here is the same action, so a second
-          treatment would have meant something it never had to mean.
+          6.83:1 and 5.76:1 — one ring colour covers the whole page. The fill
+          is pine (the site green) at rest and brick on hover.
         </Rule>
       </Block>
     </Entry>
@@ -213,8 +213,8 @@ function LinkEntry() {
           <Ground tone="cloud" label="LINK_ON_CLOUD">
             <ul className="flex flex-col gap-3">
               <li>
-                <ExternalLink href={RESOURCES_URL} className={`text-body ${LINK_ON_CLOUD}`}>
-                  Workshop resources
+                <ExternalLink href={ORGANIZERS_PATH} className={`text-body ${LINK_ON_CLOUD}`}>
+                  Organizers
                 </ExternalLink>
               </li>
               <li>
@@ -229,8 +229,8 @@ function LinkEntry() {
           <Ground tone="frost" label="LINK_ON_FROST">
             <ul className="flex flex-col gap-3">
               <li>
-                <ExternalLink href={RESOURCES_URL} className={`text-body ${LINK_ON_FROST}`}>
-                  Workshop resources
+                <ExternalLink href={ORGANIZERS_PATH} className={`text-body ${LINK_ON_FROST}`}>
+                  Organizers
                 </ExternalLink>
               </li>
               <li>
@@ -381,8 +381,13 @@ const DIVIDERS = [
   },
   {
     variant: 'cloud-to-frost' as const,
-    where: 'Contact → the footer.',
-    what: 'A real colour change: a cloud band with one frost drift settling into the footer.',
+    where: 'Contact → the footer; also Organizers intro → leadership.',
+    what: 'A real colour change: a cloud band with one frost drift settling below.',
+  },
+  {
+    variant: 'frost-to-cloud' as const,
+    where: 'Organizers leadership → the team roster.',
+    what: 'The reverse colour change: a frost band with one cloud drift settling below.',
   },
 ]
 
@@ -398,7 +403,7 @@ function DividerEntry() {
           rows={[
             {
               name: 'variant',
-              type: "'drift-a' | 'drift-b' | 'drift-c' | 'cloud-to-frost'",
+              type: "'drift-a' | 'drift-b' | 'drift-c' | 'cloud-to-frost' | 'frost-to-cloud'",
               note: 'Picks the band colour and its paths. There is no other prop.',
             },
           ]}
@@ -410,7 +415,7 @@ function DividerEntry() {
         </Caption>
       </Block>
 
-      <Block title="All four variants">
+      <Block title="All five variants">
         <div className="flex flex-col gap-6">
           {DIVIDERS.map((divider) => (
             <div key={divider.variant}>
@@ -437,9 +442,10 @@ function DividerEntry() {
           A divider’s band is the colour of the section <b>above</b> it and its
           drifts are the colour of the section <b>below</b>. The three{' '}
           <b>drift-*</b> variants are cloud-to-cloud, so the frost band shows
-          between two cloud shapes and reads as a bank of settled snow rather
-          than a rule. Nothing here is symmetric and no edge is straight; add a
-          variant rather than reusing one.
+          through between two cloud shapes and reads as a bank of settled snow
+          rather than a rule. <b>cloud-to-frost</b> and <b>frost-to-cloud</b>{' '}
+          are the real colour changes. Nothing here is symmetric and no edge is
+          straight; add a variant rather than reusing one.
         </Rule>
       </Block>
     </Entry>

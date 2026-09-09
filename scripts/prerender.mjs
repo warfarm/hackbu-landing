@@ -1,7 +1,7 @@
 /**
  * Build-time prerender — the last step of `npm run build`.
  *
- * `vite build` writes six HTML files whose entire body is `<div id="root">`,
+ * `vite build` writes seven HTML files whose entire body is `<div id="root">`,
  * so nothing paints until ~100 KB gzip of JavaScript has downloaded, parsed and
  * executed, and the LCP element — the campus illustration — does not exist in
  * the HTML response at all (P5-1, and P5-8 with it: the twelve cloud cutouts
@@ -33,7 +33,7 @@
  * ---------------------------------------------------------------------------
  * What it does not do
  * ---------------------------------------------------------------------------
- * There is no data fetching, no router and no per-request state: all six pages
+ * There is no data fetching, no router and no per-request state: all seven pages
  * are the same for every visitor, which is what makes a build-time render
  * enough. Nothing from this file, from `src/entry-server.tsx`, or from
  * `react-dom/server` reaches the browser bundle — no HTML entry imports
@@ -67,6 +67,7 @@ const PAGES = [
   { file: 'dist/schedule.html', render: 'renderSchedule' },
   { file: 'dist/sponsors.html', render: 'renderSponsors' },
   { file: 'dist/hackathons.html', render: 'renderHackathons' },
+  { file: 'dist/organizers.html', render: 'renderOrganizers' },
   { file: 'dist/components.html', render: 'renderComponents' },
 ]
 

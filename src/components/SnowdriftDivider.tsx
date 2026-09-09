@@ -15,6 +15,7 @@ type DriftVariant =
   | 'drift-b'
   | 'drift-c'
   | 'cloud-to-frost'
+  | 'frost-to-cloud'
 
 type Shape = {
   /** Band background = the colour of the section above. */
@@ -71,6 +72,17 @@ const SHAPES: Record<DriftVariant, Shape> = {
       {
         className: 'fill-frost',
         d: 'M0,160 V112 C120,92 230,76 380,84 C540,92 620,126 800,124 C940,122 1040,90 1190,86 C1300,83 1370,98 1440,110 V160 Z',
+      },
+    ],
+  },
+
+  // Frost content band settling back into a cloud section.
+  'frost-to-cloud': {
+    background: 'bg-frost',
+    paths: [
+      {
+        className: 'fill-cloud',
+        d: 'M0,160 V108 C140,88 250,72 400,80 C550,88 640,122 820,118 C960,115 1060,86 1210,82 C1320,79 1380,96 1440,108 V160 Z',
       },
     ],
   },

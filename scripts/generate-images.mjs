@@ -187,6 +187,54 @@ async function generateSponsorsPhotos() {
   }
 }
 
+async function generateOrganizerPhotos() {
+  const dir = join(ARTWORK, 'organizers')
+  let files
+  try {
+    files = (await readdir(dir)).filter((name) => name.endsWith('.jpg'))
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      return
+    }
+    throw error
+  }
+  for (const file of files.sort()) {
+    const src = join(dir, file)
+    const base = file.replace(/\.jpg$/, '')
+    await emit(sharp(src).avif(AVIF), join(dir, `${base}.avif`))
+    await emit(sharp(src).webp(CAMPUS_WEBP), join(dir, `${base}.webp`))
+  }
+}
+
+async function generateLandmarkPhotos() {
+  const dir = join(ARTWORK, 'landmarks')
+  let files
+  try {
+    // Prefer PNG cutouts (alpha); also refresh JPG companions if present.
+    files = (await readdir(dir)).filter(
+      (name) => name.endsWith('.png') || name.endsWith('.jpg'),
+    )
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      return
+    }
+    throw error
+  }
+  const bases = new Set(files.map((f) => f.replace(/\.(png|jpg)$/, '')))
+  for (const base of [...bases].sort()) {
+    const png = join(dir, `${base}.png`)
+    const jpg = join(dir, `${base}.jpg`)
+    let src = png
+    try {
+      await stat(png)
+    } catch {
+      src = jpg
+    }
+    await emit(sharp(src).avif(AVIF), join(dir, `${base}.avif`))
+    await emit(sharp(src).webp(CAMPUS_WEBP), join(dir, `${base}.webp`))
+  }
+}
+
 /**
  * One mask rung: trim to ink, resize, throw the colour away, encode.
  *
@@ -267,6 +315,8 @@ await generateCampus()
 await generateClouds()
 await generateAboutPhotos()
 await generateSponsorsPhotos()
+await generateOrganizerPhotos()
+await generateLandmarkPhotos()
 const brandInk = await generateBrandMasks()
 await generateAppIcons()
 

@@ -10,8 +10,8 @@ const WORKSHOP_DETAILS = [
   },
   {
     kicker: 'What we cover',
-    title: 'Web and mobile',
-    body: 'Putting a page on screen, making it respond to someone using it, and getting an app running on a phone. You go at your own pace and organizers help when you get stuck.',
+    title: 'Tools and topics',
+    body: 'We go over things like PyTorch, Python, HTML/CSS, and SQL — hands-on, at a pace that works for you, with organizers around when you get stuck.',
     meta: 'Starting from the first step.',
   },
   {

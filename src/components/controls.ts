@@ -24,12 +24,11 @@
  *            separates from the page at the same 6.83:1, and `cloud` on `pine`
  *            is 6.83:1 for the content inside it.
  *
- * `pine` and not `brick`: `brick` is the page's single accent and means "join
- * the Discord" (see `ButtonLink.tsx`). A menu toggle is navigation furniture,
- * not the conversion action, so it takes the same pine that already carries
- * every focus ring and the button's own hover fill. `stone` was the other
- * candidate and cannot be used — it measures 1.81:1 on `cloud`, below the 3:1
- * bar this constant exists to clear.
+ * Outlined pine (not a solid fill): the Discord CTA owns the solid pine fill
+ * (see `ButtonLink.tsx`). A menu toggle is navigation furniture, so it takes
+ * the same pine edge language without competing as a filled conversion
+ * action. `stone` was the other candidate and cannot be used — it measures
+ * 1.81:1 on `cloud`, below the 3:1 bar this constant exists to clear.
  *
  * Carried verbatim from the inline strings: the pine focus ring at offset 2.
  * Not here, deliberately, and left to the call site: shape and size — radius,

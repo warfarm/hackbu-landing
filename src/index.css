@@ -139,12 +139,12 @@
    * are rendered as `mask-image` shapes filled with this one token (see
    * `.brand-mark-*` below), which normalises them at paint time.
    *
-   * It is not an accent and never becomes one: `brick` remains the page's only
-   * interactive colour. fern must not appear on a link, a button, a border, a
-   * background or any text — it measures 3.27:1 on cloud and 2.75:1 on frost,
-   * which is below AA for text at any size. Logotypes are exempt from WCAG
-   * 1.4.3 and 1.4.11; nothing else on this page is, which is the whole reason
-   * for the restriction.
+   * It is not an accent and never becomes one: pine carries text and the
+   * Discord button, brick is the warm hover. fern must not appear on a link, a
+   * button, a border, a background or any text — it measures 3.27:1 on cloud
+   * and 2.75:1 on frost, which is below AA for text at any size. Logotypes are
+   * exempt from WCAG 1.4.3 and 1.4.11; nothing else on this page is, which is
+   * the whole reason for the restriction.
    */
   --color-fern: #339966;
 
