@@ -125,8 +125,9 @@ const JPEG = { quality: 88, mozjpeg: true }
  * reason it prints the campus srcsets.
  */
 const BRAND_MASKS = [
-  { source: 'icon.png', base: 'bearcat-mask', widths: [64, 128] },
-  { source: 'text.png', base: 'wordmark-mask', widths: [192, 384] },
+  // The largest rung of each feeds `.brand-mark-lg` (the About us lockup).
+  { source: 'icon.png', base: 'bearcat-mask', widths: [64, 128, 256] },
+  { source: 'text.png', base: 'wordmark-mask', widths: [192, 384, 768] },
 ]
 
 const written = []

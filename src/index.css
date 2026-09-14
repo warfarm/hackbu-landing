@@ -283,4 +283,19 @@
       mask-image: url('/brand/wordmark-mask-384.png');
     }
   }
+
+  /*
+   * Display-size lockup (`<Wordmark large>`), drawn up to ~22rem wide. One
+   * rung covers both densities: 768px of wordmark is 2x at its largest draw.
+   * Declared after the media query so it wins at every resolution.
+   */
+  .brand-mark-lg.brand-mark-bearcat {
+    -webkit-mask-image: url('/brand/bearcat-mask-256.png');
+    mask-image: url('/brand/bearcat-mask-256.png');
+  }
+
+  .brand-mark-lg.brand-mark-wordmark {
+    -webkit-mask-image: url('/brand/wordmark-mask-768.png');
+    mask-image: url('/brand/wordmark-mask-768.png');
+  }
 }

@@ -50,7 +50,15 @@ function aspect(mark: { width: number; height: number }) {
   return `${mark.width} / ${mark.height}`
 }
 
-export function Wordmark({ className = '' }: { className?: string }) {
+export function Wordmark({
+  className = '',
+  large = false,
+}: {
+  className?: string
+  /** Use the display-size mask rungs, for lockups drawn well past header size. */
+  large?: boolean
+}) {
+  const size = large ? 'brand-mark-lg' : ''
   return (
     <span
       // eslint-disable-next-line jsx-a11y/prefer-tag-over-role
@@ -59,11 +67,11 @@ export function Wordmark({ className = '' }: { className?: string }) {
       className={`flex w-fit items-center gap-[0.34em] ${className}`}
     >
       <span
-        className="brand-mark brand-mark-bearcat bg-fern block"
+        className={`brand-mark brand-mark-bearcat ${size} bg-fern block`}
         style={{ height: `${BEARCAT_EM}em`, aspectRatio: aspect(BEARCAT_MARK) }}
       />
       <span
-        className="brand-mark brand-mark-wordmark bg-fern block"
+        className={`brand-mark brand-mark-wordmark ${size} bg-fern block`}
         style={{ height: `${WORDMARK_EM}em`, aspectRatio: aspect(WORDMARK_MARK) }}
       />
     </span>
