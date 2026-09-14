@@ -19,7 +19,7 @@
 /* -------------------------------------------------------------------------- */
 
 /**
- * The hero is a real photograph — `hackbuimage/image.png`, an aerial of the
+ * The hero is a real photograph — `hackbuimage/hero.png`, an aerial of the
  * whole Binghamton campus under snow, 1200 x 674 — and the derivatives are
  * cut from it at and below its own width, never enlarged. There is no
  * upscaled master any more: a photograph does not survive machine enlargement

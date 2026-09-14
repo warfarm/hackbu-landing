@@ -206,7 +206,7 @@ The files the site actually ships are in `public/artwork/`.
 
 ```
 hackbuimage/                    read-only photographs, as delivered
-  image.png                     the hero — aerial of the whole campus, 1200 x 674
+  hero.png                      the hero — aerial of the whole campus, 1200 x 674
   winter-header.jpg             About — the clock tower and plaza from the air, 1600 x 600
   1-KS1-WEB-2-1024x683.jpg      Get involved — two students on a snowy path
   47065170581_63875cf429_b.jpg  Questions — winter walkway from above, 658 x 1024
@@ -221,7 +221,7 @@ public/artwork/
 
 To replace a photograph:
 
-1. Drop the new file into `hackbuimage/`. For the hero, keep the name `image.png`;
+1. Drop the new file into `hackbuimage/`. For the hero, keep the name `hero.png`;
    for a section photo, either keep the existing name or update the `SECTION_PHOTOS`
    table at the top of `scripts/generate-images.mjs`.
 2. Run `npm run images` to regenerate the JPEG fallback and the AVIF and WebP derivatives

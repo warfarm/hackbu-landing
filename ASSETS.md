@@ -10,7 +10,7 @@ downloads is a derivative in `public/artwork/`:
   `public/` any more.
 
 ```
-hackbuimage/image.png                    ->  public/artwork/photos/hero-campus.jpg
+hackbuimage/hero.png                     ->  public/artwork/photos/hero-campus.jpg
                                              public/artwork/photos/hero-campus-{640,960,1200}.{avif,webp}
 hackbuimage/winter-header.jpg            ->  public/artwork/photos/plaza-winter.{jpg,avif,webp}
 hackbuimage/1-KS1-WEB-2-1024x683.jpg     ->  public/artwork/photos/snow-walk.{jpg,avif,webp}
@@ -30,7 +30,7 @@ the JPEG stays as the `<picture>` fallback. See "The page photographs" below.
 
 ## The hero photograph
 
-**`hackbuimage/image.png` (1200 × 674, 1,732,782 B) is the hero** — a real aerial
+**`hackbuimage/hero.png` (1200 × 674, 1,732,782 B) is the hero** — a real aerial
 photograph of the whole Binghamton University campus under snow: the brick Library Tower
 at the centre, academic buildings and dormitories around it, snow-covered walkways across
 the plaza, forested hills behind. It replaced the AI-generated cel-shaded illustration on
@@ -102,7 +102,7 @@ Not shipped, listed for completeness:
 
 | File | Dimensions (px) | File size | Why it stays put |
 | --- | --- | --- | --- |
-| `hackbuimage/*` (4 files) | as above | 2,257,126 B | The delivered photographs — the read-only source `npm run images` reads. Never copied to `public/` verbatim; `image.png` in particular is a 1.7 MB PNG of a photograph, which is why the fallbacks are re-encoded JPEGs. |
+| `hackbuimage/*` (4 files) | as above | 2,257,126 B | The delivered photographs — the read-only source `npm run images` reads. Never copied to `public/` verbatim; `hero.png` in particular is a 1.7 MB PNG of a photograph, which is why the fallbacks are re-encoded JPEGs. |
 | `artwork/campus/Campus.png` | 1672 × 941 | 2,829,783 B | The retired illustration (see above). |
 | `artwork/campus/Campus-upscaled-6688.webp` | 6688 × 3764 | 24,033,448 B | Its 4x Real-ESRGAN master (see above). |
 | `artwork/clouds/cloud-1..12.png` | 224–430 × 70–303 | 838,494 B together | The twelve cloud cutouts the hero no longer renders (see "The cloud cutouts"). |
@@ -237,5 +237,5 @@ re-encoding it as a palette PNG is what turns it into the 10 KB social card abov
 - **The hero AVIF is 189 KB** and is the largest-contentful-paint candidate; it is
   preloaded from `index.html` with the same `imagesrcset`/`imagesizes` as the `<picture>`
   so it is fetched exactly once.
-- **`image.png` is a photograph stored as PNG** (1.7 MB for 1200 × 674). It is never
+- **`hero.png` is a photograph stored as PNG** (1.7 MB for 1200 × 674). It is never
   served; the re-encoded 243 KB JPEG fallback and the 189 KB AVIF are.

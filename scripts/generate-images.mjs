@@ -14,7 +14,7 @@
  * ---------------------------------------------------------------------------
  * Widths
  * ---------------------------------------------------------------------------
- * The hero is `hackbuimage/image.png`, a 1200 x 674 photograph (a PNG of a
+ * The hero is `hackbuimage/hero.png`, a 1200 x 674 photograph (a PNG of a
  * photo, so its `<img src>` fallback is a re-encoded JPEG), and the hero
  * magnifies it only 1.2x at its start frame — so the ladder is cut at and
  * below the source width and never enlarged: 640, 960 and the 1200 source
@@ -95,7 +95,7 @@ const PHOTOS_OUT = join(ARTWORK, 'photos')
  * The script prints both strings at the end of a run so a drift is visible.
  * The top rung is the source's own width; nothing is enlarged.
  */
-const HERO_SOURCE = join(PHOTO_SOURCE, 'image.png')
+const HERO_SOURCE = join(PHOTO_SOURCE, 'hero.png')
 const HERO_WIDTHS = [640, 960, 1200]
 
 /**
