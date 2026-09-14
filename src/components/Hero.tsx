@@ -18,14 +18,8 @@ import {
 } from '../lib/motion'
 
 /**
- * The hero: a scroll-driven pan down the campus illustration.
- *
- * It is illustration and nothing else. The headline, lede and Discord CTA live
- * in <AboutSection> instead, on the cloud background below — cloud text over
- * the painted sky measures 1.43:1, and the only wash that lifts it past 4.5:1
- * is a near-opaque pine field covering most of the frame. Keeping the copy off
- * the hero avoids that trade rather than tuning it: no text sits over the
- * artwork at any scroll position, so there is nothing to make legible.
+ * The hero: a scroll-driven pan down the campus illustration, with the page's
+ * welcome headline over the sky.
  *
  * Layer contract:
  *
@@ -35,10 +29,12 @@ import {
  *       <div data-hero-artwork>    the campus illustration, as a <picture> —
  *                                  scaled up and panned down.
  *       <div data-hero-clouds>     the cloud-1..12 parallax layers.
+ *       <div data-hero-copy>       welcome headline + lede, above the clouds.
  *
- * Everything inside the stage is wrapped in a HeroScrollContext, so the cloud
- * layers read the same progress values instead of opening a second scroll
- * subscription. See src/lib/motion.ts.
+ * A pine wash and text-shadow keep cloud (cream) type readable on sky and
+ * painted clouds. Everything inside the stage is wrapped in a
+ * HeroScrollContext, so the cloud layers read the same progress values instead
+ * of opening a second scroll subscription. See src/lib/motion.ts.
  */
 
 /* -------------------------------------------------------------------------- */
@@ -222,13 +218,7 @@ export function Hero() {
       // out of the tab order; `focus:outline-none` keeps the programmatic
       // focus from drawing the UA ring around the whole 260dvh track.
       tabIndex={-1}
-      // The hero carries no heading now, so it names itself. Short on purpose:
-      // this is the landmark's label, and the full description of what is in
-      // the picture is the <img>'s alt (CAMPUS_ALT), one level down. Kept as
-      // is: the overlap with the alt is P4-7, which passes 1.1.1 and 1.3.1 on
-      // both counts — the label is what a landmark list shows, the alt is what
-      // the picture says, and dropping either loses one of the two.
-      aria-label="Campus illustration"
+      aria-labelledby="hero-title"
       // No `overflow-hidden` here: an overflow-clipped ancestor becomes the
       // sticky element's scrollport and the stage would never pin. The stage
       // clips the scaled artwork itself.
@@ -282,6 +272,32 @@ export function Hero() {
               `data-hero-clouds` layer itself and reads useHeroScroll() from the
               context above rather than opening its own subscription. */}
           <HeroClouds />
+
+          {/*
+           * Welcome copy in the sky band. Cleared below the fixed header
+           * (h-16 / sm:h-20). Pine wash + text-shadow keep the type readable
+           * on sky and painted clouds.
+           */}
+          <div
+            data-hero-copy
+            className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-6 pt-24 sm:pt-28"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-pine/80 via-pine/45 to-transparent sm:h-64"
+            />
+            <div className="relative max-w-3xl text-center">
+              <h1
+                id="hero-title"
+                className="font-display text-display-xl text-cloud font-bold text-balance [text-shadow:0_2px_4px_rgb(60_92_72_/_0.85),0_6px_28px_rgb(60_92_72_/_0.55)]"
+              >
+                Welcome to HackBU
+              </h1>
+              <p className="text-lede text-cloud mt-3 font-medium text-pretty sm:mt-4 [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
+                Binghamton University&apos;s Premier Hackathon
+              </p>
+            </div>
+          </div>
         </div>
       </HeroScrollContext>
     </section>

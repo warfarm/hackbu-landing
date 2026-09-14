@@ -12,12 +12,8 @@ import { SiteFooter } from './components/SiteFooter'
 /**
  * Page shell.
  *
- * Order is: fixed header -> the hero's scroll track -> five content sections on
- * cloud, separated by snowdrift dividers -> footer on frost.
- *
- * page's masthead and carries the only <h1>; it and <AboutSection> are one
- * uninterrupted stretch of cloud, so the drift between them would separate
- * nothing and there isn't one.
+ * Order is: fixed header -> the hero's scroll track (with the page <h1>) ->
+ * content sections on cloud, separated by snowdrift dividers -> footer on frost.
  *
  * The hero is the only element the scroll work touches; see
  * src/components/Hero.tsx for its layer contract.

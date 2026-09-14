@@ -94,6 +94,13 @@ export const CAMPUS_ALT =
   'walkways, the Library Tower at the centre, bare winter hillsides behind, ' +
   'and a bright blue sky with white clouds overhead.'
 
+/** Cartoon Baxter the Bearcat — welcome pose for the hero. */
+export const BAXTER_PNG = '/artwork/mascot/Baxter.png'
+export const BAXTER_WIDTH = 1024
+export const BAXTER_HEIGHT = 1024
+export const BAXTER_ALT =
+  'Baxter the Binghamton Bearcat, waving in a green Binghamton basketball jersey.'
+
 /* -------------------------------------------------------------------------- */
 /* Brand marks                                                                */
 /* -------------------------------------------------------------------------- */
