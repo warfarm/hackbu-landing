@@ -24,7 +24,7 @@ export const CAMPUS_HEIGHT = 941
  * the illustration (see scripts/generate-images.mjs for why 4x). The hero
  * magnifies the illustration up to 3.8x, so the start frame is displayed far
  * wider than 1672px on every screen — the upscaled rungs are what keep it from
- * rendering soft next to the pixel-crisp cloud cutouts.
+ * rendering soft there.
  */
 const CAMPUS_WIDTHS = [640, 960, 1280, 1672, 2508, 3344, 5016, 6688] as const
 
@@ -117,16 +117,6 @@ export const BAXTER_ALT =
  */
 export const BEARCAT_MARK = { width: 1741, height: 1828 } as const
 export const WORDMARK_MARK = { width: 7690, height: 1080 } as const
-
-/** Cloud cutouts are pure decoration; only their format sources vary. */
-export function cloudSources(file: string) {
-  const base = file.replace(/\.png$/, '')
-  return {
-    png: `/artwork/clouds/${base}.png`,
-    webp: `/artwork/clouds/${base}.webp`,
-    avif: `/artwork/clouds/${base}.avif`,
-  }
-}
 
 /* -------------------------------------------------------------------------- */
 /* About us photos                                                            */

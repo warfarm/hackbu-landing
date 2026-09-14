@@ -1,6 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { m, useMotionValueEvent, useScroll, useTransform } from 'motion/react'
-import { HeroClouds } from './HeroClouds'
 import {
   CAMPUS_ALT,
   CAMPUS_HEIGHT,
@@ -11,10 +10,8 @@ import {
 } from '../lib/images'
 import {
   HERO_PAN_EASE,
-  HeroScrollContext,
   rangeProgress,
   usePrefersReducedMotion,
-  type HeroScroll,
 } from '../lib/motion'
 
 /**
@@ -28,13 +25,12 @@ import {
  *     <div data-hero-stage>        sticky top-0, exactly one viewport tall.
  *       <div data-hero-artwork>    the campus illustration, as a <picture> —
  *                                  scaled up and panned down.
- *       <div data-hero-clouds>     the cloud-1..12 parallax layers.
- *       <div data-hero-copy>       welcome headline + lede, above the clouds.
+ *       <div data-hero-copy>       welcome headline + lede, above the artwork.
  *
  * A pine wash and text-shadow keep cloud (cream) type readable on sky and
- * painted clouds. Everything inside the stage is wrapped in a
- * HeroScrollContext, so the cloud layers read the same progress values instead
- * of opening a second scroll subscription. See src/lib/motion.ts.
+ * painted clouds. (A drifting cloud-cutout parallax used to sit between the
+ * artwork and the copy; it was removed, so the hero is the illustration and
+ * the headline and nothing else.)
  */
 
 /* -------------------------------------------------------------------------- */
@@ -137,7 +133,7 @@ export function Hero() {
 
   // The page's only scroll subscription, and it is motion's, not ours — no
   // hand-rolled `addEventListener('scroll', ...)` anywhere in src/. Everything
-  // downstream — including HeroClouds's parallax — derives from this one value.
+  // downstream derives from this one value.
   const { scrollYProgress: progress } = useScroll({
     target: trackRef,
     offset: ['start start', 'end end'],
@@ -186,11 +182,11 @@ export function Hero() {
    * lets that texture go.
    *
    * Both directions re-arm when the reader scrolls back into the interval, so
-   * neither release is a one-way latch. The same shape as `drifting` in
-   * HeroClouds: motion's own `useMotionValueEvent` on the single `useScroll`
-   * value — still no `scroll` listener in `src/` — and the boolean changes at
-   * most twice per traversal, so React bails out of a re-render on every
-   * frame either side of a crossing.
+   * neither release is a one-way latch. It is motion's own
+   * `useMotionValueEvent` on the single `useScroll` value — still no `scroll`
+   * listener in `src/` — and the boolean changes at most twice per traversal,
+   * so React bails out of a re-render on every frame either side of a
+   * crossing.
    */
   const [panning, setPanning] = useState(() => {
     const p = progress.get()
@@ -199,11 +195,6 @@ export function Hero() {
   useMotionValueEvent(progress, 'change', (p) => {
     setPanning(p > 0 && p <= PAN_SCROLL_FRACTION)
   })
-
-  const heroScroll = useMemo<HeroScroll>(
-    () => ({ progress, reducedMotion }),
-    [progress, reducedMotion],
-  )
 
   return (
     <section
@@ -224,82 +215,75 @@ export function Hero() {
       // clips the scaled artwork itself.
       className={`bg-sky relative w-full focus:outline-none ${reducedMotion ? 'h-dvh' : TRACK_HEIGHT}`}
     >
-      <HeroScrollContext value={heroScroll}>
-        <div
-          data-hero-stage
-          className="sticky top-0 h-dvh w-full overflow-hidden"
-        >
-          <div data-hero-artwork className="absolute inset-0">
-            {/*
-             * `display: contents` so the <picture> adds no box of its own and
-             * the <img>'s `h-full` still resolves against the stage-sized div
-             * above it. AVIF first, WebP second, the original PNG as the
-             * `<img src>` a browser only reaches if it understands neither.
-             */}
-            <picture className="contents">
-              <source
-                type="image/avif"
-                srcSet={CAMPUS_SRCSET.avif}
-                sizes={CAMPUS_SIZES}
-              />
-              <source
-                type="image/webp"
-                srcSet={CAMPUS_SRCSET.webp}
-                sizes={CAMPUS_SIZES}
-              />
-              <m.img
-                src={CAMPUS_PNG}
-                alt={CAMPUS_ALT}
-                width={CAMPUS_WIDTH}
-                height={CAMPUS_HEIGHT}
-                draggable={false}
-                decoding="async"
-                fetchPriority="high"
-                // `will-change` only while the scale is actually moving: never
-                // under reduced motion (where it is pinned to 1), never at
-                // rest at scroll 0 (where the hint made the compositor show a
-                // stale low-res raster of the start frame), and released past
-                // `PAN_SCROLL_FRACTION` — see `panning` above.
-                className={`h-full w-full origin-top ${CAMPUS_OBJECT_POSITION} object-cover select-none ${
-                  reducedMotion || !panning ? '' : 'will-change-transform'
-                }`}
-                style={{ scale }}
-              />
-            </picture>
-          </div>
-
-          {/* The drifting cloud parallax. <HeroClouds> renders the
-              `data-hero-clouds` layer itself and reads useHeroScroll() from the
-              context above rather than opening its own subscription. */}
-          <HeroClouds />
-
+      <div
+        data-hero-stage
+        className="sticky top-0 h-dvh w-full overflow-hidden"
+      >
+        <div data-hero-artwork className="absolute inset-0">
           {/*
-           * Welcome copy in the sky band. Cleared below the fixed header
-           * (h-16 / sm:h-20). Pine wash + text-shadow keep the type readable
-           * on sky and painted clouds.
+           * `display: contents` so the <picture> adds no box of its own and
+           * the <img>'s `h-full` still resolves against the stage-sized div
+           * above it. AVIF first, WebP second, the original PNG as the
+           * `<img src>` a browser only reaches if it understands neither.
            */}
-          <div
-            data-hero-copy
-            className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-6 pt-24 sm:pt-28"
-          >
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-pine/80 via-pine/45 to-transparent sm:h-64"
+          <picture className="contents">
+            <source
+              type="image/avif"
+              srcSet={CAMPUS_SRCSET.avif}
+              sizes={CAMPUS_SIZES}
             />
-            <div className="relative max-w-3xl text-center">
-              <h1
-                id="hero-title"
-                className="font-display text-display-xl text-cloud font-bold text-balance [text-shadow:0_2px_4px_rgb(60_92_72_/_0.85),0_6px_28px_rgb(60_92_72_/_0.55)]"
-              >
-                Welcome to HackBU
-              </h1>
-              <p className="text-lede text-cloud mt-3 font-medium text-pretty sm:mt-4 [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
-                Binghamton University&apos;s Premier Hackathon
-              </p>
-            </div>
+            <source
+              type="image/webp"
+              srcSet={CAMPUS_SRCSET.webp}
+              sizes={CAMPUS_SIZES}
+            />
+            <m.img
+              src={CAMPUS_PNG}
+              alt={CAMPUS_ALT}
+              width={CAMPUS_WIDTH}
+              height={CAMPUS_HEIGHT}
+              draggable={false}
+              decoding="async"
+              fetchPriority="high"
+              // `will-change` only while the scale is actually moving: never
+              // under reduced motion (where it is pinned to 1), never at
+              // rest at scroll 0 (where the hint made the compositor show a
+              // stale low-res raster of the start frame), and released past
+              // `PAN_SCROLL_FRACTION` — see `panning` above.
+              className={`h-full w-full origin-top ${CAMPUS_OBJECT_POSITION} object-cover select-none ${
+                reducedMotion || !panning ? '' : 'will-change-transform'
+              }`}
+              style={{ scale }}
+            />
+          </picture>
+        </div>
+
+        {/*
+         * Welcome copy in the sky band. Cleared below the fixed header
+         * (h-16 / sm:h-20). Pine wash + text-shadow keep the type readable
+         * on sky and painted clouds.
+         */}
+        <div
+          data-hero-copy
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-6 pt-24 sm:pt-28"
+        >
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-pine/80 via-pine/45 to-transparent sm:h-64"
+          />
+          <div className="relative max-w-3xl text-center">
+            <h1
+              id="hero-title"
+              className="font-display text-display-xl text-cloud font-bold text-balance [text-shadow:0_2px_4px_rgb(60_92_72_/_0.85),0_6px_28px_rgb(60_92_72_/_0.55)]"
+            >
+              Welcome to HackBU
+            </h1>
+            <p className="text-lede text-cloud mt-3 font-medium text-pretty sm:mt-4 [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
+              Binghamton University&apos;s Premier Hackathon
+            </p>
           </div>
         </div>
-      </HeroScrollContext>
+      </div>
     </section>
   )
 }

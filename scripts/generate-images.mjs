@@ -23,17 +23,13 @@
  * interpolation is involved at all. **6688 is the ceiling** — the enlarger's
  * own 4x output, inspected at 1:1 before shipping. At 4x the model is drawing
  * plausible detail rather than recovering real pixels, but the artwork's flat
- * cel-shaded style survives that almost perfectly, and next to the pixel-crisp
- * cloud cutouts the honest alternative (a soft campus) reads as a defect.
+ * cel-shaded style survives that almost perfectly, and the honest alternative
+ * (a soft campus) reads as a defect at 3.8x.
  *
- * The twelve clouds are 224-430px cutouts rendered at up to 1.15x, so they are
- * also already at or past 1:1 on every screen. One derivative each, at the
- * intrinsic width; a <picture> with no srcset, switching on format only.
- *
- * `generateClouds` reads whatever PNGs sit in `public/artwork/clouds/`, which is
- * the cutouts and only the cutouts. `artwork/clouds/clouds-all-b.png` is a
- * reference contact sheet of all twelve, not a cutout, and is deliberately not
- * copied into `public/` — so it never reaches this script or the browser.
+ * (The hero used to layer twelve cloud cutouts over the sky, encoded here from
+ * `public/artwork/clouds/`. That layer was removed; the originals stay in
+ * `artwork/clouds/` as read-only reference and nothing copies them into
+ * `public/`, so this script never sees them.)
  *
  * ---------------------------------------------------------------------------
  * Quality
@@ -104,9 +100,6 @@ const CAMPUS_NATIVE_CEILING = 1672
 
 const AVIF = { quality: 68, effort: 6 }
 const CAMPUS_WEBP = { quality: 82, effort: 6 }
-/** The cutouts are mostly soft alpha edges; a high alphaQuality keeps them clean. */
-const CLOUD_AVIF = { quality: 70, effort: 6 }
-const CLOUD_WEBP = { quality: 82, effort: 6, alphaQuality: 90 }
 
 /**
  * The mask ladder. `widths` is `[1x, 2x]`, sized against the *largest* place
@@ -151,17 +144,6 @@ async function generateCampus() {
       resized().webp(CAMPUS_WEBP),
       join(ARTWORK, 'campus', `Campus-${width}.webp`),
     )
-  }
-}
-
-async function generateClouds() {
-  const dir = join(ARTWORK, 'clouds')
-  const files = (await readdir(dir)).filter((name) => name.endsWith('.png'))
-  for (const file of files.sort()) {
-    const src = join(dir, file)
-    const base = file.replace(/\.png$/, '')
-    await emit(sharp(src).avif(CLOUD_AVIF), join(dir, `${base}.avif`))
-    await emit(sharp(src).webp(CLOUD_WEBP), join(dir, `${base}.webp`))
   }
 }
 
@@ -312,7 +294,6 @@ function kb(bytes) {
 }
 
 await generateCampus()
-await generateClouds()
 await generateAboutPhotos()
 await generateSponsorsPhotos()
 await generateOrganizerPhotos()
@@ -341,21 +322,14 @@ for (const [base, { width, height }] of Object.entries(brandInk)) {
   )
 }
 
-// The realistic first load: one campus tier + every cloud, in one format.
-const cloudCount = written.filter(
-  (w) => w.path.includes('clouds') && w.path.endsWith('avif'),
-).length
+// The realistic first load: the widest campus tier, in one format.
+const pngStat = await stat(join(ARTWORK, 'campus', 'Campus.png'))
 for (const ext of ['avif', 'webp']) {
   const campusTop = written.find((w) =>
     w.path.endsWith(`Campus-${CAMPUS_WIDTHS.at(-1)}.${ext}`),
   )
-  const clouds = written
-    .filter((w) => w.path.includes('clouds') && w.path.endsWith(ext))
-    .reduce((sum, w) => sum + w.bytes, 0)
-  const pngStat = await stat(join(ARTWORK, 'campus', 'Campus.png'))
   console.log(
-    `\nFirst load, ${ext.toUpperCase()} path (widest campus tier + ${cloudCount} clouds): ` +
-      `${kb(campusTop.bytes + clouds)}` +
+    `\nFirst load, ${ext.toUpperCase()} path (widest campus tier): ${kb(campusTop.bytes)}` +
       (ext === 'avif' ? `  [campus PNG alone is ${kb(pngStat.size)}]` : ''),
   )
 }

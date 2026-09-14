@@ -4,10 +4,10 @@ A redesigned landing page for [HackBU](https://hackbu.org), the student tech clu
 Binghamton University. One job: get undergrads — most of them with no programming
 experience — into the Discord.
 
-The hero is a painterly illustration of campus under snow. On load the screen holds the
-top third of it — sky, drifting clouds, and the wooded ridgeline on the far side of
-campus, but **no buildings**; scrolling tilts the view down through the cloud layers to
-reveal the whole campus, holds for a beat, then scrolls away to the content below.
+The hero is an illustration of campus under snow. On load the screen holds the top third
+of it — sky and the wooded ridgeline on the far side of campus, but **no buildings**;
+scrolling tilts the view down to reveal the whole campus, holds for a beat, then scrolls
+away to the content below.
 
 (At `PAN_START_SCALE = 3.8` the opening frame is at most image rows 0–0.263, and the
 hill silhouette breaks the horizon at row 0.1413 — so roughly the lower half of the
@@ -208,15 +208,12 @@ artwork/                     read-only originals
 public/artwork/
   campus/Campus.png          the campus illustration
   campus/Campus-{640,960,1280,1672,2508,3344,5016,6688}.{avif,webp}
-  clouds/cloud-1..12.png     transparent cloud cutouts
-  clouds/cloud-1..12.{avif,webp}
 ```
 
 To replace the artwork:
 
-1. Drop the new PNGs into `public/artwork/`, keeping the same filenames. The campus
-   illustration must stay a single opaque image; the clouds must stay RGBA cutouts with
-   real alpha.
+1. Drop the new PNG into `public/artwork/`, keeping the same filename. The campus
+   illustration must stay a single opaque image.
 2. Rebuild `artwork/campus/Campus-upscaled-6688.webp` (named for the 4x width — rename
    if the new source's width differs) for the new campus illustration: the raw 4x
    Real-ESRGAN (`realesrgan-x4plus`) enlargement, stored as lossless WebP.
@@ -246,15 +243,11 @@ Two numbers in the hero are tied to the specific artwork and will need re-derivi
   `transform-origin: top`, is what keeps the framing correct on ultra-wide displays; leave
   it at `0%`.
 
-Cloud placement and the three depth layers are configured at the top of
-`src/components/HeroClouds.tsx` — twelve cutouts, four per layer, cast onto the layers by
-intrinsic height. The horizontal drift loop derives its tile count from how far clouds
-hang past the tile edge, so clouds can be repositioned freely without breaking the
-seamless wrap.
-
-`artwork/clouds/clouds-all-b.png` is a reference contact sheet of the twelve cutouts, not
-a cutout. It stays in `artwork/` and must not be copied into `public/`, or `npm run
-images` will encode it and the browser will download it.
+The hero used to layer twelve drifting cloud cutouts over the sky (`HeroClouds.tsx` and
+`public/artwork/clouds/`). Both were removed so the hero opens on the illustration alone.
+The cutouts and their contact sheet stay in `artwork/clouds/` as read-only reference;
+nothing copies them into `public/`, so `npm run images` never encodes them and the browser
+never downloads them.
 
 ## Swapping the branding
 
@@ -333,8 +326,8 @@ links, one for the outlined button, and no fourth without a line here.
 **Animation.** Only `transform` and `opacity` are ever animated — never `top`, `left`,
 `width`, `height`, `margin` or `background-position`. Every animation is gated behind
 `usePrefersReducedMotion()` from `src/lib/motion.ts`; under
-`prefers-reduced-motion: reduce` the hero pan, the cloud drift and the section reveals all
-render at rest, and the hero's tall scroll track collapses so no dead scroll space is left
+`prefers-reduced-motion: reduce` the hero pan and the section reveals all render at
+rest, and the hero's tall scroll track collapses so no dead scroll space is left
 behind.
 
 **Text over the illustration.** The hero contains no text and nothing in the tab order, by
@@ -359,11 +352,10 @@ src/
                              the landing page, About us and Sponsors
   lib/
     links.ts                 every URL — off-site and in-site — centralised
-    motion.ts                usePrefersReducedMotion, hero scroll context
+    motion.ts                usePrefersReducedMotion, the hero pan's easing + range helpers
     images.ts                <picture> source sets + brand mark geometry
   components/
     Hero.tsx                 sticky stage + scroll-driven campus pan
-    HeroClouds.tsx           three parallax cloud layers
     Reveal.tsx               whileInView reveals (enter-once, staggered)
     Layout.tsx               Container / Section / Eyebrow / SectionHeader
     SiteHeader.tsx           fixed header, collapses to a menu below `md` (768px)
@@ -392,8 +384,8 @@ scripts/
   generate-images.mjs        artwork derivatives + brand masks and app icons
   prerender.mjs              build-time prerender of all six pages, run after `vite build`
 public/
-  artwork/                   campus + cloud PNGs and their derivatives, plus the About us
-                             and Sponsors photographs
+  artwork/                   the campus PNG and its derivatives, plus the About us and
+                             Sponsors photographs
   brand/                     logo masks, favicons, app tile
   404.html                   the static 404 body (see "The pages, and how they are
                              routed" above)

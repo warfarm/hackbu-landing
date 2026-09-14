@@ -4,11 +4,9 @@
  * `vite build` writes seven HTML files whose entire body is `<div id="root">`,
  * so nothing paints until ~100 KB gzip of JavaScript has downloaded, parsed and
  * executed, and the LCP element — the campus illustration — does not exist in
- * the HTML response at all (P5-1, and P5-8 with it: the twelve cloud cutouts
- * above the fold are undiscoverable for the same reason). This script renders
- * every page to a string and writes that string into the root div, so the
- * markup ships with the document and the client hydrates it instead of building
- * it from nothing.
+ * the HTML response at all (P5-1). This script renders every page to a string
+ * and writes that string into the root div, so the markup ships with the
+ * document and the client hydrates it instead of building it from nothing.
  *
  * ---------------------------------------------------------------------------
  * Why this shape

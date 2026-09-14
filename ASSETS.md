@@ -1,22 +1,13 @@
 # Artwork assets
 
-Every image originally in the read-only `artwork/` directory has been copied into
-`public/artwork/`. The originals in `artwork/` are untouched and remain the source of
-truth — treat `public/artwork/` as the deployable copy.
-
-The campus/clouds distinction is preserved **as subdirectories**, matching the original
-layout one-for-one:
+The read-only `artwork/` directory holds the delivered source files; `public/artwork/` is
+the deployable copy. The originals in `artwork/` are untouched and remain the source of
+truth.
 
 ```
 artwork/campus/Campus.png    ->  public/artwork/campus/Campus.png
-artwork/clouds/cloud-N.png   ->  public/artwork/clouds/cloud-N.png   (N = 1..12)
+artwork/clouds/cloud-N.png   ->  (no longer copied — see "The cloud cutouts")
 ```
-
-One file in `artwork/clouds/` is **deliberately not copied**: `clouds-all-b.png`
-(2172 × 724) is a reference contact sheet showing all twelve cutouts side by side, not
-a cutout itself. Nothing renders it, so it stays in `artwork/` only — it must never
-reach `public/`, where it would be served, swept up by `npm run images`, and copied
-into `dist/` for no reason.
 
 Because these live under `public/`, Vite serves them verbatim at the matching URL path
 and copies them into `dist/` untransformed. Reference them by absolute URL, e.g.
@@ -39,63 +30,44 @@ exact 1672 × 941 by the end; the cel style survives the hero's start-frame
 magnification far better than brushwork did. This artwork's short sky is also why
 `PAN_START_SCALE` rose from 3 to 3.8 — see Hero.tsx.) It is the only *source* file in
 `public/artwork/campus/` (the AVIF/WebP derivatives sit beside it — see Derivatives
-below), and the only non-cloud source asset.
+below).
 
 A second campus file lives in `artwork/campus/` only:
 **`Campus-upscaled-6688.webp` (6688 × 3764, lossless WebP, 22,760,394 B)** is the raw 4x
 Real-ESRGAN (`realesrgan-x4plus`) enlargement of the illustration, made because the
 hero's start frame magnifies the artwork 3x and an intrinsic-width ladder renders
-visibly soft there — conspicuously so next to the pixel-crisp cloud cutouts. It is the
-source for the four srcset rungs above 1672 (see Derivatives) and is never copied to
+visibly soft there. It is the source for the four srcset rungs above 1672 (see Derivatives) and is never copied to
 `public/` or shipped itself; it is stored as lossless WebP rather than PNG purely
 because that is several MB smaller in the repository.
 
 ## The cloud cutouts
 
-**The twelve PNGs in `public/artwork/clouds/` (`cloud-1.png` … `cloud-12.png`) are
-individual cloud cutouts** — separate, independently placeable elements, each with its own alpha
-channel. They are not a spritesheet and not tiles of one image; each is one cloud on a
-transparent background, intended to be layered over the campus scene and parallaxed
-independently.
+**Removed from the site.** `artwork/clouds/cloud-1.png` … `cloud-12.png` are twelve
+individual cloud cutouts — one cloud each on a transparent background — that the hero used
+to layer over the sky as a three-deep drifting parallax. That layer (`HeroClouds.tsx`, the
+`public/artwork/clouds/` copies and their AVIF/WebP derivatives) was removed so the hero
+opens on the illustration alone. The originals stay in `artwork/clouds/` as read-only
+reference, alongside `clouds-all-b.png` (2172 × 724), a contact sheet of all twelve. Nothing
+copies any of them into `public/`, so `npm run images` never sees them and the browser never
+downloads them.
 
 ## Inventory
 
-| File | Dimensions (px) | Aspect ratio | File size | Color type | Alpha | Hero layer |
-| --- | --- | --- | --- | --- | --- | --- |
-| `public/artwork/campus/Campus.png` | 1672 × 941 | 1.777 (≈16:9) | 2,829,783 B (2.70 MiB) | 2 — truecolor RGB | No | — |
-| `public/artwork/clouds/cloud-6.png` | 224 × 70 | 3.200 | 17,623 B (17.2 KiB) | 6 — truecolor RGBA | Yes | far |
-| `public/artwork/clouds/cloud-12.png` | 238 × 97 | 2.454 | 26,215 B (25.6 KiB) | 6 — truecolor RGBA | Yes | far |
-| `public/artwork/clouds/cloud-4.png` | 266 × 108 | 2.463 | 32,041 B (31.3 KiB) | 6 — truecolor RGBA | Yes | far |
-| `public/artwork/clouds/cloud-10.png` | 291 × 167 | 1.743 | 51,509 B (50.3 KiB) | 6 — truecolor RGBA | Yes | far |
-| `public/artwork/clouds/cloud-7.png` | 413 × 170 | 2.429 | 70,612 B (69.0 KiB) | 6 — truecolor RGBA | Yes | mid |
-| `public/artwork/clouds/cloud-2.png` | 430 × 194 | 2.216 | 84,998 B (83.0 KiB) | 6 — truecolor RGBA | Yes | mid |
-| `public/artwork/clouds/cloud-9.png` | 380 × 221 | 1.719 | 83,747 B (81.8 KiB) | 6 — truecolor RGBA | Yes | mid |
-| `public/artwork/clouds/cloud-3.png` | 263 × 229 | 1.148 | 67,012 B (65.4 KiB) | 6 — truecolor RGBA | Yes | mid |
-| `public/artwork/clouds/cloud-5.png` | 343 × 253 | 1.356 | 87,093 B (85.1 KiB) | 6 — truecolor RGBA | Yes | near |
-| `public/artwork/clouds/cloud-1.png` | 429 × 259 | 1.656 | 107,042 B (104.5 KiB) | 6 — truecolor RGBA | Yes | near |
-| `public/artwork/clouds/cloud-8.png` | 312 × 294 | 1.061 | 95,464 B (93.2 KiB) | 6 — truecolor RGBA | Yes | near |
-| `public/artwork/clouds/cloud-11.png` | 342 × 303 | 1.129 | 115,138 B (112.4 KiB) | 6 — truecolor RGBA | Yes | near |
+| File | Dimensions (px) | Aspect ratio | File size | Color type | Alpha |
+| --- | --- | --- | --- | --- | --- |
+| `public/artwork/campus/Campus.png` | 1672 × 941 | 1.777 (≈16:9) | 2,829,783 B (2.70 MiB) | 2 — truecolor RGB | No |
 
-13 files, 3,668,277 bytes (3.50 MiB) total.
-
-Listed in the order the hero casts them, which is a sort on **intrinsic height** — the
-dimension that reads as scale for clouds in a horizontal sky band. It separates the
-three layers in both dimensions at once: rendered at the layer scales the boxes are
-123–160 px wide / 38–92 px tall (far), 210–344 / 136–183 (mid) and 359–493 / 291–348
-(near), with no overlap on either axis. The aspect ratios fall in line with it — the
-flat wisps (3.20, 2.45, 2.46) land in `far`, the near-square cumulus towers (1.06,
-1.13, 1.36) in `near`.
+1 file, 2,829,783 bytes (2.70 MiB) total.
 
 Not shipped, listed for completeness:
 
 | File | Dimensions (px) | File size | Why it stays in `artwork/` |
 | --- | --- | --- | --- |
-| `artwork/clouds/clouds-all-b.png` | 2172 × 724 | 453,487 B (442.9 KiB) | Reference contact sheet of all twelve cutouts, not a cutout. Never copied to `public/`, never rendered, never fed to `npm run images`. |
+| `artwork/clouds/cloud-1..12.png` | 224–430 × 70–303 | 838,494 B (818.8 KiB) together | The twelve cloud cutouts the hero no longer renders (see "The cloud cutouts"). Never copied to `public/`, never fed to `npm run images`. |
+| `artwork/clouds/clouds-all-b.png` | 2172 × 724 | 453,487 B (442.9 KiB) | Reference contact sheet of the twelve cutouts, not a cutout. Never copied to `public/`, never rendered, never fed to `npm run images`. |
 | `artwork/campus/Campus-upscaled-6688.webp` | 6688 × 3764 | 24,033,448 B (22.9 MiB) | 4x Real-ESRGAN enlargement of `Campus.png` (lossless WebP) — the source `npm run images` cuts the 2508/3344/5016/6688 rungs from. Never copied to `public/`; only its AVIF/WebP derivatives ship. |
 
-All thirteen are valid PNGs at 8-bit depth, and every cutout is tightly cropped — the
-ink fills its canvas. Dimensions were read directly from each file's IHDR chunk; sizes
-are from the filesystem.
+Dimensions were read directly from each file's IHDR chunk; sizes are from the filesystem.
 
 ## The page photographs
 
@@ -144,8 +116,6 @@ fails the deploy too) and nothing else.
 | --- | --- | --- | --- |
 | `campus/Campus-{640,…,3344,5016,6688}.avif` | 8 | AVIF q68 | 5,676 KB |
 | `campus/Campus-{640,…,3344,5016,6688}.webp` | 8 | WebP q82 | 6,387 KB |
-| `clouds/cloud-N.avif` | 1 each (intrinsic) × 12 | AVIF q70 | 169 KB |
-| `clouds/cloud-N.webp` | 1 each (intrinsic) × 12 | WebP q82, alphaQuality 90 | 256 KB |
 | `about/{collaborate,table,hackathon,hall}.avif` | 1 each (intrinsic) × 4 | AVIF q68 | 448 KB |
 | `about/{collaborate,table,hackathon,hall}.webp` | 1 each (intrinsic) × 4 | WebP q82 | 435 KB |
 | `sponsors/workshop.avif` | 1 (intrinsic) | AVIF q68 | 128 KB |
@@ -162,28 +132,24 @@ take the top of the ladder. Small touch screens are deliberately capped by the l
 `(pointer: coarse)` so short or narrow *desktop* windows never take them): a phone's
 `object-cover` crop discards most of the drawn width, so the heavy top rungs would be
 mostly cropped bytes — DPR-2 phones land on 2508 and DPR-3 phones on 3344 instead.
-The clouds render at up to 1.15x their intrinsic width, so they get one derivative each
-and their `<picture>` switches on format only, with no `srcset`.
 
-**Measured first load of the landing page** (dev server, Chromium, after the final
-2026-09-03 artwork swap): 13 image requests either way, split by screen class —
+**First load of the landing page**, by screen class. Since the cloud layer was removed
+the hero makes **one** image request — the campus tier the `sizes` expression selects —
+so the numbers below are that file's size on disk (budget taken as 1,500,000 B):
 
-- **Desktop** (verified at 1900x912 @1x and 1440x900 @2x, both selecting
-  `Campus-6688.avif`): **2,312,836 bytes (2,259 KB)** — the 6688 AVIF (2,139,617 B; the
-  bare-tree hillside texture compresses worse than the previous artwork) plus the
-  twelve cloud AVIFs (173,219 B), each fetched exactly once. That is **151% of the
-  1.5 MB budget: the budget is deliberately exceeded on desktop**, traded for a start
-  frame that is not visibly soft next to the pixel-crisp cloud cutouts.
-- **Phone** (verified at 390x844 @3x and 844x390 @3x with touch emulation, both capped
-  to `Campus-3344.avif`): **1,058,588 bytes (1,034 KB)** — 69% of the budget.
+- **Desktop** (1900x912 @1x and 1440x900 @2x both select `Campus-6688.avif`):
+  **2,136,858 bytes (2,087 KB)** — **142% of the 1.5 MB budget: the budget is
+  deliberately exceeded on desktop**, traded for a start frame that is not visibly soft
+  at 3.8x magnification. (The bare-tree hillside texture compresses worse than the
+  previous artwork did.)
+- **Phone** (390x844 @3x and 844x390 @3x with touch emulation both cap to
+  `Campus-3344.avif`): **882,582 bytes (862 KB)** — 59% of the budget.
 
 (History: 495,259 B / 32% of budget when the ladder was capped at the original
 painterly artwork's intrinsic 1672px; the desktop overrun began when the upscaled
-rungs landed and is the price of the sharp start frame.)
-
-Every cloud loads on first paint whatever the viewport: the drift track mounts
-`SET_COUNT` copies of each cutout, but they share one URL each, so the request count is
-the cutout count and not the node count.
+rungs landed and is the price of the sharp start frame. Before the cloud layer went,
+the twelve cloud AVIFs added ~173 KB and twelve requests on top of the campus tier —
+2,312,836 B on desktop, 1,058,588 B on phones, measured 2026-09-03.)
 
 ## The brand marks
 
@@ -230,8 +196,7 @@ settled — recorded here as fact rather than as open questions:
   upscaling past 1:1 on a wide desktop viewport. `src/components/Hero.tsx` instead scales
   the illustration up from a fixed top edge (`object-position: 49% 0%` +
   `transform-origin: top`, no translation at all), which fits the source dimensions.
-- **At 2.70 MiB, Campus.png is 77% of the artwork bytes** (2,829,783 / 3,668,277 —
-  the Inventory total — = 77.1%, rounded). It is also the largest-contentful-paint
-  candidate; AVIF/WebP derivatives beside it are what keep the transferred weight far
-  below that, per Derivatives above.
-- The clouds are small (70–303 px tall) and will be visibly soft if scaled far above 1:1.
+- **At 2.70 MiB, Campus.png is the whole of the shipped source artwork** (the Inventory
+  total, now that the cloud cutouts no longer ship). It is also the
+  largest-contentful-paint candidate; AVIF/WebP derivatives beside it are what keep the
+  transferred weight far below that, per Derivatives above.
