@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react'
 import { m, useMotionValueEvent, useScroll, useTransform } from 'motion/react'
 import {
-  CAMPUS_ALT,
-  CAMPUS_HEIGHT,
-  CAMPUS_PNG,
-  CAMPUS_SIZES,
-  CAMPUS_SRCSET,
-  CAMPUS_WIDTH,
+  HERO_ALT,
+  HERO_HEIGHT,
+  HERO_JPG,
+  HERO_SIZES,
+  HERO_SRCSET,
+  HERO_WIDTH,
 } from '../lib/images'
 import {
   HERO_PAN_EASE,
@@ -15,22 +15,25 @@ import {
 } from '../lib/motion'
 
 /**
- * The hero: a scroll-driven pan down the campus illustration, with the page's
- * welcome headline over the sky.
+ * The hero: a real aerial photograph of campus under snow, settling from a
+ * slight zoom to its full frame as the reader scrolls, with the page's welcome
+ * headline over the sky.
  *
  * Layer contract:
  *
  *   <section data-hero>            the scroll TRACK. Taller than the viewport
  *                                  purely to buy scroll distance for the pan.
  *     <div data-hero-stage>        sticky top-0, exactly one viewport tall.
- *       <div data-hero-artwork>    the campus illustration, as a <picture> —
- *                                  scaled up and panned down.
- *       <div data-hero-copy>       welcome headline + lede, above the artwork.
+ *       <div data-hero-artwork>    the photograph, as a <picture> — opened a
+ *                                  little magnified and eased back to 1.
+ *       <div data-hero-copy>       welcome headline + lede, above the photo.
  *
- * A pine wash and text-shadow keep cloud (cream) type readable on sky and
- * painted clouds. (A drifting cloud-cutout parallax used to sit between the
- * artwork and the copy; it was removed, so the hero is the illustration and
- * the headline and nothing else.)
+ * A pine wash and text-shadow keep cloud (cream) type readable over the sky
+ * and the hills. (Until 2026-09 this was a cel-shaded *illustration* opened at
+ * 3.8x on a sky band, with a drifting cloud-cutout parallax over it; both went
+ * when the real photograph landed. A photograph cannot take that magnification
+ * — there is no upscaled master behind it and no sky-only band to hide in — so
+ * the pan below is a settle, not a reveal.)
  */
 
 /* -------------------------------------------------------------------------- */
@@ -38,94 +41,78 @@ import {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Starting scale of the illustration.
+ * Starting scale of the photograph.
  *
  * The image is rendered `object-cover` into a stage exactly one viewport tall,
- * with its top edge pinned to the top of the stage (see `object-[49%_0%]` and
- * `origin-top` below). Writing `f1` for the fraction of the image's height that
- * `object-cover` leaves visible at scale 1, **the visible band at scale S runs
- * from 0 to f1/S**, and
+ * with its top edge pinned to the top of the stage (see `origin-top` and the
+ * `0%` vertical object-position below). Writing `f1` for the fraction of the
+ * image's height that `object-cover` leaves visible at scale 1, **the visible
+ * band at scale S runs from 0 to f1/S**. The photograph is 1600 x 600 — wider
+ * than any viewport short of 2.667:1 — so cover is height-bound everywhere
+ * that matters, `f1 = 1`, and the start frame shows the top 1/1.2 = 83% of the
+ * photo: sky, hills, both towers and the buildings, with the foreground plaza
+ * arriving as the pan runs. The photograph has no sky-only band to open on
+ * (the hills break the horizon at about 0.13 of its height), so unlike the
+ * illustration this replaced there is no "no buildings" constraint to satisfy
+ * — the buildings *are* the picture.
  *
- *     viewport aspect <= 1672/941   ->  f1 = 1        (cover is height-bound)
- *     viewport aspect >  1672/941   ->  f1 = aspect_image / aspect_viewport
- *
- * Measured against the source file, the first brick of the dormitory
- * complexes begins at row 260 of 941 = 0.2763 of the image height. (Verified
- * by scanning the PNG for brick-orange pixels: every row above 260 returns
- * none, then the count passes 10 at row 260 and 40 within three rows.)
- *
- * `f1` never exceeds 1, so `f1/S <= 1/S` and S = 3.8 shows at most the top
- * 1/3.8 = 0.263 of the image at *every* aspect ratio — sky, clouds and the
- * bare winter hillsides, with 12 source pixels of clearance before the first
- * brick. The binding constraint is 1/S < 0.2763, i.e. **S > 3.62** — this
- * artwork's sky band is shorter than any before it, which is what pushed the
- * scale up from the long-standing 3. The cost of the extra magnification is
- * carried by the 4x-upscaled srcset rungs (see src/lib/images.ts, whose
- * `sizes` bakes in the same 3.8 factor). Viewports at or below 16:9 —
- * 1440x900 and every portrait screen — have `f1 = 1` and see the full
- * 0.263; wider ones only shrink the band.
+ * 1.2 is as far as the source can be pushed: the 1600px file is drawn 2400 CSS
+ * px wide on a 1440x900 screen even at scale 1 (see HERO_SIZES), so every
+ * extra tenth of magnification is visible softness on a retina display. It is
+ * enough to read as movement, and the eased curve does the rest. **Keep the
+ * `sizes` multiplier in src/lib/images.ts equal to this.**
  */
-const PAN_START_SCALE = 3.8
+const PAN_START_SCALE = 1.2
 
 /**
  * Total height of the scroll track. The sticky stage is one viewport tall, so
- * the stage stays pinned for `260 - 100 = 160dvh` of scrolling.
+ * the stage stays pinned for `180 - 100 = 80dvh` of scrolling. (It was 260dvh
+ * for the illustration's 3.8x reveal; a 1.2x settle stretched over 160dvh
+ * would read as the page having stalled.)
  */
-const TRACK_HEIGHT = 'h-[260dvh]'
+const TRACK_HEIGHT = 'h-[180dvh]'
 
 /**
  * Fraction of the pinned scroll the pan itself consumes. The pan finishes at
- * 0.75 (= 120dvh of scrolling) and the remaining 0.25 (= 40dvh) is a hold on
+ * 0.75 (= 60dvh of scrolling) and the remaining 0.25 (= 20dvh) is a hold on
  * the finished frame before the stage unpins and the hero scrolls away.
  */
 const PAN_SCROLL_FRACTION = 0.75
 
 /**
- * How the illustration's top edge stays pinned — and why the previous scheme
- * did not.
+ * Where the photograph sits in the stage, and why it is two values.
  *
- * An earlier scheme used `object-position: center` + `transform-origin: center`
- * and paid for the pin with a derived `translateY((S-1)/2 x 100%)`. Writing `C` for the
- * drawn content height and `H` for the stage height, that puts the content's
- * top edge at screen `S(H - C)/2`. On any viewport narrower than the artwork's
- * aspect, cover is height-constrained, `C = H`, and the expression is 0 —
- * pinned. On a viewport *wider* than the artwork cover flips to
- * width-constrained, `C > H`, and the top edge sits above the stage: the
- * visible band at scale 3 becomes `(1-f1)/2 .. (1-f1)/2 + f1/3`, which put
- * rooftops on screen at scroll 0 on wide viewports (measured 0.115..0.372
- * against an earlier artwork's 0.351 roofline at 1400x600).
- *
- * The fix is to stop compensating and move the two reference points instead:
- *
- *   object-position `49% 0%`   the drawn content's top edge sits on the stage's
- *                              top edge before any transform, at every aspect
+ *   object-position `<x> 0%`   the photo's top edge sits on the stage's top
+ *                              edge before any transform, at every aspect
  *   transform-origin `top`     scaling then grows downward from that edge
  *
- * so the top edge maps to screen 0 for all S, with no translate at all. The
- * visible band is `0 .. f1/S` everywhere, which starts at 0 rather than at
- * `(1-f1)/2` and is what makes the no-buildings criterion aspect-independent.
- * `translateY` is gone; scale alone drives the pan.
+ * The vertical `0%` + `origin-top` pair pins the sky to the top of the stage
+ * for all S with no translate at all — the scheme the illustration used, kept
+ * because it is aspect-independent: the visible band is `0 .. f1/S`
+ * everywhere. (`origin-top` is `50% 0%`, so the horizontal half of the scale
+ * still grows about the stage's centre.)
  *
- * The horizontal `49%` is the focal crop: the Library Tower is centred at
- * 0.4964 of the image width (the tallest run of brick-orange pixels in a
- * column scan), and on a 390x844 viewport cover draws the 16:9 image 1500 CSS
- * px wide and discards ~74% of it, so `center` would leave the tower ~5px
- * left of centre. It is applied at every width — above `sm` the horizontal
- * crop is small enough that the 1% shift is invisible, and one value is one
- * thing to reason about.
+ * The horizontal value is the focal crop, and a 2.667:1 photograph is cropped
+ * hard on anything but an ultra-wide screen — a 390x844 phone shows 17% of
+ * its width, a 1440x900 laptop 60%. Two subjects compete for that window: the
+ * green clock tower filling the left third of the frame (x = 0.10..0.40, the
+ * clock face at 0.27..0.35) and the Library Tower at x = 0.67..0.75. Measured
+ * against simulated cover-crops of the source:
  *
- * (`origin-top` is `50% 0%`, so the horizontal half of the scale still grows
- * about the stage's centre and the tower stays centred through the whole pan.)
+ *   phones, portrait tablets   `70%`   the Library Tower centred over the
+ *                                      plaza; at 50% the window (0.42..0.58)
+ *                                      holds neither landmark.
+ *   landscape >= 3:2           `50%`   the window is wide enough (>= 56% of
+ *                                      the frame) for the clock face AND the
+ *                                      Library Tower; 70% would push the clock
+ *                                      tower off the left edge.
  *
- * The trade this accepts: above 16:9 the pan's end state shows the top `f1`
- * of the image rather than the middle `f1`. Cover has to crop something at
- * those aspects either way; cropping only the foreground plaza snow, and
- * keeping an exact top pin at every aspect with no viewport measurement, is
- * the better half of that trade. At or below 16:9 — 1440x900 and 390x844
- * included — nothing changes: `f1 = 1`, the band is `0..1/S`, and the pan
- * still ends on the whole illustration at scale 1.
+ * The switch is on aspect ratio, not width, because the aspect ratio is what
+ * decides how much of the frame `cover` keeps. Tailwind's arbitrary media
+ * variant carries the query; nothing else in the stylesheet needs to know.
  */
-const CAMPUS_OBJECT_POSITION = 'object-[49%_0%]'
+const HERO_OBJECT_POSITION =
+  'object-[70%_0%] [@media(min-aspect-ratio:3/2)]:object-[50%_0%]'
 
 export function Hero() {
   const trackRef = useRef<HTMLElement>(null)
@@ -160,23 +147,23 @@ export function Hero() {
    * The top release (p = 0) is the load-bearing one, and it is about
    * *sharpness*, not memory (measured live in an 800x455 Chromium pane,
    * 2026-09-03). With the hint present from the first render, the compositor
-   * rasters the image layer once around hydration — before or as the scale(3)
+   * rasters the image layer once around hydration — before or as the start-scale
    * transform lands — and then, because `will-change` tells it not to
    * re-raster on transform change, the start frame the reader sees is that
-   * stale raster GPU-stretched 3x: blurry at every srcset rung, and showing a
+   * stale raster GPU-stretched to the start scale: blurry at every srcset rung, and showing a
    * subtly wrong crop. (Forced screenshots re-raster and hid this; toggling
    * the hint off live snapped the frame sharp.) With no hint at p = 0 the
-   * browser paints the true scale-3 frame at full raster quality — this is
+   * browser paints the true start frame at full raster quality — this is
    * the frame the page opens on and holds, so it is exactly where quality
    * matters most. When scrolling starts the promotion arrives with the
-   * current (~3x) transform, so the texture is rastered near its largest
+   * current (start-scale) transform, so the texture is rastered near its largest
    * scale and is only ever GPU-*down*scaled as the pan proceeds — supersampled
    * rather than smeared.
    *
    * The bottom release past `PAN_SCROLL_FRACTION` is P5-7 / P2-8, as before:
    * `scale` stops changing there, but the compositor keeps whatever the hint
    * bought for the life of the document. Measured with CDP `LayerTree` on
-   * GPU-backed Edge: at track progress 0.8 the campus `<img>` was still its
+   * GPU-backed Edge: at track progress 0.8 the hero `<img>` was still its
    * own layer holding a full-viewport texture (5,130,000 B at 1440x900) with
    * `WillChangeTransform` as its only compositing reason. Dropping the hint
    * lets that texture go.
@@ -207,7 +194,7 @@ export function Hero() {
       // in the tab order — the same shape as the skip link's target (P7-2, and
       // P2-4 in src/App.tsx, where the reasoning is written out). -1 keeps it
       // out of the tab order; `focus:outline-none` keeps the programmatic
-      // focus from drawing the UA ring around the whole 260dvh track.
+      // focus from drawing the UA ring around the whole 180dvh track.
       tabIndex={-1}
       aria-labelledby="hero-title"
       // No `overflow-hidden` here: an overflow-clipped ancestor becomes the
@@ -223,25 +210,25 @@ export function Hero() {
           {/*
            * `display: contents` so the <picture> adds no box of its own and
            * the <img>'s `h-full` still resolves against the stage-sized div
-           * above it. AVIF first, WebP second, the original PNG as the
-           * `<img src>` a browser only reaches if it understands neither.
+           * above it. AVIF first, WebP second, the JPEG as the `<img src>` a
+           * browser only reaches if it understands neither.
            */}
           <picture className="contents">
             <source
               type="image/avif"
-              srcSet={CAMPUS_SRCSET.avif}
-              sizes={CAMPUS_SIZES}
+              srcSet={HERO_SRCSET.avif}
+              sizes={HERO_SIZES}
             />
             <source
               type="image/webp"
-              srcSet={CAMPUS_SRCSET.webp}
-              sizes={CAMPUS_SIZES}
+              srcSet={HERO_SRCSET.webp}
+              sizes={HERO_SIZES}
             />
             <m.img
-              src={CAMPUS_PNG}
-              alt={CAMPUS_ALT}
-              width={CAMPUS_WIDTH}
-              height={CAMPUS_HEIGHT}
+              src={HERO_JPG}
+              alt={HERO_ALT}
+              width={HERO_WIDTH}
+              height={HERO_HEIGHT}
               draggable={false}
               decoding="async"
               fetchPriority="high"
@@ -250,7 +237,7 @@ export function Hero() {
               // rest at scroll 0 (where the hint made the compositor show a
               // stale low-res raster of the start frame), and released past
               // `PAN_SCROLL_FRACTION` — see `panning` above.
-              className={`h-full w-full origin-top ${CAMPUS_OBJECT_POSITION} object-cover select-none ${
+              className={`h-full w-full origin-top ${HERO_OBJECT_POSITION} object-cover select-none ${
                 reducedMotion || !panning ? '' : 'will-change-transform'
               }`}
               style={{ scale }}
@@ -259,9 +246,9 @@ export function Hero() {
         </div>
 
         {/*
-         * Welcome copy in the sky band. Cleared below the fixed header
+         * Welcome copy over the sky. Cleared below the fixed header
          * (h-16 / sm:h-20). Pine wash + text-shadow keep the type readable
-         * on sky and painted clouds.
+         * over the sky and the hills behind it.
          */}
         <div
           data-hero-copy

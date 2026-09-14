@@ -2,7 +2,9 @@ import { Section, SectionHeader } from '../Layout'
 import { ButtonLink } from '../ButtonLink'
 import { ExternalLink, LINK_ON_FROST } from '../ExternalLink'
 import { Reveal } from '../Reveal'
+import { SectionPhoto } from '../SectionPhoto'
 import { DISCORD_URL, MAILING_LIST_URL } from '../../lib/links'
+import { SECTION_PHOTOS } from '../../lib/images'
 
 /**
  * "Get involved" — the conversion point of the whole page.
@@ -13,6 +15,11 @@ import { DISCORD_URL, MAILING_LIST_URL } from '../../lib/links'
  *
  * The card is `bg-frost`, so that link takes the frost treatment — an underline
  * on hover, never brick. See LINK_ON_FROST in ExternalLink.tsx.
+ *
+ * The header shares its row with a <SectionPhoto> from `md` up — two students
+ * walking a snowed-in campus path, which is "show up to a workshop when it
+ * suits you" as a picture. Below `md` the photo stacks under the header. It is
+ * a 3:2 crop, feathered into the cloud background on all four edges.
  */
 export function GetInvolvedSection() {
   return (
@@ -22,12 +29,18 @@ export function GetInvolvedSection() {
       className="bg-cloud"
     >
       <Reveal>
-        <SectionHeader
-          eyebrow="Get involved"
-          titleId="get-involved-title"
-          title="No membership or commitment required."
-          lede="There’s no application, no dues, and no attendance to keep up. Show up to a workshop when it suits you, skip the ones that don’t. We announce everything we do in the Discord, so joining it is the whole first step."
-        />
+        <div className="grid gap-10 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-center">
+          <SectionHeader
+            eyebrow="Get involved"
+            titleId="get-involved-title"
+            title="No membership or commitment required."
+            lede="There’s no application, no dues, and no attendance to keep up. Show up to a workshop when it suits you, skip the ones that don’t. We announce everything we do in the Discord, so joining it is the whole first step."
+          />
+          <SectionPhoto
+            photo={SECTION_PHOTOS.snowWalk}
+            className="aspect-[3/2] w-full"
+          />
+        </div>
       </Reveal>
 
       <Reveal delay={0.1}>

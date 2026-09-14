@@ -2,16 +2,24 @@ import { Eyebrow, Section } from '../Layout'
 import { ButtonLink } from '../ButtonLink'
 import { Reveal, RevealGroup, RevealItem } from '../Reveal'
 import { DISCORD_URL, MAILING_LIST_URL } from '../../lib/links'
+import { SectionPhoto } from '../SectionPhoto'
 import {
   BAXTER_ALT,
   BAXTER_HEIGHT,
   BAXTER_PNG,
   BAXTER_WIDTH,
+  SECTION_PHOTOS,
 } from '../../lib/images'
 
 /**
- * "About us" — Baxter beside the mission copy, plus Discord and mailing-list
- * CTAs.
+ * "About us" — Baxter beside the mission copy, a wide aerial photograph of the
+ * campus under snow beneath it, then the Discord and mailing-list CTAs.
+ *
+ * The photograph is the section's one <SectionPhoto>: a real aerial of the
+ * whole campus, cropped to a wide band (16:9 on phones, 21:9 from `sm`) and
+ * feathered into the cloud background on all four edges. It sits between the
+ * mission statement and the cards so the copy reads first and the picture
+ * answers "where".
  *
  * The page <h1> lives in the hero; this section opens with an <h2> so the
  * outline stays h1 → section h2s with no skipped level.
@@ -60,6 +68,13 @@ export function AboutSection() {
             />
           </div>
         </header>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <SectionPhoto
+          photo={SECTION_PHOTOS.campusAerial}
+          className="mt-12 aspect-[16/9] w-full sm:aspect-[21/9]"
+        />
       </Reveal>
 
       <RevealGroup as="ul" className="mt-12 grid gap-6 md:grid-cols-2 md:gap-8">

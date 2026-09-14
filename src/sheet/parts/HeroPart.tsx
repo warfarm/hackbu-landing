@@ -1,22 +1,22 @@
 import { Block, Caption, Entry, Rows, Rule, SheetSection } from '../kit'
 import { LINK_ON_CLOUD } from '../../components/ExternalLink'
 import {
-  CAMPUS_ALT,
-  CAMPUS_HEIGHT,
-  CAMPUS_PNG,
-  CAMPUS_SRCSET,
-  CAMPUS_WIDTH,
+  HERO_ALT,
+  HERO_HEIGHT,
+  HERO_JPG,
+  HERO_SRCSET,
+  HERO_WIDTH,
 } from '../../lib/images'
 
 /**
  * Part 4 — the hero, documented rather than embedded.
  *
- * <Hero> is a 260dvh scroll track with a sticky stage pinned inside it. Dropped
- * into this page it would hijack three viewports of the sheet's own scrolling
- * to play an animation that is about the top of the landing page, and the
- * sticky stage would be pinned against the sheet's scroll position rather than
- * its own. So what is here instead is the artwork it is made of, at rest, plus
- * the numbers that drive it.
+ * <Hero> is a 180dvh scroll track with a sticky stage pinned inside it. Dropped
+ * into this page it would hijack almost two viewports of the sheet's own
+ * scrolling to play an animation that is about the top of the landing page,
+ * and the sticky stage would be pinned against the sheet's scroll position
+ * rather than its own. So what is here instead is the photograph it is made
+ * of, at rest, plus the numbers that drive it.
  *
  * The numbers below are mirrored from src/components/Hero.tsx, which keeps
  * them as module-private constants — there is nothing exported to import. They
@@ -31,18 +31,18 @@ type Param = { name: string; value: string; note: string }
 const PAN_PARAMS: readonly Param[] = [
   {
     name: 'PAN_START_SCALE',
-    value: '3.8',
-    note: 'Scale of the illustration at scroll 0, easing to 1 as the pan runs. At 3.8 the stage shows at most the top 0.263 of the image at every aspect ratio — the first brick begins at 0.2763 of the image height, so the binding constraint is scale > 3.62.',
+    value: '1.2',
+    note: 'Scale of the photograph at scroll 0, easing to 1 as the pan runs. 1.2 is the most a 1600px source can be magnified before it reads soft on a retina laptop; the photo has no sky-only band, so the old "no buildings at scroll 0" constraint is gone with the illustration.',
   },
   {
     name: 'PAN_SCROLL_FRACTION',
     value: '0.75',
-    note: 'The pan completes three-quarters of the way through the pinned scroll (120dvh of it). The last 0.25 (40dvh) is a hold on the finished frame before the stage unpins.',
+    note: 'The pan completes three-quarters of the way through the pinned scroll (60dvh of it). The last 0.25 (20dvh) is a hold on the finished frame before the stage unpins.',
   },
   {
     name: 'TRACK_HEIGHT',
-    value: 'h-[260dvh]',
-    note: 'The track exists only to buy scroll distance. The stage inside it is one viewport tall and sticky, so it stays pinned for 160dvh.',
+    value: 'h-[180dvh]',
+    note: 'The track exists only to buy scroll distance. The stage inside it is one viewport tall and sticky, so it stays pinned for 80dvh.',
   },
   {
     name: 'HERO_PAN_EASE',
@@ -51,8 +51,8 @@ const PAN_PARAMS: readonly Param[] = [
   },
   {
     name: 'object-position / transform-origin',
-    value: 'object-[49%_0%] · origin-top',
-    note: 'Pins the drawn content’s top edge to the top of the stage before any transform, so scale alone drives the pan and there is no translate. 49% horizontally is the Library Tower’s centre.',
+    value: 'object-[70%_0%] · ≥3:2 object-[50%_0%] · origin-top',
+    note: 'Pins the photo’s top edge to the top of the stage before any transform, so scale alone drives the pan and there is no translate. Horizontally, phones centre the Library Tower (70%); screens at or wider than 3:2 sit at 50%, where the cover-crop is wide enough to hold the clock tower and the Library Tower together.',
   },
 ]
 
@@ -64,12 +64,12 @@ export function HeroPart() {
       id="hero"
       number="4"
       title="The hero"
-      intro="The one component on this sheet that is not rendered live. It is a 260dvh scroll track with a sticky stage inside it: embedded here it would take three viewports of the sheet’s scrolling and pin itself against the wrong scroll position. What follows is its artwork at rest and the numbers that drive it."
+      intro="The one component on this sheet that is not rendered live. It is a 180dvh scroll track with a sticky stage inside it: embedded here it would take almost two viewports of the sheet’s scrolling and pin itself against the wrong scroll position. What follows is its photograph at rest and the numbers that drive it."
     >
       <Entry
         name="Hero"
         path="src/components/Hero.tsx"
-        use="The top of the landing page, and nothing else. It is illustration only — no copy sits over it at any scroll position."
+        use="The top of the landing page, and nothing else: a real aerial photograph of campus under snow, with the page’s <h1> over its sky."
       >
         <Block title="See it live">
           <p className="text-body text-pine">
@@ -77,8 +77,9 @@ export function HeroPart() {
             <a href="/" className={`${LINK_ON_CLOUD} underline underline-offset-4`}>
               Open the landing page
             </a>{' '}
-            and scroll: the illustration starts magnified on the sky and eases
-            down to the whole campus over the first 120dvh.
+            and scroll: the photograph opens at a slight zoom with its sky
+            pinned to the top and settles to its full frame over the first
+            60dvh.
           </p>
         </Block>
 
@@ -97,23 +98,23 @@ export function HeroPart() {
               },
               {
                 name: '<div data-hero-artwork>',
-                value: 'the illustration',
-                note: 'A <picture> — AVIF, then WebP, then the PNG as the <img src>. It is scaled up and panned down.',
+                value: 'the photograph',
+                note: 'A <picture> — AVIF, then WebP, then the JPEG as the <img src>. It opens at 1.2x and eases back to 1.',
               },
             ]}
           />
         </Block>
 
-        <Block title="The campus illustration, at rest">
+        <Block title="The hero photograph, at rest">
           <div className="border-frost overflow-hidden rounded-xl border">
             <picture>
-              <source type="image/avif" srcSet={CAMPUS_SRCSET.avif} sizes="(min-width: 64rem) 60rem, 92vw" />
-              <source type="image/webp" srcSet={CAMPUS_SRCSET.webp} sizes="(min-width: 64rem) 60rem, 92vw" />
+              <source type="image/avif" srcSet={HERO_SRCSET.avif} sizes="(min-width: 64rem) 60rem, 92vw" />
+              <source type="image/webp" srcSet={HERO_SRCSET.webp} sizes="(min-width: 64rem) 60rem, 92vw" />
               <img
-                src={CAMPUS_PNG}
-                alt={CAMPUS_ALT}
-                width={CAMPUS_WIDTH}
-                height={CAMPUS_HEIGHT}
+                src={HERO_JPG}
+                alt={HERO_ALT}
+                width={HERO_WIDTH}
+                height={HERO_HEIGHT}
                 decoding="async"
                 loading="lazy"
                 className="block h-auto w-full"
@@ -121,10 +122,11 @@ export function HeroPart() {
             </picture>
           </div>
           <Caption>
-            public/artwork/campus/Campus.png — {CAMPUS_WIDTH}×{CAMPUS_HEIGHT},
-            with AVIF and WebP derivatives from 640 up to a 4x-upscaled 6688.
-            This is the frame the pan ends on; it opens at 3.8 times this
-            size, showing only the sky and the bare winter hills.
+            public/artwork/photos/hero-winter.jpg — {HERO_WIDTH}×{HERO_HEIGHT},
+            with AVIF and WebP derivatives from 640 up to the source’s own
+            1600. This is the frame the pan ends on; it opens at 1.2 times
+            this size with the top edge pinned, so the foreground plaza is
+            what the settle brings in.
           </Caption>
         </Block>
 
@@ -140,10 +142,10 @@ export function HeroPart() {
         <Block title="Reduced motion">
           <Rule>
             Under <b>prefers-reduced-motion</b> the pan is pinned to its end
-            state — scale 1, the whole campus — <b>and the track collapses from
-            260dvh to h-dvh</b>. Freezing the animation alone would strand the
-            reader in two viewports of dead scroll space: a component that buys
-            scroll distance has to give it back.
+            state — scale 1, the whole photograph — <b>and the track collapses
+            from 180dvh to h-dvh</b>. Freezing the animation alone would strand
+            the reader in most of a viewport of dead scroll space: a component
+            that buys scroll distance has to give it back.
           </Rule>
         </Block>
       </Entry>

@@ -1,98 +1,141 @@
 /**
  * Image delivery constants.
  *
- * `scripts/generate-images.mjs` writes AVIF + WebP derivatives beside the PNGs
- * in `public/artwork/`; this module is the single place the app describes them.
- * The PNGs stay as the last-resort `<img src>` inside each `<picture>`, so a
- * browser that understands neither modern format still gets the artwork.
+ * `scripts/generate-images.mjs` writes AVIF + WebP derivatives beside the
+ * source files in `public/artwork/`; this module is the single place the app
+ * describes them. The JPEG (or PNG) stays as the last-resort `<img src>`
+ * inside each `<picture>`, so a browser that understands neither modern
+ * format still gets the picture.
  *
- * Three copies of the campus srcset exist and they must agree:
- *   - `CAMPUS_WIDTHS` here
- *   - `CAMPUS_WIDTHS` in scripts/generate-images.mjs
+ * Three copies of the hero srcset exist and they must agree:
+ *   - `HERO_WIDTHS` here
+ *   - `HERO_WIDTHS` in scripts/generate-images.mjs
  *   - the `imagesrcset` on the preload link in index.html
  * `npm run images` prints the strings it generated for exactly this reason.
  */
 
-export const CAMPUS_PNG = '/artwork/campus/Campus.png'
-export const CAMPUS_WIDTH = 1672
-export const CAMPUS_HEIGHT = 941
+/* -------------------------------------------------------------------------- */
+/* Hero photograph                                                            */
+/* -------------------------------------------------------------------------- */
 
 /**
- * The derivative ladder. The rungs at and below the intrinsic 1672px are cut
- * from the illustrated source; the four above it are cut from
- * `artwork/campus/Campus-upscaled-6688.webp`, a 4x Real-ESRGAN enlargement of
- * the illustration (see scripts/generate-images.mjs for why 4x). The hero
- * magnifies the illustration up to 3.8x, so the start frame is displayed far
- * wider than 1672px on every screen — the upscaled rungs are what keep it from
- * rendering soft there.
+ * The hero is a real photograph — `hackbuimage/winter-header.jpg`, an aerial
+ * of the Binghamton campus under snow, 1600 x 600 — and the derivatives are
+ * cut from it at and below its own width, never enlarged. There is no
+ * upscaled master any more: a photograph does not survive machine enlargement
+ * the way the flat-shaded illustration it replaced did, and the hero's start
+ * frame magnifies it only 1.2x (see PAN_START_SCALE in Hero.tsx), so the
+ * source width is the honest ceiling.
  */
-const CAMPUS_WIDTHS = [640, 960, 1280, 1672, 2508, 3344, 5016, 6688] as const
+export const HERO_JPG = '/artwork/photos/hero-winter.jpg'
+export const HERO_WIDTH = 1600
+export const HERO_HEIGHT = 600
 
-function campusSrcSet(extension: 'avif' | 'webp'): string {
-  return CAMPUS_WIDTHS.map(
-    (width) => `/artwork/campus/Campus-${width}.${extension} ${width}w`,
+const HERO_WIDTHS = [640, 960, 1280, 1600] as const
+
+function heroSrcSet(extension: 'avif' | 'webp'): string {
+  return HERO_WIDTHS.map(
+    (width) => `/artwork/photos/hero-winter-${width}.${extension} ${width}w`,
   ).join(', ')
 }
 
-export const CAMPUS_SRCSET = {
-  avif: campusSrcSet('avif'),
-  webp: campusSrcSet('webp'),
+export const HERO_SRCSET = {
+  avif: heroSrcSet('avif'),
+  webp: heroSrcSet('webp'),
 } as const
 
 /**
- * How wide the illustration is actually *drawn*, which is not the width of its
- * box. The `<img>` is `object-cover` into a viewport-sized stage, so at scale 1
- * the drawn content is:
+ * How wide the photograph is actually *drawn*, which is not the width of its
+ * box. The `<img>` is `object-cover` into a viewport-sized stage, so at scale
+ * 1 the drawn content is:
  *
- *   viewport aspect >= 1672/941 (16:9)  ->  width-constrained, content
- *                                           width = 100vw
- *   viewport aspect <  1672/941         ->  height-constrained, content width
- *                                           = 100vh x 1672/941 = 177.68vh
+ *   viewport aspect >= 1600/600 (2.667)  ->  width-constrained, 100vw
+ *   viewport aspect <  1600/600          ->  height-constrained,
+ *                                            100vh x 1600/600 = 266.67vh
  *
- * (The artwork is 16:9, so laptops like 1440x900 and every portrait screen
- * sit in the vh branch; only screens wider than 16:9 take `vw`.)
- *
- * The image is fetched while the hero sits at its start frame, where the pan
- * has the content magnified by PAN_START_SCALE = 3.8 (see Hero.tsx) — so both
- * regimes are written here multiplied by 3.8: `380vw`, and
- * `380vh x 1672/941 = 675.20vh`. `sizes` has no way to see a transform, so the
- * factor is baked into the expression; it is exactly what lets a desktop reach
- * the upscaled rungs — quoting the unmagnified width would leave the browser
- * three rungs down, on the blur the ladder exists to fix. **Keep this factor
- * equal to PAN_START_SCALE** — the two moved together when the scale rose
- * from 3 for the current artwork's shorter sky.
- *
- * The two leading `1114px` entries cap small TOUCH screens out of the heavy
- * top rungs. On a phone, `object-cover` discards most of the drawn width (see
- * CAMPUS_OBJECT_POSITION in Hero.tsx), so a 1-2 MB rung's bytes would be
- * mostly cropped off screen; 1114px quotes a slot that lands DPR-2 phones on
- * the 2508 rung and DPR-3 phones on 3344 (1114 x 3 = 3342 <= 3344). The
- * `max-height` entry is the same cap for landscape phones, which a width test
- * alone misses. Both are gated on `(pointer: coarse)` because the dimension
- * tests alone also catch small *desktop* windows — a 455px-tall embedded
- * pane was measured taking the landscape-phone cap and rendering the start
- * frame from a low rung stretched 2x. A desktop window is DPR-1-or-2 and
- * resizable upward, so it always reads the honest magnified size below, and
- * desktops take the top of the ladder. (A browser that cannot evaluate
- * `pointer` treats the condition as false and falls through to the honest
- * entries — the failure mode is extra bytes, never extra blur.)
- *
- * Must match `imagesizes` on the preload link in index.html, or the preload
- * fetches a different rung than `<picture>` asks for and the image loads twice.
+ * Almost every screen is narrower than 2.667:1, so the `vh` branch is the
+ * usual one. Both are written multiplied by PAN_START_SCALE = 1.2, the scale
+ * the photo is fetched at: `120vw` and `320vh`. **Keep the factor equal to
+ * PAN_START_SCALE.** With a ladder that tops out at the 1600px source the
+ * expression matters less than it used to — anything past a 1333px 1x draw
+ * already takes the top rung — but it must still match `imagesizes` on the
+ * preload link in index.html, or the preload and the `<picture>` resolve to
+ * different rungs and the image loads twice.
  */
-export const CAMPUS_SIZES =
-  '((pointer: coarse) and (max-width: 767px)) 1114px, ((pointer: coarse) and (max-height: 500px)) 1114px, (min-aspect-ratio: 1672/941) 380vw, 675.20vh'
+export const HERO_SIZES = '(min-aspect-ratio: 1600/600) 120vw, 320vh'
 
 /**
- * The campus illustration is content, not decoration — it is the reason the
- * page opens the way it does — so it gets a description of what is in it
- * rather than an empty alt.
+ * The photograph is content, not decoration — it is the reason the page opens
+ * the way it does — so it gets a description of what is in it.
  */
-export const CAMPUS_ALT =
-  'Illustration of the Binghamton University campus under snow, seen from ' +
-  'above: red brick academic buildings and dormitories along snow-covered ' +
-  'walkways, the Library Tower at the centre, bare winter hillsides behind, ' +
-  'and a bright blue sky with white clouds overhead.'
+export const HERO_ALT =
+  'Aerial photograph of the Binghamton University campus under snow: the ' +
+  'green steel frame of the clock tower in the foreground, brick academic ' +
+  'buildings and the tall Library Tower beyond, students crossing the ' +
+  'snow-covered plaza between bare trees, and wooded hills behind.'
+
+/* -------------------------------------------------------------------------- */
+/* Landing-page section photographs                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One real campus photograph per content section — About, Get involved and
+ * Questions — set into the layout with feathered edges (see
+ * src/components/SectionPhoto.tsx). Sources are the files delivered in
+ * `hackbuimage/`; `npm run images` writes the JPEG + AVIF + WebP copies into
+ * `public/artwork/photos/` at the source's own size. Contact, the page's quiet
+ * landing, deliberately carries none: there were three photographs for four
+ * sections, and it is the one built to have nothing competing in it.
+ */
+export type SitePhoto = {
+  jpg: string
+  webp: string
+  avif: string
+  width: number
+  height: number
+  alt: string
+}
+
+function sitePhoto(
+  file: string,
+  width: number,
+  height: number,
+  alt: string,
+): SitePhoto {
+  const base = `/artwork/photos/${file}`
+  return {
+    jpg: `${base}.jpg`,
+    webp: `${base}.webp`,
+    avif: `${base}.avif`,
+    width,
+    height,
+    alt,
+  }
+}
+
+export const SECTION_PHOTOS = {
+  /** About — from `hackbuimage/image.png`. */
+  campusAerial: sitePhoto(
+    'campus-aerial',
+    1200,
+    674,
+    'Aerial photograph of the snow-covered Binghamton University campus: the Library Tower at the centre, brick buildings and dormitories around it, and forested hills behind.',
+  ),
+  /** Get involved — from `hackbuimage/1-KS1-WEB-2-1024x683.jpg`. */
+  snowWalk: sitePhoto(
+    'snow-walk',
+    1024,
+    683,
+    'Two students walking along a snow-covered campus path during a snowfall, with bare trees and a glass-fronted building ahead of them.',
+  ),
+  /** Questions — from `hackbuimage/47065170581_63875cf429_b.jpg`. */
+  campusPath: sitePhoto(
+    'campus-path',
+    658,
+    1024,
+    'View from above of a winter walkway across the Binghamton campus, students crossing between brick buildings beneath the green clock tower.',
+  ),
+} as const
 
 /** Cartoon Baxter the Bearcat — welcome pose for the hero. */
 export const BAXTER_PNG = '/artwork/mascot/Baxter.png'

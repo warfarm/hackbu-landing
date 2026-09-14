@@ -4,16 +4,17 @@ A redesigned landing page for [HackBU](https://hackbu.org), the student tech clu
 Binghamton University. One job: get undergrads — most of them with no programming
 experience — into the Discord.
 
-The hero is an illustration of campus under snow. On load the screen holds the top third
-of it — sky and the wooded ridgeline on the far side of campus, but **no buildings**;
-scrolling tilts the view down to reveal the whole campus, holds for a beat, then scrolls
-away to the content below.
+The hero is a real aerial photograph of campus under snow — the green clock tower in the
+foreground, the Library Tower beyond, students crossing the plaza. On load it opens at a
+slight zoom (`PAN_START_SCALE = 1.2`) with its sky pinned to the top of the screen;
+scrolling eases it back to its full frame, holds for a beat, then scrolls away to the
+content below. Each content section then carries one more campus photograph, set into the
+page with feathered edges (`SectionPhoto.tsx` and `.photo-feather` in `src/index.css`).
 
-(At `PAN_START_SCALE = 3.8` the opening frame is at most image rows 0–0.263, and the
-hill silhouette breaks the horizon at row 0.1413 — so roughly the lower half of the
-frame is bare winter hillside on screens at or below 16:9, less on wider ones. The
-first brick is at row 0.2763 and stays off screen with 12 source pixels to spare. The
-guarantee the hero keeps is *no buildings*, not *only sky*.)
+(The photograph replaced a cel-shaded illustration that opened at 3.8x on a sky band with
+a drifting cloud parallax over it. A photograph cannot take that magnification and has no
+sky-only band to open on, so the pan is a settle rather than a reveal, and the scroll
+track shrank from 260dvh to 180dvh with it.)
 
 Five public pages live here now: the landing page plus **About us**, **Schedule**,
 **Sponsors** and **Hackathons**, each a separate HTML entry with its own bundle (see
@@ -198,56 +199,58 @@ The sheet is `noindex, nofollow` and is not linked from any public page.
 
 ## Swapping the artwork
 
-Source art lives in `artwork/`, which is treated as read-only reference. The files the
-site actually ships are in `public/artwork/`.
+Source images live in two read-only directories: `hackbuimage/`, the delivered
+photographs, and `artwork/`, the retired illustration and cloud cutouts kept as reference.
+The files the site actually ships are in `public/artwork/`.
 
 ```
-artwork/                     read-only originals
-  campus/Campus-upscaled-6688.webp  4x Real-ESRGAN enlargement (lossless) — source
-                                    of the rungs above 1672; never shipped itself
+hackbuimage/                    read-only photographs, as delivered
+  winter-header.jpg             the hero — 1600 x 600
+  image.png                     About — aerial of the whole campus, 1200 x 674
+  1-KS1-WEB-2-1024x683.jpg      Get involved — two students on a snowy path
+  47065170581_63875cf429_b.jpg  Questions — winter walkway from above, 658 x 1024
+artwork/                        read-only originals, no longer shipped
+  campus/                       the retired illustration + its 4x Real-ESRGAN master
+  clouds/                       the retired cloud cutouts + their contact sheet
 public/artwork/
-  campus/Campus.png          the campus illustration
-  campus/Campus-{640,960,1280,1672,2508,3344,5016,6688}.{avif,webp}
+  photos/hero-winter.jpg        the hero's JPEG fallback
+  photos/hero-winter-{640,960,1280,1600}.{avif,webp}
+  photos/{campus-aerial,snow-walk,campus-path}.{jpg,avif,webp}
 ```
 
-To replace the artwork:
+To replace a photograph:
 
-1. Drop the new PNG into `public/artwork/`, keeping the same filename. The campus
-   illustration must stay a single opaque image.
-2. Rebuild `artwork/campus/Campus-upscaled-6688.webp` (named for the 4x width — rename
-   if the new source's width differs) for the new campus illustration: the raw 4x
-   Real-ESRGAN (`realesrgan-x4plus`) enlargement, stored as lossless WebP.
-   The hero's start frame magnifies the artwork 3.8x, and the srcset rungs above the
-   source width are cut from this file — without it `npm run images` fails. Inspect the
-   enlargement at 1:1 before committing it: at 4x the model paints plausible brushwork
-   rather than recovering detail, and it must still read as the same painting.
-3. Run `npm run images` to regenerate the AVIF and WebP derivatives. The PNGs remain as
-   the `<picture>` fallback.
-4. Update `ASSETS.md`, which records every file with its pixel dimensions.
-5. Commit the regenerated derivatives along with the new PNGs.
+1. Drop the new file into `hackbuimage/`. For the hero, keep the name `winter-header.jpg`;
+   for a section photo, either keep the existing name or update the `SECTION_PHOTOS`
+   table at the top of `scripts/generate-images.mjs`.
+2. Run `npm run images` to regenerate the JPEG fallback and the AVIF and WebP derivatives
+   in `public/artwork/photos/`. Nothing is enlarged: the hero ladder tops out at the
+   source's own width, so a wider source is the only way to a sharper hero.
+3. Update the dimensions and `alt` text in `src/lib/images.ts` (`HERO_WIDTH` /
+   `HERO_HEIGHT` / `HERO_ALT`, or the `SECTION_PHOTOS` entry), and `ASSETS.md`.
+4. Commit the regenerated derivatives along with the new source.
 
-### If the new campus illustration is framed differently
+### If the new hero photograph is framed differently
 
-Two numbers in the hero are tied to the specific artwork and will need re-deriving:
+Three things in the hero are tied to the specific photograph and will need re-deriving:
 
-- **`PAN_START_SCALE`** in `src/components/Hero.tsx` (currently `3.8`). The hero shows the
-  top `1/scale` of the image at scroll 0, and **no buildings** may be visible there. In
-  the current illustration the first buildings appear at `0.2763` of the image height, so
-  the start scale must stay above `1 / 0.2763 ≈ 3.62`. Measure where buildings begin in the new
-  image and set the scale accordingly. Note this is a floor, not a preference — dropping
-  below it puts rooftops on screen before the user has scrolled. Keep the `sizes`
-  multiplier in `src/lib/images.ts` (`CAMPUS_SIZES`) equal to the scale.
-- **`object-position`** on the campus `<img>` (currently `49% 0%`). The horizontal value
-  keeps the focal point — the Library Tower — centred when narrow viewports crop the
-  sides. The vertical `0%` pins the image's top edge and, together with
-  `transform-origin: top`, is what keeps the framing correct on ultra-wide displays; leave
-  it at `0%`.
+- **`PAN_START_SCALE`** in `src/components/Hero.tsx` (currently `1.2`). Keep the `sizes`
+  multiplier in `src/lib/images.ts` (`HERO_SIZES`) and the preload's `imagesizes` in
+  `index.html` equal to it. Do not push it far: the photo is already drawn wider than its
+  1600px on most screens at scale 1.
+- **`object-position`** on the hero `<img>`: `70% 0%` on phones and portrait screens,
+  `50% 0%` at or above a 3:2 aspect ratio. The horizontal values are the focal crop —
+  where the Library Tower and the clock tower fall in the frame — and were chosen against
+  simulated `object-cover` crops of the source; a differently composed photo wants its own.
+  The vertical `0%` pins the top edge and, together with `transform-origin: top`, is what
+  keeps the framing aspect-independent; leave it at `0%`.
+- **`HERO_SIZES`**'s aspect-ratio breakpoint (`1600/600`), which is the photo's own ratio.
 
-The hero used to layer twelve drifting cloud cutouts over the sky (`HeroClouds.tsx` and
-`public/artwork/clouds/`). Both were removed so the hero opens on the illustration alone.
-The cutouts and their contact sheet stay in `artwork/clouds/` as read-only reference;
-nothing copies them into `public/`, so `npm run images` never encodes them and the browser
-never downloads them.
+The hero used to layer twelve drifting cloud cutouts over a cel-shaded illustration
+(`HeroClouds.tsx`, `public/artwork/clouds/`, `public/artwork/campus/`). All of it was
+removed when the photograph landed. Everything retired stays in `artwork/` as read-only
+reference; nothing copies it into `public/`, so `npm run images` never encodes it and the
+browser never downloads it.
 
 ## Swapping the branding
 
@@ -330,10 +333,12 @@ links, one for the outlined button, and no fourth without a line here.
 rest, and the hero's tall scroll track collapses so no dead scroll space is left
 behind.
 
-**Text over the illustration.** The hero contains no text and nothing in the tab order, by
-design (the section carries `tabIndex={-1}` only so the logo link's `#top` target can take
-focus programmatically). The illustration is the signature moment and is never used as a background behind
-copy — the headline and primary CTA sit in the intro section immediately below it.
+**Text over the photograph.** The hero carries the page's `<h1>` and its lede over the sky
+of the photograph — under a pine gradient wash and a text-shadow confined to the top band
+of the frame — and nothing else: no CTA, and nothing in the tab order (the section carries
+`tabIndex={-1}` only so the logo link's `#top` target can take focus programmatically).
+The photograph is the signature moment and is never used as a background behind body copy
+or buttons; those live in the sections below, on cloud and frost.
 
 ## Layout
 
@@ -355,7 +360,8 @@ src/
     motion.ts                usePrefersReducedMotion, the hero pan's easing + range helpers
     images.ts                <picture> source sets + brand mark geometry
   components/
-    Hero.tsx                 sticky stage + scroll-driven campus pan
+    Hero.tsx                 sticky stage + scroll-driven settle of the hero photo
+    SectionPhoto.tsx         a section photograph with feathered edges
     Reveal.tsx               whileInView reveals (enter-once, staggered)
     Layout.tsx               Container / Section / Eyebrow / SectionHeader
     SiteHeader.tsx           fixed header, collapses to a menu below `md` (768px)
@@ -380,12 +386,14 @@ src/
     main.tsx                 sheet entry: hydrateRoot in prod, createRoot in dev
     sheet.css, kit.tsx, ComponentSheet.tsx
     parts/                   Tokens, Primitives, Composed, Hero
+hackbuimage/                 the four delivered photographs — read-only source (see
+                             "Swapping the artwork")
 scripts/
-  generate-images.mjs        artwork derivatives + brand masks and app icons
+  generate-images.mjs        photo derivatives + brand masks and app icons
   prerender.mjs              build-time prerender of all six pages, run after `vite build`
 public/
-  artwork/                   the campus PNG and its derivatives, plus the About us and
-                             Sponsors photographs
+  artwork/                   photos/ (hero + section photographs and their derivatives),
+                             plus the About us and Sponsors photographs
   brand/                     logo masks, favicons, app tile
   404.html                   the static 404 body (see "The pages, and how they are
                              routed" above)

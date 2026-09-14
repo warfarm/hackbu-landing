@@ -87,7 +87,7 @@ export function ComposedPart() {
       <Entry
         name="AboutSection"
         path="src/components/sections/AboutSection.tsx"
-        use="The page’s masthead. It sits directly under the hero and carries the only <h1>: mission, Discord and mailing-list CTAs."
+        use="The page’s masthead. It sits directly under the hero: mission statement with Baxter, the campus aerial, and the Discord and mailing-list CTAs."
       >
         <NoProps>Copy is written into the component.</NoProps>
         <Block title="As rendered">
@@ -100,11 +100,13 @@ export function ComposedPart() {
         </Block>
         <Block title="Notes">
           <Rule>
-            The hero above it is illustration only: cloud text over the painted
-            sky measured <b>1.43:1</b>, and the only wash that lifted it past
-            4.5:1 was a near-opaque pine field over most of the frame. Moving the
-            headline, lede and CTA down here retired that trade rather than
-            tuning it — no text sits over the artwork at any scroll position.
+            The hero above it carries the page’s <b>&lt;h1&gt;</b> over the
+            photograph’s sky, under a pine gradient wash and a text-shadow
+            confined to the top band of the frame — so this section’s heading
+            is an <b>&lt;h2&gt;</b> and the outline runs h1 → h2 with no skipped
+            level. (When the hero was an illustration, cloud text over its
+            painted sky measured <b>1.43:1</b> and the copy lived down here
+            instead.)
           </Rule>
         </Block>
       </Entry>

@@ -21,7 +21,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--
-      LCP preload for the campus illustration.
+      LCP preload for the hero photograph.
 
       The hero <img> lives inside the React bundle, so without this the browser
       cannot discover it until the module graph has parsed and the app has
@@ -44,16 +44,12 @@
       type="image/avif"
       fetchpriority="high"
       imagesrcset="
-        /artwork/campus/Campus-640.avif 640w,
-        /artwork/campus/Campus-960.avif 960w,
-        /artwork/campus/Campus-1280.avif 1280w,
-        /artwork/campus/Campus-1672.avif 1672w,
-        /artwork/campus/Campus-2508.avif 2508w,
-        /artwork/campus/Campus-3344.avif 3344w,
-        /artwork/campus/Campus-5016.avif 5016w,
-        /artwork/campus/Campus-6688.avif 6688w
+        /artwork/photos/hero-winter-640.avif 640w,
+        /artwork/photos/hero-winter-960.avif 960w,
+        /artwork/photos/hero-winter-1280.avif 1280w,
+        /artwork/photos/hero-winter-1600.avif 1600w
       "
-      imagesizes="((pointer: coarse) and (max-width: 767px)) 1114px, ((pointer: coarse) and (max-height: 500px)) 1114px, (min-aspect-ratio: 1672/941) 380vw, 675.20vh"
+      imagesizes="(min-aspect-ratio: 1600/600) 120vw, 320vh"
     />
     <meta
       name="description"

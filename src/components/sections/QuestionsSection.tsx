@@ -1,11 +1,18 @@
 import { useId, useState } from 'react'
 import { Section, SectionHeader } from '../Layout'
 import { Reveal, RevealGroup, RevealItem } from '../Reveal'
+import { SectionPhoto } from '../SectionPhoto'
+import { SECTION_PHOTOS } from '../../lib/images'
 
 /**
  * "Questions newcomers actually have" — each answer sits behind a disclosure
  * so the section stays scannable with eight items. One open at a time keeps
  * the page from stacking long answers.
+ *
+ * From `lg` up the list shares its row with a portrait <SectionPhoto> — a
+ * winter walkway seen from above — in an 18rem column that stays put
+ * (`sticky`) while the eight questions scroll past it. Below `lg` the photo
+ * follows the list as a 4:3 crop, so the questions stay first on a phone.
  */
 
 const QUESTIONS = [
@@ -65,8 +72,9 @@ export function QuestionsSection() {
         />
       </Reveal>
 
-      <RevealGroup className="border-frost mt-12 border-t">
-        {QUESTIONS.map((item, index) => {
+      <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-14">
+        <RevealGroup className="border-frost border-t">
+          {QUESTIONS.map((item, index) => {
           const open = openIndex === index
           const panelId = `${baseId}-panel-${index}`
           const buttonId = `${baseId}-button-${index}`
@@ -105,7 +113,15 @@ export function QuestionsSection() {
             </RevealItem>
           )
         })}
-      </RevealGroup>
+        </RevealGroup>
+
+        <Reveal className="lg:sticky lg:top-28 lg:self-start">
+          <SectionPhoto
+            photo={SECTION_PHOTOS.campusPath}
+            className="aspect-[4/3] w-full lg:aspect-[658/1024]"
+          />
+        </Reveal>
+      </div>
     </Section>
   )
 }

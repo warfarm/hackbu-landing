@@ -41,7 +41,7 @@ const TOKENS: readonly Token[] = [
     hex: '#4A96D2',
     swatch: 'bg-sky',
     role: 'The hero’s sky. Scene colour, never UI.',
-    usage: 'One use: the hero track’s background, behind the campus illustration.',
+    usage: 'One use: the hero track’s background, behind the photograph while it loads.',
   },
   {
     name: 'horizon',

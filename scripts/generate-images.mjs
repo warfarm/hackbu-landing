@@ -1,9 +1,10 @@
 /**
  * Build-time image derivative generator — `npm run images`.
  *
- * Reads the deployable PNGs under `public/artwork/` and writes AVIF + WebP
- * derivatives beside them. The originals in `artwork/` are never touched, and
- * the PNGs in `public/artwork/` stay in place as the final <picture> fallback.
+ * Reads the source images — the delivered photographs in `hackbuimage/`, and
+ * the JPEG/PNG copies under `public/artwork/` — and writes AVIF + WebP
+ * derivatives into `public/artwork/`. The sources are never touched; a JPEG or
+ * PNG stays in place as the final <picture> fallback.
  *
  * This runs by hand, not on every build: the outputs are committed, so a
  * deploy needs nothing but `npm run build` (lint, `tsc -b`, `vite build`, then
@@ -13,37 +14,35 @@
  * ---------------------------------------------------------------------------
  * Widths
  * ---------------------------------------------------------------------------
- * Campus.png is 1672 x 941, and the hero magnifies the illustration up to
- * 3.8x — so at the start frame every screen wants far more pixels than the
- * source has, and a ladder capped at the intrinsic width rendered visibly
- * soft. The rungs above 1672 are therefore cut from
- * `artwork/campus/Campus-upscaled-6688.webp` (lossless), the raw 4x
- * Real-ESRGAN (`realesrgan-x4plus`) enlargement of the illustration; the
- * rungs at and below 1672 still come from the true source, where no
- * interpolation is involved at all. **6688 is the ceiling** — the enlarger's
- * own 4x output, inspected at 1:1 before shipping. At 4x the model is drawing
- * plausible detail rather than recovering real pixels, but the artwork's flat
- * cel-shaded style survives that almost perfectly, and the honest alternative
- * (a soft campus) reads as a defect at 3.8x.
+ * The hero is `hackbuimage/winter-header.jpg`, a 1600 x 600 photograph, and
+ * the hero magnifies it only 1.2x at its start frame — so the ladder is cut at
+ * and below the source width and never enlarged: 640, 960, 1280 and the 1600
+ * source itself. (Its predecessor, a cel-shaded illustration opened at 3.8x,
+ * needed a 4x Real-ESRGAN master to stay sharp; a photograph does not survive
+ * that kind of enlargement and is not asked to. The illustration and its
+ * master stay in the read-only `artwork/campus/` as reference and are no
+ * longer copied to `public/`. The cloud cutouts that drifted over it went the
+ * same way, into `artwork/clouds/`.)
  *
- * (The hero used to layer twelve cloud cutouts over the sky, encoded here from
- * `public/artwork/clouds/`. That layer was removed; the originals stay in
- * `artwork/clouds/` as read-only reference and nothing copies them into
- * `public/`, so this script never sees them.)
+ * The three section photographs — also from `hackbuimage/` — are rendered at
+ * a fraction of their width inside the content column, so they get one
+ * derivative each at the intrinsic size: a re-encoded JPEG as the `<img src>`
+ * fallback plus AVIF and WebP, switching on format only.
  *
  * ---------------------------------------------------------------------------
  * Quality
  * ---------------------------------------------------------------------------
- * Measured on the full-width campus tier (PSNR against the source PNG):
+ * Measured on the retired illustration's full-width tier when these settings
+ * were chosen (PSNR against its source PNG):
  *
  *     AVIF q60 237 KB 34.25 dB   q65 267 KB 35.15 dB   q70 324 KB 36.63 dB
  *     WebP q80 318 KB 33.49 dB   q85 385 KB 34.59 dB   q90 499 KB 36.23 dB
  *
- * AVIF q68 / WebP q82 sit just below the knee of both curves. The campus image
- * is the LCP element and is displayed upscaled, where compression artifacts are
- * magnified along with everything else, so this leans toward quality — it is
- * still ~9x smaller than the 2.81 MB PNG and leaves most of the 1.5 MB
- * first-load image budget unspent.
+ * AVIF q68 / WebP q82 sit just below the knee of both curves. The hero
+ * photograph is the LCP element and is drawn wider than its 1600px on most
+ * screens, where compression artifacts are magnified along with everything
+ * else, so this leans toward quality — the 1600 AVIF is still ~169 KB, about
+ * a tenth of the 1.5 MB first-load image budget.
  *
  * ---------------------------------------------------------------------------
  * Brand marks
@@ -85,21 +84,34 @@ const ARTWORK = join(ROOT, 'public', 'artwork')
 const BRAND_SOURCE = join(ROOT, 'brand-source')
 const BRAND_OUT = join(ROOT, 'public', 'brand')
 
+/** The delivered photographs. Read-only, exactly like `artwork/` and `brand-source/`. */
+const PHOTO_SOURCE = join(ROOT, 'hackbuimage')
+const PHOTOS_OUT = join(ARTWORK, 'photos')
+
 /**
- * Campus srcset ladder. **Keep in sync with `CAMPUS_WIDTHS` in
+ * Hero srcset ladder. **Keep in sync with `HERO_WIDTHS` in
  * `src/lib/images.ts` and with the preload `imagesrcset` in `index.html`.**
  * The script prints both strings at the end of a run so a drift is visible.
+ * The top rung is the source's own width; nothing is enlarged.
  */
-const CAMPUS_WIDTHS = [640, 960, 1280, 1672, 2508, 3344, 5016, 6688]
+const HERO_SOURCE = join(PHOTO_SOURCE, 'winter-header.jpg')
+const HERO_WIDTHS = [640, 960, 1280, 1600]
 
 /**
- * Widths above this rung are cut from the upscaled master instead of the
- * source illustration (see the Widths note at the top of the file).
+ * The section photographs: delivered file in `hackbuimage/` -> base name in
+ * `public/artwork/photos/`. **Keep in step with `SECTION_PHOTOS` in
+ * `src/lib/images.ts`.**
  */
-const CAMPUS_NATIVE_CEILING = 1672
+const SECTION_PHOTOS = [
+  ['image.png', 'campus-aerial'],
+  ['1-KS1-WEB-2-1024x683.jpg', 'snow-walk'],
+  ['47065170581_63875cf429_b.jpg', 'campus-path'],
+]
 
 const AVIF = { quality: 68, effort: 6 }
-const CAMPUS_WEBP = { quality: 82, effort: 6 }
+const WEBP = { quality: 82, effort: 6 }
+/** The `<img src>` fallbacks are re-encoded from the delivered files (one is a PNG). */
+const JPEG = { quality: 88, mozjpeg: true }
 
 /**
  * The mask ladder. `widths` is `[1x, 2x]`, sized against the *largest* place
@@ -126,24 +138,25 @@ async function emit(pipeline, outPath) {
   return buffer.length
 }
 
-async function generateCampus() {
-  const native = join(ARTWORK, 'campus', 'Campus.png')
-  const upscaled = join(ROOT, 'artwork', 'campus', 'Campus-upscaled-6688.webp')
-  const { width: upscaledWidth } = await sharp(upscaled).metadata()
-
-  for (const width of CAMPUS_WIDTHS) {
-    if (width > upscaledWidth) {
-      throw new Error(
-        `Campus width ${width} exceeds the ${upscaledWidth}px upscaled master.`,
-      )
+async function generateHero() {
+  const { width: sourceWidth } = await sharp(HERO_SOURCE).metadata()
+  for (const width of HERO_WIDTHS) {
+    if (width > sourceWidth) {
+      throw new Error(`Hero width ${width} exceeds the ${sourceWidth}px source.`)
     }
-    const src = width > CAMPUS_NATIVE_CEILING ? upscaled : native
-    const resized = () => sharp(src).resize({ width, withoutEnlargement: true })
-    await emit(resized().avif(AVIF), join(ARTWORK, 'campus', `Campus-${width}.avif`))
-    await emit(
-      resized().webp(CAMPUS_WEBP),
-      join(ARTWORK, 'campus', `Campus-${width}.webp`),
-    )
+    const resized = () => sharp(HERO_SOURCE).resize({ width, withoutEnlargement: true })
+    await emit(resized().avif(AVIF), join(PHOTOS_OUT, `hero-winter-${width}.avif`))
+    await emit(resized().webp(WEBP), join(PHOTOS_OUT, `hero-winter-${width}.webp`))
+  }
+  await emit(sharp(HERO_SOURCE).jpeg(JPEG), join(PHOTOS_OUT, 'hero-winter.jpg'))
+}
+
+async function generateSectionPhotos() {
+  for (const [source, base] of SECTION_PHOTOS) {
+    const src = join(PHOTO_SOURCE, source)
+    await emit(sharp(src).jpeg(JPEG), join(PHOTOS_OUT, `${base}.jpg`))
+    await emit(sharp(src).avif(AVIF), join(PHOTOS_OUT, `${base}.avif`))
+    await emit(sharp(src).webp(WEBP), join(PHOTOS_OUT, `${base}.webp`))
   }
 }
 
@@ -154,7 +167,7 @@ async function generateAboutPhotos() {
     const src = join(dir, file)
     const base = file.replace(/\.jpg$/, '')
     await emit(sharp(src).avif(AVIF), join(dir, `${base}.avif`))
-    await emit(sharp(src).webp(CAMPUS_WEBP), join(dir, `${base}.webp`))
+    await emit(sharp(src).webp(WEBP), join(dir, `${base}.webp`))
   }
 }
 
@@ -165,7 +178,7 @@ async function generateSponsorsPhotos() {
     const src = join(dir, file)
     const base = file.replace(/\.jpg$/, '')
     await emit(sharp(src).avif(AVIF), join(dir, `${base}.avif`))
-    await emit(sharp(src).webp(CAMPUS_WEBP), join(dir, `${base}.webp`))
+    await emit(sharp(src).webp(WEBP), join(dir, `${base}.webp`))
   }
 }
 
@@ -184,7 +197,7 @@ async function generateOrganizerPhotos() {
     const src = join(dir, file)
     const base = file.replace(/\.jpg$/, '')
     await emit(sharp(src).avif(AVIF), join(dir, `${base}.avif`))
-    await emit(sharp(src).webp(CAMPUS_WEBP), join(dir, `${base}.webp`))
+    await emit(sharp(src).webp(WEBP), join(dir, `${base}.webp`))
   }
 }
 
@@ -213,7 +226,7 @@ async function generateLandmarkPhotos() {
       src = jpg
     }
     await emit(sharp(src).avif(AVIF), join(dir, `${base}.avif`))
-    await emit(sharp(src).webp(CAMPUS_WEBP), join(dir, `${base}.webp`))
+    await emit(sharp(src).webp(WEBP), join(dir, `${base}.webp`))
   }
 }
 
@@ -293,7 +306,8 @@ function kb(bytes) {
   return `${(bytes / 1024).toFixed(1)} KB`
 }
 
-await generateCampus()
+await generateHero()
+await generateSectionPhotos()
 await generateAboutPhotos()
 await generateSponsorsPhotos()
 await generateOrganizerPhotos()
@@ -310,9 +324,9 @@ console.log(`\n${written.length} derivatives, ${kb(total)} on disk.`)
 
 // The two strings that have to match the hand-written copies in the app.
 const srcset = (ext) =>
-  CAMPUS_WIDTHS.map((w) => `/artwork/campus/Campus-${w}.${ext} ${w}w`).join(', ')
-console.log(`\nCampus AVIF srcset:\n  ${srcset('avif')}`)
-console.log(`Campus WebP srcset:\n  ${srcset('webp')}`)
+  HERO_WIDTHS.map((w) => `/artwork/photos/hero-winter-${w}.${ext} ${w}w`).join(', ')
+console.log(`\nHero AVIF srcset:\n  ${srcset('avif')}`)
+console.log(`Hero WebP srcset:\n  ${srcset('webp')}`)
 
 // The mark geometry the app has to agree with. `aspect-ratio` in
 // src/components/Wordmark.tsx is built from exactly these numbers.
@@ -322,14 +336,14 @@ for (const [base, { width, height }] of Object.entries(brandInk)) {
   )
 }
 
-// The realistic first load: the widest campus tier, in one format.
-const pngStat = await stat(join(ARTWORK, 'campus', 'Campus.png'))
+// The realistic first load: the widest hero tier, in one format.
+const heroStat = await stat(HERO_SOURCE)
 for (const ext of ['avif', 'webp']) {
-  const campusTop = written.find((w) =>
-    w.path.endsWith(`Campus-${CAMPUS_WIDTHS.at(-1)}.${ext}`),
+  const heroTop = written.find((w) =>
+    w.path.endsWith(`hero-winter-${HERO_WIDTHS.at(-1)}.${ext}`),
   )
   console.log(
-    `\nFirst load, ${ext.toUpperCase()} path (widest campus tier): ${kb(campusTop.bytes)}` +
-      (ext === 'avif' ? `  [campus PNG alone is ${kb(pngStat.size)}]` : ''),
+    `\nFirst load, ${ext.toUpperCase()} path (widest hero tier): ${kb(heroTop.bytes)}` +
+      (ext === 'avif' ? `  [source JPEG is ${kb(heroStat.size)}]` : ''),
   )
 }

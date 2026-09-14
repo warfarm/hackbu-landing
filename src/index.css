@@ -226,6 +226,32 @@
  *
  * Only one rung is ever fetched — an unmatched media query loads nothing.
  */
+/*
+ * Feathered photograph edges — the landing page's section photos
+ * (src/components/SectionPhoto.tsx).
+ *
+ * The photographs are opaque JPEG/AVIF/WebP with no alpha channel, so their
+ * edges are dissolved at paint time instead: two linear gradients, one per
+ * axis, each fully transparent at the edge and opaque from 12% in, intersected
+ * so every side and every corner fades into the section background. Only the
+ * alpha of the gradient is read, which is why the stops are plain `black`. A
+ * browser without `mask-composite` unions the two layers instead, which leaves
+ * the photo whole with only its corners softened — degraded, never broken. The
+ * WebKit pair is the legacy spelling Safari still reads.
+ */
+@layer components {
+  .photo-feather {
+    -webkit-mask-image:
+      linear-gradient(to right, transparent, black 12%, black 88%, transparent),
+      linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+    mask-image:
+      linear-gradient(to right, transparent, black 12%, black 88%, transparent),
+      linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+}
+
 @layer components {
   .brand-mark {
     -webkit-mask-repeat: no-repeat;
