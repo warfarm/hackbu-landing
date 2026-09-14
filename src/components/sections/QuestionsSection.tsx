@@ -94,15 +94,14 @@ export function QuestionsSection() {
                   </span>
                 </button>
               </h3>
-              <div
+              <section
                 id={panelId}
-                role="region"
                 aria-labelledby={buttonId}
                 hidden={!open}
                 className="pb-8"
               >
                 <p className="text-body text-pine max-w-2xl">{item.answer}</p>
-              </div>
+              </section>
             </RevealItem>
           )
         })}
