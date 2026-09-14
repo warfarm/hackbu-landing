@@ -32,7 +32,7 @@ const PAN_PARAMS: readonly Param[] = [
   {
     name: 'PAN_START_SCALE',
     value: '1.2',
-    note: 'Scale of the photograph at scroll 0, easing to 1 as the pan runs. 1.2 is the most a 1600px source can be magnified before it reads soft on a retina laptop; the photo has no sky-only band, so the old "no buildings at scroll 0" constraint is gone with the illustration.',
+    note: 'Scale of the photograph at scroll 0, easing to 1 as the pan runs. 1.2 is the most a 1200px source can be magnified before it reads soft on a retina laptop; the photo has no sky-only band, so the old "no buildings at scroll 0" constraint is gone with the illustration.',
   },
   {
     name: 'PAN_SCROLL_FRACTION',
@@ -51,8 +51,8 @@ const PAN_PARAMS: readonly Param[] = [
   },
   {
     name: 'object-position / transform-origin',
-    value: 'object-[70%_0%] · ≥3:2 object-[50%_0%] · origin-top',
-    note: 'Pins the photo’s top edge to the top of the stage before any transform, so scale alone drives the pan and there is no translate. Horizontally, phones centre the Library Tower (70%); screens at or wider than 3:2 sit at 50%, where the cover-crop is wide enough to hold the clock tower and the Library Tower together.',
+    value: 'object-[50%_0%] · origin-top',
+    note: 'Pins the photo’s top edge to the top of the stage before any transform, so scale alone drives the pan and there is no translate. 50% horizontally is the Library Tower, which stands at the centre of the frame — so one value serves every screen.',
   },
 ]
 
@@ -69,7 +69,7 @@ export function HeroPart() {
       <Entry
         name="Hero"
         path="src/components/Hero.tsx"
-        use="The top of the landing page, and nothing else: a real aerial photograph of campus under snow, with the page’s <h1> over its sky."
+        use="The top of the landing page, and nothing else: a real aerial photograph of the whole campus under snow, with the page’s <h1> across the top of the frame."
       >
         <Block title="See it live">
           <p className="text-body text-pine">
@@ -77,9 +77,8 @@ export function HeroPart() {
             <a href="/" className={`${LINK_ON_CLOUD} underline underline-offset-4`}>
               Open the landing page
             </a>{' '}
-            and scroll: the photograph opens at a slight zoom with its sky
-            pinned to the top and settles to its full frame over the first
-            60dvh.
+            and scroll: the photograph opens at a slight zoom with its top
+            edge pinned and settles to its full frame over the first 60dvh.
           </p>
         </Block>
 
@@ -122,9 +121,9 @@ export function HeroPart() {
             </picture>
           </div>
           <Caption>
-            public/artwork/photos/hero-winter.jpg — {HERO_WIDTH}×{HERO_HEIGHT},
+            public/artwork/photos/hero-campus.jpg — {HERO_WIDTH}×{HERO_HEIGHT},
             with AVIF and WebP derivatives from 640 up to the source’s own
-            1600. This is the frame the pan ends on; it opens at 1.2 times
+            1200. This is the frame the pan ends on; it opens at 1.2 times
             this size with the top edge pinned, so the foreground plaza is
             what the settle brings in.
           </Caption>

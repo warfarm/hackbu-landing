@@ -100,8 +100,8 @@ export function ComposedPart() {
         </Block>
         <Block title="Notes">
           <Rule>
-            The hero above it carries the page’s <b>&lt;h1&gt;</b> over the
-            photograph’s sky, under a pine gradient wash and a text-shadow
+            The hero above it carries the page’s <b>&lt;h1&gt;</b> across the
+            top of the photograph, under a pine gradient wash and a text-shadow
             confined to the top band of the frame — so this section’s heading
             is an <b>&lt;h2&gt;</b> and the outline runs h1 → h2 with no skipped
             level. (When the hero was an illustration, cloud text over its

@@ -4,9 +4,10 @@ A redesigned landing page for [HackBU](https://hackbu.org), the student tech clu
 Binghamton University. One job: get undergrads — most of them with no programming
 experience — into the Discord.
 
-The hero is a real aerial photograph of campus under snow — the green clock tower in the
-foreground, the Library Tower beyond, students crossing the plaza. On load it opens at a
-slight zoom (`PAN_START_SCALE = 1.2`) with its sky pinned to the top of the screen;
+The hero is a real aerial photograph of the whole campus under snow — the Library Tower at
+the centre, brick buildings and dormitories around it, forested hills behind. On load it
+opens at a slight zoom (`PAN_START_SCALE = 1.2`) with its top edge pinned to the top of the
+screen;
 scrolling eases it back to its full frame, holds for a beat, then scrolls away to the
 content below. Each content section then carries one more campus photograph, set into the
 page with feathered edges (`SectionPhoto.tsx` and `.photo-feather` in `src/index.css`).
@@ -205,22 +206,22 @@ The files the site actually ships are in `public/artwork/`.
 
 ```
 hackbuimage/                    read-only photographs, as delivered
-  winter-header.jpg             the hero — 1600 x 600
-  image.png                     About — aerial of the whole campus, 1200 x 674
+  image.png                     the hero — aerial of the whole campus, 1200 x 674
+  winter-header.jpg             About — the clock tower and plaza from the air, 1600 x 600
   1-KS1-WEB-2-1024x683.jpg      Get involved — two students on a snowy path
   47065170581_63875cf429_b.jpg  Questions — winter walkway from above, 658 x 1024
 artwork/                        read-only originals, no longer shipped
   campus/                       the retired illustration + its 4x Real-ESRGAN master
   clouds/                       the retired cloud cutouts + their contact sheet
 public/artwork/
-  photos/hero-winter.jpg        the hero's JPEG fallback
-  photos/hero-winter-{640,960,1280,1600}.{avif,webp}
-  photos/{campus-aerial,snow-walk,campus-path}.{jpg,avif,webp}
+  photos/hero-campus.jpg        the hero's JPEG fallback (the source is a PNG)
+  photos/hero-campus-{640,960,1200}.{avif,webp}
+  photos/{plaza-winter,snow-walk,campus-path}.{jpg,avif,webp}
 ```
 
 To replace a photograph:
 
-1. Drop the new file into `hackbuimage/`. For the hero, keep the name `winter-header.jpg`;
+1. Drop the new file into `hackbuimage/`. For the hero, keep the name `image.png`;
    for a section photo, either keep the existing name or update the `SECTION_PHOTOS`
    table at the top of `scripts/generate-images.mjs`.
 2. Run `npm run images` to regenerate the JPEG fallback and the AVIF and WebP derivatives
@@ -237,14 +238,14 @@ Three things in the hero are tied to the specific photograph and will need re-de
 - **`PAN_START_SCALE`** in `src/components/Hero.tsx` (currently `1.2`). Keep the `sizes`
   multiplier in `src/lib/images.ts` (`HERO_SIZES`) and the preload's `imagesizes` in
   `index.html` equal to it. Do not push it far: the photo is already drawn wider than its
-  1600px on most screens at scale 1.
-- **`object-position`** on the hero `<img>`: `70% 0%` on phones and portrait screens,
-  `50% 0%` at or above a 3:2 aspect ratio. The horizontal values are the focal crop —
-  where the Library Tower and the clock tower fall in the frame — and were chosen against
-  simulated `object-cover` crops of the source; a differently composed photo wants its own.
-  The vertical `0%` pins the top edge and, together with `transform-origin: top`, is what
-  keeps the framing aspect-independent; leave it at `0%`.
-- **`HERO_SIZES`**'s aspect-ratio breakpoint (`1600/600`), which is the photo's own ratio.
+  1200px on most screens at scale 1.
+- **`object-position`** on the hero `<img>` (currently `50% 0%`). The horizontal value is
+  the focal crop — the Library Tower stands at the centre of this frame, so one value
+  serves every screen; a photo with its landmark off-centre wants its own value, or two
+  switched on aspect ratio (the winter plaza photo needed `70%` on phones and `50%` from
+  3:2 when it was the hero). The vertical `0%` pins the top edge and, together with
+  `transform-origin: top`, is what keeps the framing aspect-independent; leave it at `0%`.
+- **`HERO_SIZES`**'s aspect-ratio breakpoint (`1200/674`), which is the photo's own ratio.
 
 The hero used to layer twelve drifting cloud cutouts over a cel-shaded illustration
 (`HeroClouds.tsx`, `public/artwork/clouds/`, `public/artwork/campus/`). All of it was

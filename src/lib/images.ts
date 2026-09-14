@@ -19,23 +19,24 @@
 /* -------------------------------------------------------------------------- */
 
 /**
- * The hero is a real photograph — `hackbuimage/winter-header.jpg`, an aerial
- * of the Binghamton campus under snow, 1600 x 600 — and the derivatives are
+ * The hero is a real photograph — `hackbuimage/image.png`, an aerial of the
+ * whole Binghamton campus under snow, 1200 x 674 — and the derivatives are
  * cut from it at and below its own width, never enlarged. There is no
  * upscaled master any more: a photograph does not survive machine enlargement
  * the way the flat-shaded illustration it replaced did, and the hero's start
  * frame magnifies it only 1.2x (see PAN_START_SCALE in Hero.tsx), so the
- * source width is the honest ceiling.
+ * source width is the honest ceiling. (The `<img src>` fallback is a
+ * re-encoded JPEG: the delivered file is a 1.7 MB PNG of a photograph.)
  */
-export const HERO_JPG = '/artwork/photos/hero-winter.jpg'
-export const HERO_WIDTH = 1600
-export const HERO_HEIGHT = 600
+export const HERO_JPG = '/artwork/photos/hero-campus.jpg'
+export const HERO_WIDTH = 1200
+export const HERO_HEIGHT = 674
 
-const HERO_WIDTHS = [640, 960, 1280, 1600] as const
+const HERO_WIDTHS = [640, 960, 1200] as const
 
 function heroSrcSet(extension: 'avif' | 'webp'): string {
   return HERO_WIDTHS.map(
-    (width) => `/artwork/photos/hero-winter-${width}.${extension} ${width}w`,
+    (width) => `/artwork/photos/hero-campus-${width}.${extension} ${width}w`,
   ).join(', ')
 }
 
@@ -49,20 +50,21 @@ export const HERO_SRCSET = {
  * box. The `<img>` is `object-cover` into a viewport-sized stage, so at scale
  * 1 the drawn content is:
  *
- *   viewport aspect >= 1600/600 (2.667)  ->  width-constrained, 100vw
- *   viewport aspect <  1600/600          ->  height-constrained,
- *                                            100vh x 1600/600 = 266.67vh
+ *   viewport aspect >= 1200/674 (1.780)  ->  width-constrained, 100vw
+ *   viewport aspect <  1200/674          ->  height-constrained,
+ *                                            100vh x 1200/674 = 178.04vh
  *
- * Almost every screen is narrower than 2.667:1, so the `vh` branch is the
- * usual one. Both are written multiplied by PAN_START_SCALE = 1.2, the scale
- * the photo is fetched at: `120vw` and `320vh`. **Keep the factor equal to
- * PAN_START_SCALE.** With a ladder that tops out at the 1600px source the
- * expression matters less than it used to — anything past a 1333px 1x draw
- * already takes the top rung — but it must still match `imagesizes` on the
- * preload link in index.html, or the preload and the `<picture>` resolve to
- * different rungs and the image loads twice.
+ * The photo is a hair under 16:9, so 1440x900 laptops and every phone take
+ * the `vh` branch and only screens wider than 16:9 take `vw`. Both are
+ * written multiplied by PAN_START_SCALE = 1.2, the scale the photo is fetched
+ * at: `120vw` and `213.65vh`. **Keep the factor equal to PAN_START_SCALE.**
+ * With a ladder that tops out at the 1200px source the expression matters
+ * less than it used to — anything past a 1000px 1x draw already takes the top
+ * rung — but it must still match `imagesizes` on the preload link in
+ * index.html, or the preload and the `<picture>` resolve to different rungs
+ * and the image loads twice.
  */
-export const HERO_SIZES = '(min-aspect-ratio: 1600/600) 120vw, 320vh'
+export const HERO_SIZES = '(min-aspect-ratio: 1200/674) 120vw, 213.65vh'
 
 /**
  * The photograph is content, not decoration — it is the reason the page opens
@@ -70,9 +72,9 @@ export const HERO_SIZES = '(min-aspect-ratio: 1600/600) 120vw, 320vh'
  */
 export const HERO_ALT =
   'Aerial photograph of the Binghamton University campus under snow: the ' +
-  'green steel frame of the clock tower in the foreground, brick academic ' +
-  'buildings and the tall Library Tower beyond, students crossing the ' +
-  'snow-covered plaza between bare trees, and wooded hills behind.'
+  'brick Library Tower at the centre, academic buildings and dormitories ' +
+  'around it, snow-covered walkways crossing the plaza, and forested hills ' +
+  'behind.'
 
 /* -------------------------------------------------------------------------- */
 /* Landing-page section photographs                                           */
@@ -114,12 +116,12 @@ function sitePhoto(
 }
 
 export const SECTION_PHOTOS = {
-  /** About — from `hackbuimage/image.png`. */
-  campusAerial: sitePhoto(
-    'campus-aerial',
-    1200,
-    674,
-    'Aerial photograph of the snow-covered Binghamton University campus: the Library Tower at the centre, brick buildings and dormitories around it, and forested hills behind.',
+  /** About — from `hackbuimage/winter-header.jpg`. */
+  plazaWinter: sitePhoto(
+    'plaza-winter',
+    1600,
+    600,
+    'Aerial photograph of the Binghamton campus in winter: the green steel frame of the clock tower in the foreground, brick buildings and the Library Tower beyond, and students crossing the snow-covered plaza.',
   ),
   /** Get involved — from `hackbuimage/1-KS1-WEB-2-1024x683.jpg`. */
   snowWalk: sitePhoto(

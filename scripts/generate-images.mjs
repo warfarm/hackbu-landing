@@ -14,10 +14,11 @@
  * ---------------------------------------------------------------------------
  * Widths
  * ---------------------------------------------------------------------------
- * The hero is `hackbuimage/winter-header.jpg`, a 1600 x 600 photograph, and
- * the hero magnifies it only 1.2x at its start frame — so the ladder is cut at
- * and below the source width and never enlarged: 640, 960, 1280 and the 1600
- * source itself. (Its predecessor, a cel-shaded illustration opened at 3.8x,
+ * The hero is `hackbuimage/image.png`, a 1200 x 674 photograph (a PNG of a
+ * photo, so its `<img src>` fallback is a re-encoded JPEG), and the hero
+ * magnifies it only 1.2x at its start frame — so the ladder is cut at and
+ * below the source width and never enlarged: 640, 960 and the 1200 source
+ * itself. (Its predecessor, a cel-shaded illustration opened at 3.8x,
  * needed a 4x Real-ESRGAN master to stay sharp; a photograph does not survive
  * that kind of enlargement and is not asked to. The illustration and its
  * master stay in the read-only `artwork/campus/` as reference and are no
@@ -41,8 +42,8 @@
  * AVIF q68 / WebP q82 sit just below the knee of both curves. The hero
  * photograph is the LCP element and is drawn wider than its 1600px on most
  * screens, where compression artifacts are magnified along with everything
- * else, so this leans toward quality — the 1600 AVIF is still ~169 KB, about
- * a tenth of the 1.5 MB first-load image budget.
+ * else, so this leans toward quality — the 1200 AVIF is still ~194 KB, about
+ * an eighth of the 1.5 MB first-load image budget.
  *
  * ---------------------------------------------------------------------------
  * Brand marks
@@ -94,8 +95,8 @@ const PHOTOS_OUT = join(ARTWORK, 'photos')
  * The script prints both strings at the end of a run so a drift is visible.
  * The top rung is the source's own width; nothing is enlarged.
  */
-const HERO_SOURCE = join(PHOTO_SOURCE, 'winter-header.jpg')
-const HERO_WIDTHS = [640, 960, 1280, 1600]
+const HERO_SOURCE = join(PHOTO_SOURCE, 'image.png')
+const HERO_WIDTHS = [640, 960, 1200]
 
 /**
  * The section photographs: delivered file in `hackbuimage/` -> base name in
@@ -103,7 +104,7 @@ const HERO_WIDTHS = [640, 960, 1280, 1600]
  * `src/lib/images.ts`.**
  */
 const SECTION_PHOTOS = [
-  ['image.png', 'campus-aerial'],
+  ['winter-header.jpg', 'plaza-winter'],
   ['1-KS1-WEB-2-1024x683.jpg', 'snow-walk'],
   ['47065170581_63875cf429_b.jpg', 'campus-path'],
 ]
@@ -145,10 +146,10 @@ async function generateHero() {
       throw new Error(`Hero width ${width} exceeds the ${sourceWidth}px source.`)
     }
     const resized = () => sharp(HERO_SOURCE).resize({ width, withoutEnlargement: true })
-    await emit(resized().avif(AVIF), join(PHOTOS_OUT, `hero-winter-${width}.avif`))
-    await emit(resized().webp(WEBP), join(PHOTOS_OUT, `hero-winter-${width}.webp`))
+    await emit(resized().avif(AVIF), join(PHOTOS_OUT, `hero-campus-${width}.avif`))
+    await emit(resized().webp(WEBP), join(PHOTOS_OUT, `hero-campus-${width}.webp`))
   }
-  await emit(sharp(HERO_SOURCE).jpeg(JPEG), join(PHOTOS_OUT, 'hero-winter.jpg'))
+  await emit(sharp(HERO_SOURCE).jpeg(JPEG), join(PHOTOS_OUT, 'hero-campus.jpg'))
 }
 
 async function generateSectionPhotos() {
@@ -324,7 +325,7 @@ console.log(`\n${written.length} derivatives, ${kb(total)} on disk.`)
 
 // The two strings that have to match the hand-written copies in the app.
 const srcset = (ext) =>
-  HERO_WIDTHS.map((w) => `/artwork/photos/hero-winter-${w}.${ext} ${w}w`).join(', ')
+  HERO_WIDTHS.map((w) => `/artwork/photos/hero-campus-${w}.${ext} ${w}w`).join(', ')
 console.log(`\nHero AVIF srcset:\n  ${srcset('avif')}`)
 console.log(`Hero WebP srcset:\n  ${srcset('webp')}`)
 
@@ -340,10 +341,10 @@ for (const [base, { width, height }] of Object.entries(brandInk)) {
 const heroStat = await stat(HERO_SOURCE)
 for (const ext of ['avif', 'webp']) {
   const heroTop = written.find((w) =>
-    w.path.endsWith(`hero-winter-${HERO_WIDTHS.at(-1)}.${ext}`),
+    w.path.endsWith(`hero-campus-${HERO_WIDTHS.at(-1)}.${ext}`),
   )
   console.log(
     `\nFirst load, ${ext.toUpperCase()} path (widest hero tier): ${kb(heroTop.bytes)}` +
-      (ext === 'avif' ? `  [source JPEG is ${kb(heroStat.size)}]` : ''),
+      (ext === 'avif' ? `  [source PNG is ${kb(heroStat.size)}]` : ''),
   )
 }

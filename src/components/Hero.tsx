@@ -15,9 +15,9 @@ import {
 } from '../lib/motion'
 
 /**
- * The hero: a real aerial photograph of campus under snow, settling from a
- * slight zoom to its full frame as the reader scrolls, with the page's welcome
- * headline over the sky.
+ * The hero: a real aerial photograph of the whole campus under snow, settling
+ * from a slight zoom to its full frame as the reader scrolls, with the page's
+ * welcome headline across the top of the frame.
  *
  * Layer contract:
  *
@@ -28,12 +28,13 @@ import {
  *                                  little magnified and eased back to 1.
  *       <div data-hero-copy>       welcome headline + lede, above the photo.
  *
- * A pine wash and text-shadow keep cloud (cream) type readable over the sky
- * and the hills. (Until 2026-09 this was a cel-shaded *illustration* opened at
- * 3.8x on a sky band, with a drifting cloud-cutout parallax over it; both went
- * when the real photograph landed. A photograph cannot take that magnification
- * — there is no upscaled master behind it and no sky-only band to hide in — so
- * the pan below is a settle, not a reveal.)
+ * A pine wash and text-shadow keep cloud (cream) type readable over the
+ * hills that fill the top of the photograph. (Until 2026-09 this was a
+ * cel-shaded *illustration* opened at 3.8x on a sky band, with a drifting
+ * cloud-cutout parallax over it; both went when the real photographs landed.
+ * A photograph cannot take that magnification — there is no upscaled master
+ * behind it and no sky-only band to hide in — so the pan below is a settle,
+ * not a reveal.)
  */
 
 /* -------------------------------------------------------------------------- */
@@ -47,16 +48,17 @@ import {
  * with its top edge pinned to the top of the stage (see `origin-top` and the
  * `0%` vertical object-position below). Writing `f1` for the fraction of the
  * image's height that `object-cover` leaves visible at scale 1, **the visible
- * band at scale S runs from 0 to f1/S**. The photograph is 1600 x 600 — wider
- * than any viewport short of 2.667:1 — so cover is height-bound everywhere
- * that matters, `f1 = 1`, and the start frame shows the top 1/1.2 = 83% of the
- * photo: sky, hills, both towers and the buildings, with the foreground plaza
- * arriving as the pan runs. The photograph has no sky-only band to open on
- * (the hills break the horizon at about 0.13 of its height), so unlike the
- * illustration this replaced there is no "no buildings" constraint to satisfy
- * — the buildings *are* the picture.
+ * band at scale S runs from 0 to f1/S**. The photograph is 1200 x 674, a hair
+ * under 16:9, so cover is height-bound on 1440x900 laptops and every phone
+ * (`f1 = 1`) and the start frame shows the top 1/1.2 = 83% of the photo:
+ * hills, dormitories, the Library Tower and the buildings around it, with the
+ * foreground plaza arriving as the pan runs. Screens wider than 16:9 are
+ * width-bound instead (`f1 < 1`) and lose a little more of the plaza, never
+ * the top. The photograph has no sky at all — the hills run right off the top
+ * edge — so unlike the illustration this replaced there is no "no buildings"
+ * constraint to satisfy: the buildings *are* the picture.
  *
- * 1.2 is as far as the source can be pushed: the 1600px file is drawn 2400 CSS
+ * 1.2 is as far as the source can be pushed: the 1200px file is drawn 1602 CSS
  * px wide on a 1440x900 screen even at scale 1 (see HERO_SIZES), so every
  * extra tenth of magnification is visible softness on a retina display. It is
  * enough to read as movement, and the eased curve does the rest. **Keep the
@@ -80,39 +82,27 @@ const TRACK_HEIGHT = 'h-[180dvh]'
 const PAN_SCROLL_FRACTION = 0.75
 
 /**
- * Where the photograph sits in the stage, and why it is two values.
+ * Where the photograph sits in the stage.
  *
- *   object-position `<x> 0%`   the photo's top edge sits on the stage's top
+ *   object-position `50% 0%`   the photo's top edge sits on the stage's top
  *                              edge before any transform, at every aspect
  *   transform-origin `top`     scaling then grows downward from that edge
  *
- * The vertical `0%` + `origin-top` pair pins the sky to the top of the stage
- * for all S with no translate at all — the scheme the illustration used, kept
- * because it is aspect-independent: the visible band is `0 .. f1/S`
- * everywhere. (`origin-top` is `50% 0%`, so the horizontal half of the scale
- * still grows about the stage's centre.)
+ * The vertical `0%` + `origin-top` pair pins the top of the frame to the top
+ * of the stage for all S with no translate at all — the scheme the
+ * illustration used, kept because it is aspect-independent: the visible band
+ * is `0 .. f1/S` everywhere. (`origin-top` is `50% 0%`, so the horizontal half
+ * of the scale still grows about the stage's centre.)
  *
- * The horizontal value is the focal crop, and a 2.667:1 photograph is cropped
- * hard on anything but an ultra-wide screen — a 390x844 phone shows 17% of
- * its width, a 1440x900 laptop 60%. Two subjects compete for that window: the
- * green clock tower filling the left third of the frame (x = 0.10..0.40, the
- * clock face at 0.27..0.35) and the Library Tower at x = 0.67..0.75. Measured
- * against simulated cover-crops of the source:
- *
- *   phones, portrait tablets   `70%`   the Library Tower centred over the
- *                                      plaza; at 50% the window (0.42..0.58)
- *                                      holds neither landmark.
- *   landscape >= 3:2           `50%`   the window is wide enough (>= 56% of
- *                                      the frame) for the clock face AND the
- *                                      Library Tower; 70% would push the clock
- *                                      tower off the left edge.
- *
- * The switch is on aspect ratio, not width, because the aspect ratio is what
- * decides how much of the frame `cover` keeps. Tailwind's arbitrary media
- * variant carries the query; nothing else in the stylesheet needs to know.
+ * The horizontal `50%` is the focal crop, and here one value serves every
+ * screen: the Library Tower stands at 0.50 of the frame's width, so whatever
+ * `cover` keeps — 26% of the width on a 390x844 phone, 90% on a 1440x900
+ * laptop — is centred on it, with the brick buildings falling away
+ * symmetrically either side. (The winter plaza photograph this hero briefly
+ * used had its landmarks off-centre and needed two values switched on aspect
+ * ratio; it now lives in the About section instead.)
  */
-const HERO_OBJECT_POSITION =
-  'object-[70%_0%] [@media(min-aspect-ratio:3/2)]:object-[50%_0%]'
+const HERO_OBJECT_POSITION = 'object-[50%_0%]'
 
 export function Hero() {
   const trackRef = useRef<HTMLElement>(null)
@@ -246,9 +236,9 @@ export function Hero() {
         </div>
 
         {/*
-         * Welcome copy over the sky. Cleared below the fixed header
-         * (h-16 / sm:h-20). Pine wash + text-shadow keep the type readable
-         * over the sky and the hills behind it.
+         * Welcome copy across the top of the frame. Cleared below the fixed
+         * header (h-16 / sm:h-20). Pine wash + text-shadow keep the type
+         * readable over the hills that fill the top of the photograph.
          */}
         <div
           data-hero-copy

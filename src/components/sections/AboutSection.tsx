@@ -12,13 +12,14 @@ import {
 } from '../../lib/images'
 
 /**
- * "About us" — Baxter beside the mission copy, a wide aerial photograph of the
- * campus under snow beneath it, then the Discord and mailing-list CTAs.
+ * "About us" — Baxter beside the mission copy, the winter plaza photograph
+ * beneath it, then the Discord and mailing-list CTAs.
  *
- * The photograph is the section's one <SectionPhoto>: a real aerial of the
- * whole campus, cropped to a wide band (16:9 on phones, 21:9 from `sm`) and
- * feathered into the cloud background on all four edges. It sits between the
- * mission statement and the cards so the copy reads first and the picture
+ * The photograph is the section's one <SectionPhoto>: the green clock tower
+ * and the Library Tower from the air, students crossing the snow — a wide
+ * 1600 x 600 frame shown as a band (16:9 on phones, its own 8:3 from `sm`)
+ * and feathered into the cloud background on all four edges. It sits between
+ * the mission statement and the cards so the copy reads first and the picture
  * answers "where".
  *
  * The page <h1> lives in the hero; this section opens with an <h2> so the
@@ -72,8 +73,8 @@ export function AboutSection() {
 
       <Reveal delay={0.05}>
         <SectionPhoto
-          photo={SECTION_PHOTOS.campusAerial}
-          className="mt-12 aspect-[16/9] w-full sm:aspect-[21/9]"
+          photo={SECTION_PHOTOS.plazaWinter}
+          className="mt-12 aspect-[16/9] w-full sm:aspect-[8/3]"
         />
       </Reveal>
 
