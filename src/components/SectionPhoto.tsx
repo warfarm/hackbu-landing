@@ -12,9 +12,17 @@ import type { SitePhoto } from '../lib/images'
  * JPEG fallback is what makes baking the alpha into the files impossible in
  * the first place: a mask gives every format the same edge for free.
  *
- * The wrapper owns the box (aspect ratio, width, sticky positioning — passed
- * in via `className`) and the `<img>` covers it, so a photo can be cropped to
- * a different shape at different breakpoints without a second file.
+ * The wrapper owns the box (aspect ratio, width — passed in via `className`)
+ * and the `<img>` covers it, so a photo can be cropped to a different shape at
+ * different breakpoints without a second file. `imgClassName` is for the crop
+ * itself: an `object-*` position for when the centre of the file is not the
+ * part worth keeping in a tall box.
+ *
+ * On the landing page every photo is a *bleed* from `md` up: its <Reveal>
+ * wrapper carries `.photo-bleed` (src/index.css), which lifts it out of the
+ * column to run down the right edge of the window behind the section's copy
+ * and cards, and this component fills that box with `h-full`. Below `md` the
+ * same element sits in flow between the section's blocks.
  *
  * Every section photo is below the fold, so they are all `loading="lazy"`.
  * They are decorative *context*, not the section's content, but they are real
@@ -23,10 +31,13 @@ import type { SitePhoto } from '../lib/images'
 export function SectionPhoto({
   photo,
   className = '',
+  imgClassName = '',
   sizes,
 }: {
   photo: SitePhoto
   className?: string
+  /** Extra classes on the `<img>` — an `object-*` position for the crop. */
+  imgClassName?: string
   /** Optional `sizes` when the rendered box is much narrower than the file. */
   sizes?: string
 }) {
@@ -43,7 +54,7 @@ export function SectionPhoto({
           decoding="async"
           loading="lazy"
           draggable={false}
-          className="h-full w-full object-cover select-none"
+          className={`h-full w-full object-cover select-none ${imgClassName}`}
         />
       </picture>
     </div>

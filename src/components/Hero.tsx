@@ -48,18 +48,18 @@ import {
  * with its top edge pinned to the top of the stage (see `origin-top` and the
  * `0%` vertical object-position below). Writing `f1` for the fraction of the
  * image's height that `object-cover` leaves visible at scale 1, **the visible
- * band at scale S runs from 0 to f1/S**. The photograph is 1200 x 674, a hair
+ * band at scale S runs from 0 to f1/S**. The photograph is 2048 x 1151, a hair
  * under 16:9, so cover is height-bound on 1440x900 laptops and every phone
  * (`f1 = 1`) and the start frame shows the top 1/1.2 = 83% of the photo:
- * hills, dormitories, the Library Tower and the buildings around it, with the
- * foreground plaza arriving as the pan runs. Screens wider than 16:9 are
+ * hills, athletic fields, the Library Tower and the academic buildings, with
+ * the foreground residence halls arriving as the pan runs. Screens wider than 16:9 are
  * width-bound instead (`f1 < 1`) and lose a little more of the plaza, never
  * the top. The photograph has no sky at all — the hills run right off the top
  * edge — so unlike the illustration this replaced there is no "no buildings"
  * constraint to satisfy: the buildings *are* the picture.
  *
- * 1.2 is as far as the source can be pushed: the 1200px file is drawn 1602 CSS
- * px wide on a 1440x900 screen even at scale 1 (see HERO_SIZES), so every
+ * 1.2 is as far as the source should be pushed: the 2048px file is drawn 1601
+ * CSS px wide on a 1440x900 screen even at scale 1 (see HERO_SIZES), so every
  * extra tenth of magnification is visible softness on a retina display. It is
  * enough to read as movement, and the eased curve does the rest. **Keep the
  * `sizes` multiplier in src/lib/images.ts equal to this.**
@@ -84,7 +84,7 @@ const PAN_SCROLL_FRACTION = 0.75
 /**
  * Where the photograph sits in the stage.
  *
- *   object-position `50% 0%`   the photo's top edge sits on the stage's top
+ *   object-position `77% 0%`   the photo's top edge sits on the stage's top
  *                              edge before any transform, at every aspect
  *   transform-origin `top`     scaling then grows downward from that edge
  *
@@ -94,15 +94,24 @@ const PAN_SCROLL_FRACTION = 0.75
  * is `0 .. f1/S` everywhere. (`origin-top` is `50% 0%`, so the horizontal half
  * of the scale still grows about the stage's centre.)
  *
- * The horizontal `50%` is the focal crop, and here one value serves every
- * screen: the Library Tower stands at 0.50 of the frame's width, so whatever
- * `cover` keeps — 26% of the width on a 390x844 phone, 90% on a 1440x900
- * laptop — is centred on it, with the brick buildings falling away
- * symmetrically either side. (The winter plaza photograph this hero briefly
- * used had its landmarks off-centre and needed two values switched on aspect
- * ratio; it now lives in the About section instead.)
+ * The horizontal `77%` is the focal crop. The Library Tower stands at 0.70 of
+ * the frame's width, off to the right. On a 390x844 phone `cover` keeps only
+ * 26% of the width, and 77% slides that window to run 0.57–0.83 — centred on
+ * the tower. On a 1440x900 laptop it keeps 90%, and 77% trims 7.7% from the
+ * left and 2.3% from the right, so the whole campus still reads. (An earlier
+ * hero with the tower dead centre used `50%`.)
  */
-const HERO_OBJECT_POSITION = 'object-[50%_0%]'
+const HERO_OBJECT_POSITION = 'object-[77%_0%]'
+
+/**
+ * Tileable film grain for the hero's cover layer: SVG fractal noise,
+ * desaturated, inlined as a data URI so it costs no request.
+ */
+const HERO_GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E" +
+  "%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E" +
+  "%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E" +
+  "%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"
 
 export function Hero() {
   const trackRef = useRef<HTMLElement>(null)
@@ -234,6 +243,37 @@ export function Hero() {
             />
           </picture>
         </div>
+
+        {/*
+         * Cover for a soft source. The photograph is 2048px wide and retina
+         * laptops and phones still draw it about 1.9–2.6x larger in device
+         * pixels (see HERO_SIZES), so it cannot be fully sharp. Two static layers, outside the
+         * scaled <img> so they never move with the pan, make that read as
+         * intentional rather than as blur:
+         *   - a pine wash, heavier at the edges, lowers the local contrast
+         *     that makes interpolation softness visible;
+         *   - a faint film grain gives the eye fine, crisp detail to resolve
+         *     instead of the smeared edges underneath. It is fractal noise,
+         *     not a regular dot screen: a grid of dots was tried first and
+         *     read as a halftone pattern, badly so on 3x phones.
+         * Revisit both once a >=3000px original replaces hackbuimage/hero.jpg.
+         */}
+        <div
+          aria-hidden="true"
+          data-hero-cover
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(to bottom, rgb(60 92 72 / 0.38), rgb(60 92 72 / 0.12) 40%, rgb(60 92 72 / 0.12) 60%, rgb(60 92 72 / 0.42)),' +
+              'radial-gradient(ellipse at center, transparent 55%, rgb(28 44 36 / 0.35))',
+          }}
+        />
+        <div
+          aria-hidden="true"
+          data-hero-grain
+          className="pointer-events-none absolute inset-0 opacity-[0.14] mix-blend-overlay"
+          style={{ backgroundImage: HERO_GRAIN, backgroundSize: '220px 220px' }}
+        />
 
         {/*
          * Welcome copy across the top of the frame. Cleared below the fixed

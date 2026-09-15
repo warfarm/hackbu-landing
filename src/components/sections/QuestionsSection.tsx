@@ -9,10 +9,15 @@ import { SECTION_PHOTOS } from '../../lib/images'
  * so the section stays scannable with eight items. One open at a time keeps
  * the page from stacking long answers.
  *
- * From `lg` up the list shares its row with a portrait <SectionPhoto> — a
- * winter walkway seen from above — in an 18rem column that stays put
- * (`sticky`) while the eight questions scroll past it. Below `lg` the photo
- * follows the list as a 4:3 crop, so the questions stay first on a phone.
+ * From `md` up a portrait <SectionPhoto> — a winter walkway seen from above —
+ * is a bleed (see `.photo-bleed` in src/index.css): it runs down the window's
+ * right edge for the full height of the section, header included, with the
+ * heading and the list held to half of the column so the copy ends inside
+ * the photo's feathered edge and never over the picture itself. The box is
+ * taller than it is wide and the file is 658 x 1024, so the crop is mostly
+ * vertical and simply reveals more of the walkway as answers open. Below `md`
+ * the photo follows the list as a 4:3 block, so the questions stay first on a
+ * phone.
  */
 
 const QUESTIONS = [
@@ -63,17 +68,21 @@ export function QuestionsSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <Section id="questions" labelledBy="questions-title" className="bg-cloud">
-      <Reveal>
-        <SectionHeader
-          eyebrow="Things people ask us"
-          titleId="questions-title"
-          title="Questions newcomers actually have."
-        />
-      </Reveal>
+    <Section
+      id="questions"
+      labelledBy="questions-title"
+      className="bg-cloud overflow-x-clip"
+    >
+      <div className="relative flex flex-col">
+        <Reveal className="relative z-10 md:max-w-[50%]">
+          <SectionHeader
+            eyebrow="Things people ask us"
+            titleId="questions-title"
+            title="Questions newcomers actually have."
+          />
+        </Reveal>
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-14">
-        <RevealGroup className="border-frost border-t">
+        <RevealGroup className="border-frost relative z-10 mt-12 border-t md:max-w-[50%]">
           {QUESTIONS.map((item, index) => {
           const open = openIndex === index
           const panelId = `${baseId}-panel-${index}`
@@ -115,10 +124,10 @@ export function QuestionsSection() {
         })}
         </RevealGroup>
 
-        <Reveal className="lg:sticky lg:top-28 lg:self-start">
+        <Reveal className="photo-bleed mt-10 md:mt-0" delay={0.05}>
           <SectionPhoto
             photo={SECTION_PHOTOS.campusPath}
-            className="aspect-[4/3] w-full lg:aspect-[658/1024]"
+            className="aspect-[4/3] w-full md:aspect-auto md:h-full"
           />
         </Reveal>
       </div>

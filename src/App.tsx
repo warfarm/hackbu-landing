@@ -3,6 +3,7 @@ import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
 import { SnowdriftDivider } from './components/SnowdriftDivider'
 import { ScrollTwistLogo } from './components/ScrollTwistLogo'
+import { Snowfall } from './components/Snowfall'
 import { AboutSection } from './components/sections/AboutSection'
 import { GetInvolvedSection } from './components/sections/GetInvolvedSection'
 import { QuestionsSection } from './components/sections/QuestionsSection'
@@ -41,6 +42,8 @@ export default function App() {
         </a>
 
         <SiteHeader homeHref="#top" />
+        {/* Snow first, bearcat second: both are fixed at z-20, so DOM order puts the logo over the flakes. */}
+        <Snowfall />
         <ScrollTwistLogo />
 
         {/*

@@ -14,11 +14,10 @@
  * ---------------------------------------------------------------------------
  * Widths
  * ---------------------------------------------------------------------------
- * The hero is `hackbuimage/hero.png`, a 1200 x 674 photograph (a PNG of a
- * photo, so its `<img src>` fallback is a re-encoded JPEG), and the hero
+ * The hero is `hackbuimage/hero.jpg`, a 2048 x 1151 photograph, and the hero
  * magnifies it only 1.2x at its start frame — so the ladder is cut at and
- * below the source width and never enlarged: 640, 960 and the 1200 source
- * itself. (Its predecessor, a cel-shaded illustration opened at 3.8x,
+ * below the source width and never enlarged: 640, 960, 1280, 1600 and the
+ * 2048 source itself. (Its predecessor, a cel-shaded illustration opened at 3.8x,
  * needed a 4x Real-ESRGAN master to stay sharp; a photograph does not survive
  * that kind of enlargement and is not asked to. The illustration and its
  * master stay in the read-only `artwork/campus/` as reference and are no
@@ -42,8 +41,8 @@
  * AVIF q68 / WebP q82 sit just below the knee of both curves. The hero
  * photograph is the LCP element and is drawn wider than its 1600px on most
  * screens, where compression artifacts are magnified along with everything
- * else, so this leans toward quality — the 1200 AVIF is still ~194 KB, about
- * an eighth of the 1.5 MB first-load image budget.
+ * else, so this leans toward quality — the 2048 AVIF is ~550 KB, a little
+ * over a third of the 1.5 MB first-load image budget.
  *
  * ---------------------------------------------------------------------------
  * Brand marks
@@ -95,8 +94,8 @@ const PHOTOS_OUT = join(ARTWORK, 'photos')
  * The script prints both strings at the end of a run so a drift is visible.
  * The top rung is the source's own width; nothing is enlarged.
  */
-const HERO_SOURCE = join(PHOTO_SOURCE, 'hero.png')
-const HERO_WIDTHS = [640, 960, 1200]
+const HERO_SOURCE = join(PHOTO_SOURCE, 'hero.jpg')
+const HERO_WIDTHS = [640, 960, 1280, 1600, 2048]
 
 /**
  * The section photographs: delivered file in `hackbuimage/` -> base name in

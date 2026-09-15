@@ -12,3 +12,5 @@ dist/
 # live unpacked in artwork/ and brand-source/, so the zips are redundant here.
 HackBULogo.zip
 moreclouds.zip
+.vercel
+.env*

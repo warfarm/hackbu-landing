@@ -19,20 +19,20 @@
 /* -------------------------------------------------------------------------- */
 
 /**
- * The hero is a real photograph — `hackbuimage/hero.png`, an aerial of the
- * whole Binghamton campus under snow, 1200 x 674 — and the derivatives are
- * cut from it at and below its own width, never enlarged. There is no
- * upscaled master any more: a photograph does not survive machine enlargement
- * the way the flat-shaded illustration it replaced did, and the hero's start
- * frame magnifies it only 1.2x (see PAN_START_SCALE in Hero.tsx), so the
- * source width is the honest ceiling. (The `<img src>` fallback is a
- * re-encoded JPEG: the delivered file is a 1.7 MB PNG of a photograph.)
+ * The hero is a real photograph — `hackbuimage/hero.jpg`, an aerial of the
+ * Binghamton campus in winter at dusk, 2048 x 1151, from the Binghamton
+ * University Alumni Instagram — and the derivatives are cut from it at and
+ * below its own width, never enlarged. There is no upscaled master: a
+ * photograph does not survive machine enlargement the way the flat-shaded
+ * illustration it replaced did, and the hero's start frame magnifies it only
+ * 1.2x (see PAN_START_SCALE in Hero.tsx), so the source width is the honest
+ * ceiling.
  */
 export const HERO_JPG = '/artwork/photos/hero-campus.jpg'
-export const HERO_WIDTH = 1200
-export const HERO_HEIGHT = 674
+export const HERO_WIDTH = 2048
+export const HERO_HEIGHT = 1151
 
-const HERO_WIDTHS = [640, 960, 1200] as const
+const HERO_WIDTHS = [640, 960, 1280, 1600, 2048] as const
 
 function heroSrcSet(extension: 'avif' | 'webp'): string {
   return HERO_WIDTHS.map(
@@ -50,31 +50,29 @@ export const HERO_SRCSET = {
  * box. The `<img>` is `object-cover` into a viewport-sized stage, so at scale
  * 1 the drawn content is:
  *
- *   viewport aspect >= 1200/674 (1.780)  ->  width-constrained, 100vw
- *   viewport aspect <  1200/674          ->  height-constrained,
- *                                            100vh x 1200/674 = 178.04vh
+ *   viewport aspect >= 2048/1151 (1.779)  ->  width-constrained, 100vw
+ *   viewport aspect <  2048/1151          ->  height-constrained,
+ *                                             100vh x 2048/1151 = 177.93vh
  *
  * The photo is a hair under 16:9, so 1440x900 laptops and every phone take
  * the `vh` branch and only screens wider than 16:9 take `vw`. Both are
  * written multiplied by PAN_START_SCALE = 1.2, the scale the photo is fetched
- * at: `120vw` and `213.65vh`. **Keep the factor equal to PAN_START_SCALE.**
- * With a ladder that tops out at the 1200px source the expression matters
- * less than it used to — anything past a 1000px 1x draw already takes the top
- * rung — but it must still match `imagesizes` on the preload link in
- * index.html, or the preload and the `<picture>` resolve to different rungs
- * and the image loads twice.
+ * at: `120vw` and `213.52vh`. **Keep the factor equal to PAN_START_SCALE.**
+ * It must also match `imagesizes` on the preload link in index.html, or the
+ * preload and the `<picture>` resolve to different rungs and the image loads
+ * twice.
  */
-export const HERO_SIZES = '(min-aspect-ratio: 1200/674) 120vw, 213.65vh'
+export const HERO_SIZES = '(min-aspect-ratio: 2048/1151) 120vw, 213.52vh'
 
 /**
  * The photograph is content, not decoration — it is the reason the page opens
  * the way it does — so it gets a description of what is in it.
  */
 export const HERO_ALT =
-  'Aerial photograph of the Binghamton University campus under snow: the ' +
-  'brick Library Tower at the centre, academic buildings and dormitories ' +
-  'around it, snow-covered walkways crossing the plaza, and forested hills ' +
-  'behind.'
+  'Aerial photograph of the Binghamton University campus in winter at dusk: ' +
+  'the brick Library Tower rising on the right, snow-dusted academic ' +
+  'buildings and red-brick residence halls below, athletic fields and ' +
+  'wooded hills beyond, and lights coming on across campus.'
 
 /* -------------------------------------------------------------------------- */
 /* Landing-page section photographs                                           */

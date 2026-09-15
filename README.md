@@ -206,7 +206,7 @@ The files the site actually ships are in `public/artwork/`.
 
 ```
 hackbuimage/                    read-only photographs, as delivered
-  hero.png                      the hero — aerial of the whole campus, 1200 x 674
+  hero.jpg                      the hero — winter aerial of campus at dusk, 2048 x 1151
   winter-header.jpg             About — the clock tower and plaza from the air, 1600 x 600
   1-KS1-WEB-2-1024x683.jpg      Get involved — two students on a snowy path
   47065170581_63875cf429_b.jpg  Questions — winter walkway from above, 658 x 1024
@@ -214,14 +214,14 @@ artwork/                        read-only originals, no longer shipped
   campus/                       the retired illustration + its 4x Real-ESRGAN master
   clouds/                       the retired cloud cutouts + their contact sheet
 public/artwork/
-  photos/hero-campus.jpg        the hero's JPEG fallback (the source is a PNG)
-  photos/hero-campus-{640,960,1200}.{avif,webp}
+  photos/hero-campus.jpg        the hero's JPEG fallback
+  photos/hero-campus-{640,960,1280,1600,2048}.{avif,webp}
   photos/{plaza-winter,snow-walk,campus-path}.{jpg,avif,webp}
 ```
 
 To replace a photograph:
 
-1. Drop the new file into `hackbuimage/`. For the hero, keep the name `hero.png`;
+1. Drop the new file into `hackbuimage/`. For the hero, keep the name `hero.jpg`;
    for a section photo, either keep the existing name or update the `SECTION_PHOTOS`
    table at the top of `scripts/generate-images.mjs`.
 2. Run `npm run images` to regenerate the JPEG fallback and the AVIF and WebP derivatives
@@ -237,15 +237,18 @@ Three things in the hero are tied to the specific photograph and will need re-de
 
 - **`PAN_START_SCALE`** in `src/components/Hero.tsx` (currently `1.2`). Keep the `sizes`
   multiplier in `src/lib/images.ts` (`HERO_SIZES`) and the preload's `imagesizes` in
-  `index.html` equal to it. Do not push it far: the photo is already drawn wider than its
-  1200px on most screens at scale 1.
-- **`object-position`** on the hero `<img>` (currently `50% 0%`). The horizontal value is
-  the focal crop — the Library Tower stands at the centre of this frame, so one value
-  serves every screen; a photo with its landmark off-centre wants its own value, or two
-  switched on aspect ratio (the winter plaza photo needed `70%` on phones and `50%` from
-  3:2 when it was the hero). The vertical `0%` pins the top edge and, together with
-  `transform-origin: top`, is what keeps the framing aspect-independent; leave it at `0%`.
-- **`HERO_SIZES`**'s aspect-ratio breakpoint (`1200/674`), which is the photo's own ratio.
+  `index.html` equal to it. Do not push it far: retina screens already draw the 2048px
+  photo about 1.9x at scale 1.
+- **`object-position`** on the hero `<img>` (currently `77% 0%`). The horizontal value is
+  the focal crop — the Library Tower stands at 0.70 of this frame's width, and `77%`
+  centres it in a phone's narrow crop while a laptop still sees nearly the whole frame.
+  A photo with its landmark elsewhere wants its own value (the earlier daytime aerial had
+  the tower dead centre and used `50%`). The vertical `0%` pins the top edge and, together
+  with `transform-origin: top`, is what keeps the framing aspect-independent; leave it at
+  `0%`.
+- **`HERO_SIZES`**'s aspect-ratio breakpoint (`2048/1151`), which is the photo's own ratio.
+- **The cover layer** (pine wash + film grain) over the photo in `Hero.tsx`, which hides
+  softness; a ≥3000px original may not need it.
 
 The hero used to layer twelve drifting cloud cutouts over a cel-shaded illustration
 (`HeroClouds.tsx`, `public/artwork/clouds/`, `public/artwork/campus/`). All of it was

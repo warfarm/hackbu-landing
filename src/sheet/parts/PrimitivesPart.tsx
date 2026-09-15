@@ -276,7 +276,7 @@ function LayoutEntry() {
         <div className="border-frost mt-4 rounded-xl border py-4">
           <Container>
             <div className="border-stone/60 text-caption text-pine rounded-lg border border-dashed p-4">
-              The content column: <b>max-w-5xl</b> (64rem), centred, with{' '}
+              The content column: <b>max-w-[120rem]</b>, centred, with{' '}
               <b>px-6</b> gutters and <b>sm:px-8</b> from 640px up.
             </div>
           </Container>

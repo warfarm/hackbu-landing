@@ -4,13 +4,27 @@ import type { ReactNode } from 'react'
  * Shared layout primitives. Later phases should compose these instead of
  * re-declaring widths, gutters or vertical rhythm.
  *
- *   Container      max-w-5xl (64rem), centred, 1.5rem/2rem gutters
+ *   Container      max-w-[120rem], centred, 1.5rem/2rem gutters
  *   Section        vertical rhythm (py-20 / sm:py-28) + Container
  *   Eyebrow        the small uppercase label above a headline
  *   SectionHeader  eyebrow + display headline + optional lede
  */
 
-/** Reusable content column: capped width, centred at every viewport size. */
+/**
+ * Reusable content column: capped width, centred at every viewport size.
+ *
+ * 120rem, not the 64rem it started at: on anything up to a 1920px display
+ * the column is effectively the window, and the content sits at the gutter —
+ * 2rem from the window's edge. The landing page's section photos are bleeds
+ * that run from inside the column to the window's right edge
+ * (`.photo-bleed`, src/index.css), and against a 64rem column the copy on the
+ * left sat a long way in from the window while the picture touched it — the
+ * page read as off-centre. Pushing the copy out to the edge is the layout the
+ * bleed was drawn for, and doing it here keeps the header, footer and every
+ * section on the same line. The cap only bites on ultrawide screens, where a
+ * line of text at the far left and a photo at the far right would stop
+ * reading as one page.
+ */
 export function Container({
   children,
   className = '',
@@ -19,7 +33,7 @@ export function Container({
   className?: string
 }) {
   return (
-    <div className={`mx-auto w-full max-w-5xl px-6 sm:px-8 ${className}`}>
+    <div className={`mx-auto w-full max-w-[120rem] px-6 sm:px-8 ${className}`}>
       {children}
     </div>
   )

@@ -3,24 +3,29 @@ import { ButtonLink } from '../ButtonLink'
 import { Reveal, RevealGroup, RevealItem } from '../Reveal'
 import { DISCORD_URL, MAILING_LIST_URL } from '../../lib/links'
 import { SectionPhoto } from '../SectionPhoto'
-import {
-  BAXTER_ALT,
-  BAXTER_HEIGHT,
-  BAXTER_PNG,
-  BAXTER_WIDTH,
-  SECTION_PHOTOS,
-} from '../../lib/images'
+import { SECTION_PHOTOS } from '../../lib/images'
 
 /**
- * "About us" — Baxter beside the mission copy, the winter plaza photograph
- * beneath it, then the Discord and mailing-list CTAs.
+ * "About us" — the mission copy, then the Discord and mailing-list CTAs with
+ * the winter plaza photograph running down the right of them. The header is
+ * capped at half the column like every other text block beside a bleed, so
+ * the headline never runs across the whole window. (Baxter used to stand at
+ * the right of the header; the mascot was dropped when the photo bleeds
+ * arrived — two pictures in one section fought each other.)
  *
  * The photograph is the section's one <SectionPhoto>: the green clock tower
- * and the Library Tower from the air, students crossing the snow — a wide
- * 1600 x 600 frame shown as a band (16:9 on phones, its own 8:3 from `sm`)
- * and feathered into the cloud background on all four edges. It sits between
- * the mission statement and the cards so the copy reads first and the picture
- * answers "where".
+ * and the Library Tower from the air, students crossing the snow. From `md`
+ * up it is a bleed (see `.photo-bleed` in src/index.css): the two cards stack
+ * in the left half of the column and the photo fills the window's right edge
+ * for the height of the stack, feathered into the copy and the window. Cards
+ * and closing line stop at the midpoint, the same cap as every other text
+ * block beside a bleed, so nothing sits on the picture itself.
+ * The file is a wide 1600 x 600 frame, so the near-square box shows less than
+ * half of it; `object-[35%_50%]` keeps the crop on the clock tower and the
+ * buildings behind it rather than the empty hillside in the file's centre.
+ * Below `md` it is a band in flow (16:9 on phones, its own 8:3 from `sm`)
+ * between the mission statement and the cards, so the copy reads first and
+ * the picture answers "where".
  *
  * The page <h1> lives in the hero; this section opens with an <h2> so the
  * outline stays h1 → section h2s with no skipped level.
@@ -40,82 +45,79 @@ const CARD =
 
 export function AboutSection() {
   return (
-    <Section id="about" labelledBy="about-title" className="bg-cloud">
+    <Section
+      id="about"
+      labelledBy="about-title"
+      className="bg-cloud overflow-x-clip"
+    >
       <Reveal>
-        <header>
+        <header className="md:max-w-[50%]">
           <Eyebrow>About Us</Eyebrow>
-          <div className="mt-4 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-10">
-            <div className="min-w-0 flex-1 text-center sm:text-left">
-              <h2
-                id="about-title"
-                className="font-display text-display-lg text-pine font-semibold text-balance"
-              >
-                HackBU exists to foster a community of individuals who solve
-                problems through the innovative use of technology.
-              </h2>
-              <p className="text-lede text-pine mt-4 text-pretty sm:mt-5">
-                We host weekly development workshops and hold our own hackathon
-                yearly.
-              </p>
-            </div>
-            <img
-              src={BAXTER_PNG}
-              alt={BAXTER_ALT}
-              width={BAXTER_WIDTH}
-              height={BAXTER_HEIGHT}
-              draggable={false}
-              decoding="async"
-              className="h-52 w-auto shrink-0 sm:h-64 md:h-72 lg:h-80"
-            />
-          </div>
+          <h2
+            id="about-title"
+            className="font-display text-display-lg text-pine mt-4 font-semibold text-balance"
+          >
+            HackBU exists to foster a community of individuals who solve
+            problems through the innovative use of technology.
+          </h2>
+          <p className="text-lede text-pine mt-4 text-pretty sm:mt-5">
+            We host weekly development workshops and hold our own hackathon
+            yearly.
+          </p>
         </header>
       </Reveal>
 
-      <Reveal delay={0.05}>
-        <SectionPhoto
-          photo={SECTION_PHOTOS.plazaWinter}
-          className="mt-12 aspect-[16/9] w-full sm:aspect-[8/3]"
-        />
-      </Reveal>
+      <div className="relative mt-12 flex flex-col">
+        <Reveal className="photo-bleed" delay={0.05}>
+          <SectionPhoto
+            photo={SECTION_PHOTOS.plazaWinter}
+            className="aspect-[16/9] w-full sm:aspect-[8/3] md:aspect-auto md:h-full"
+            imgClassName="md:object-[35%_50%]"
+          />
+        </Reveal>
 
-      <RevealGroup as="ul" className="mt-12 grid gap-6 md:grid-cols-2 md:gap-8">
-        <RevealItem as="li" className={CARD}>
-          <Eyebrow>Discord</Eyebrow>
-          <p className="font-display text-display-md text-pine mt-4 font-semibold">
-            Join our Discord
-          </p>
-          <p className="text-body text-pine mt-4">
-            The best way to stay up to date on all of our events is to join our
-            Discord server:
-          </p>
-          <div className="mt-auto pt-6">
-            <ButtonLink href={DISCORD_URL} className="w-full sm:w-auto">
+        <RevealGroup
+          as="ul"
+          className="relative z-10 mt-12 grid gap-6 md:mt-0 md:max-w-[50%]"
+        >
+          <RevealItem as="li" className={CARD}>
+            <Eyebrow>Discord</Eyebrow>
+            <p className="font-display text-display-md text-pine mt-4 font-semibold">
               Join our Discord
-            </ButtonLink>
-          </div>
-        </RevealItem>
-        <RevealItem as="li" className={CARD}>
-          <Eyebrow>Mailing list</Eyebrow>
-          <p className="font-display text-display-md text-pine mt-4 font-semibold">
-            Join our Mailing List
-          </p>
-          <p className="text-body text-pine mt-4">
-            We also send updates on our hackathon event to our mailing list:
-          </p>
-          <div className="mt-auto pt-6">
-            <ButtonLink href={MAILING_LIST_URL} className="w-full sm:w-auto">
+            </p>
+            <p className="text-body text-pine mt-4">
+              The best way to stay up to date on all of our events is to join
+              our Discord server:
+            </p>
+            <div className="mt-auto pt-6">
+              <ButtonLink href={DISCORD_URL} className="w-full sm:w-auto">
+                Join our Discord
+              </ButtonLink>
+            </div>
+          </RevealItem>
+          <RevealItem as="li" className={CARD}>
+            <Eyebrow>Mailing list</Eyebrow>
+            <p className="font-display text-display-md text-pine mt-4 font-semibold">
               Join our Mailing List
-            </ButtonLink>
-          </div>
-        </RevealItem>
-      </RevealGroup>
+            </p>
+            <p className="text-body text-pine mt-4">
+              We also send updates on our hackathon event to our mailing list:
+            </p>
+            <div className="mt-auto pt-6">
+              <ButtonLink href={MAILING_LIST_URL} className="w-full sm:w-auto">
+                Join our Mailing List
+              </ButtonLink>
+            </div>
+          </RevealItem>
+        </RevealGroup>
 
-      <Reveal delay={0.1}>
-        <p className="text-lede text-pine mt-8 max-w-2xl">
-          No membership or commitment is required to be a part of our club! We
-          look forward to seeing you at our events.
-        </p>
-      </Reveal>
+        <Reveal delay={0.1} className="relative z-10 md:max-w-[50%]">
+          <p className="text-lede text-pine mt-8 max-w-2xl">
+            No membership or commitment is required to be a part of our club!
+            We look forward to seeing you at our events.
+          </p>
+        </Reveal>
+      </div>
     </Section>
   )
 }

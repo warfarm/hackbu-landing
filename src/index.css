@@ -250,6 +250,38 @@
     -webkit-mask-composite: source-in;
     mask-composite: intersect;
   }
+
+  /*
+   * A section photo that leaves the content column and runs off the right
+   * edge of the viewport, from `md` up (below that it stays in flow, a plain
+   * feathered block). It is applied to the photo's positioned wrapper, whose
+   * containing block is a `relative` row inside the centred <Container>.
+   *
+   * `right: calc(50% - 50vw)`: the row is horizontally centred in the
+   * viewport, so the viewport's right edge is exactly (100vw - row width) / 2
+   * outside the row's right edge, and `50%` here is half the row's width. The
+   * value is negative, i.e. the box is pushed *out* of the row to the window
+   * edge, whatever the row's width is. `100vw` counts a classic scrollbar,
+   * so the box can overshoot by half a scrollbar: the sections that host a
+   * bleed photo are `overflow-x-clip` (clip, not hidden — it clips without
+   * making the section a scroll container). The feather then dissolves the
+   * left edge into the copy beside it and the right edge at the window.
+   *
+   * `top`/`bottom` 0 stretch the box to the row's full height. The *left*
+   * edge, not the width, is what is fixed: half the row, the same line the
+   * sections cap their text blocks at, so copy and picture meet at the
+   * middle of the window and the feather is all that softens the seam. A fixed width did not do this — on a wide window it left
+   * a band of empty background between the copy and the picture.
+   */
+  .photo-bleed {
+    @variant md {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      right: calc(50% - 50vw);
+    }
+  }
 }
 
 @layer components {
