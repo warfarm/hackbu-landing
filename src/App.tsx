@@ -41,7 +41,7 @@ export default function App() {
           Skip to content
         </a>
 
-        <SiteHeader homeHref="#top" />
+        <SiteHeader homeHref="#top" intro />
         {/* Snow first, bearcat second: both are fixed at z-20, so DOM order puts the logo over the flakes. */}
         <Snowfall />
         <ScrollTwistLogo />

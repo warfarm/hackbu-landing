@@ -9,6 +9,15 @@ import { SECTION_PHOTOS } from '../../lib/images'
  * so the section stays scannable with eight items. One open at a time keeps
  * the page from stacking long answers.
  *
+ * Opening is animated: the panel is a one-row grid whose row goes `0fr` to
+ * `1fr` (`.faq-panel`, src/index.css), so the answer's height is never
+ * measured and no JS runs per frame. The panel stays in the DOM either way —
+ * `aria-controls` always resolves — and `visibility` on the panel, driven by
+ * the same transition, is what keeps a closed answer out of the
+ * accessibility tree and the tab order. The `+` in the button is two SVG
+ * strokes, and the upright one scales to nothing when the item is open so
+ * it becomes a `−` in the same motion.
+ *
  * From `md` up a portrait <SectionPhoto> — a winter walkway seen from above —
  * is a bleed (see `.photo-bleed` in src/index.css): it runs down the window's
  * right edge for the full height of the section, header included, with the
@@ -103,22 +112,16 @@ export function QuestionsSection() {
                   className="font-display text-display-md text-pine hover:text-brick focus-visible:outline-pine flex w-full cursor-pointer items-center justify-between gap-6 py-8 text-left font-semibold text-balance focus-visible:outline-2 focus-visible:outline-offset-4"
                 >
                   {item.question}
-                  <span
-                    aria-hidden="true"
-                    className="text-pine/90 w-6 shrink-0 text-center text-2xl font-normal"
-                  >
-                    {open ? '−' : '+'}
-                  </span>
+                  <DisclosureGlyph open={open} />
                 </button>
               </h3>
-              <section
-                id={panelId}
-                aria-labelledby={buttonId}
-                hidden={!open}
-                className="pb-8"
-              >
-                <p className="text-body text-pine max-w-2xl">{item.answer}</p>
-              </section>
+              <div className="faq-panel" data-open={open}>
+                <section id={panelId} aria-labelledby={buttonId}>
+                  <p className="faq-panel-body text-body text-pine max-w-2xl pb-8">
+                    {item.answer}
+                  </p>
+                </section>
+              </div>
             </RevealItem>
           )
         })}
@@ -132,5 +135,33 @@ export function QuestionsSection() {
         </Reveal>
       </div>
     </Section>
+  )
+}
+
+/**
+ * The `+` / `−` at the end of each question. A horizontal stroke and a
+ * vertical one; the vertical stroke scales to zero about its centre when the
+ * item is open, so the plus closes into a minus and back without a swap.
+ * Decorative — the button's `aria-expanded` carries the state.
+ */
+function DisclosureGlyph({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="text-pine/90 h-6 w-6 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+    >
+      <path d="M5 12 H19" />
+      <path
+        d="M12 5 V19"
+        className="origin-center transition-transform duration-300 ease-out motion-reduce:transition-none"
+        style={{ transform: open ? 'scaleY(0)' : 'scaleY(1)' }}
+      />
+    </svg>
   )
 }

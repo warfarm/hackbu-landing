@@ -193,6 +193,108 @@
 }
 
 /*
+ * Page-load intro. The fixed header slides down from above the viewport and
+ * the hero's headline and lede rise into place a beat behind it. Keyframes,
+ * not motion: the intro has to start at first paint, before hydration, and
+ * both pages are prerendered (P5-1) — a header carrying motion's `initial`
+ * as an inline style would ship translated off-screen until the JS arrived,
+ * or for good if it did not. Keyframes put nothing on the markup, so the
+ * prerendered HTML is unchanged and the resting frame is what the element
+ * has with no class at all.
+ *
+ * `both` fills so the delayed elements hold their first keyframe (hidden)
+ * through their delay. Reduced motion is `motion-reduce:animate-none` at
+ * each call site — the media query rather than `usePrefersReducedMotion()`,
+ * because that hook is deliberately gated on having mounted
+ * (src/lib/motion.ts) and a CSS animation would be several frames in before
+ * it could answer. Same curve as the section reveals in Reveal.tsx.
+ */
+@theme {
+  --animate-intro-bar: intro-bar 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  --animate-intro-rise: intro-rise 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+
+  @keyframes intro-bar {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes intro-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/*
+ * FAQ disclosure panel (src/components/sections/QuestionsSection.tsx).
+ *
+ * An answer opens and closes by animating the single grid row it sits in
+ * between `0fr` and `1fr` — the one way to transition to a height nobody
+ * has measured. The direct child clips (`overflow: hidden`, and `min-height: 0`
+ * without which a grid item will not shrink below its content), and the
+ * bottom padding lives inside it so it collapses with the rest. `visibility`
+ * rides along: it is a discrete property, so it flips to `hidden` only once
+ * the close has finished and to `visible` the instant an open starts, which
+ * keeps a closed answer out of the accessibility tree and the tab order with
+ * no `hidden` attribute to toggle. The copy itself fades and settles a hair
+ * behind the row so the open reads as the answer arriving, not the gap.
+ */
+@layer components {
+  .faq-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .faq-panel > * {
+    min-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    transition: visibility 0s linear 0.35s;
+  }
+
+  .faq-panel-body {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .faq-panel[data-open='true'] {
+    grid-template-rows: 1fr;
+  }
+
+  .faq-panel[data-open='true'] > * {
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  .faq-panel[data-open='true'] .faq-panel-body {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.08s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-panel,
+    .faq-panel > *,
+    .faq-panel-body {
+      transition: none;
+    }
+  }
+}
+
+/*
  * The two HackBU logo marks.
  *
  * A mark is an empty element with two halves to it: its **colour** is the

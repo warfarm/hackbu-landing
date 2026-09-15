@@ -26,6 +26,11 @@ import { DISCORD_URL, NAV_LINKS } from '../lib/links'
  *
  * Off-site destinations go through <ExternalLink> (new tab). In-site ones
  * (About us, Schedule, Sponsors) are ordinary same-tab anchors.
+ *
+ * `intro` slides the bar in from above the viewport on page load — the
+ * landing page's opening beat, timed with the hero copy (see the intro
+ * keyframes in src/index.css). Off by default so the inner pages and the
+ * component sheet render the bar in place.
  */
 
 const NAV_LINK_CLASSES = `text-body ${LINK_ON_CLOUD}`
@@ -37,11 +42,14 @@ function isExternalHref(href: string) {
 export function SiteHeader({
   homeHref = '/',
   currentHref,
+  intro = false,
 }: {
   /** Lockup destination. Landing uses `#top`; other pages use `/`. */
   homeHref?: string
   /** Marks the matching nav item as the current page. */
   currentHref?: string
+  /** Slide the bar in from the top on load. Landing only. */
+  intro?: boolean
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const toggleRef = useRef<HTMLButtonElement>(null)
@@ -60,7 +68,11 @@ export function SiteHeader({
   }, [menuOpen])
 
   return (
-    <header className="border-frost bg-cloud fixed inset-x-0 top-0 z-50 border-b">
+    <header
+      className={`border-frost bg-cloud fixed inset-x-0 top-0 z-50 border-b ${
+        intro ? 'animate-intro-bar motion-reduce:animate-none' : ''
+      }`}
+    >
       <Container className="flex h-16 items-center justify-between sm:h-20">
         <a
           href={homeHref}

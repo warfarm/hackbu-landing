@@ -279,6 +279,12 @@ export function Hero() {
          * Welcome copy across the top of the frame. Cleared below the fixed
          * header (h-16 / sm:h-20). Pine wash + text-shadow keep the type
          * readable over the hills that fill the top of the photograph.
+         *
+         * On load the headline and lede rise into place behind the header's
+         * slide-in (`intro-rise` / `intro-bar`, src/index.css): the bar lands
+         * at 0.7s, the headline starts at 0.45s and the lede at 0.6s, so the
+         * three overlap into one gesture rather than queueing. Reduced
+         * motion drops the animation and shows the resting frame.
          */}
         <div
           data-hero-copy
@@ -291,11 +297,11 @@ export function Hero() {
           <div className="relative max-w-3xl text-center">
             <h1
               id="hero-title"
-              className="font-display text-display-xl text-cloud font-bold text-balance [text-shadow:0_2px_4px_rgb(60_92_72_/_0.85),0_6px_28px_rgb(60_92_72_/_0.55)]"
+              className="font-display text-display-xl text-cloud animate-intro-rise motion-reduce:animate-none font-bold text-balance [animation-delay:0.45s] [text-shadow:0_2px_4px_rgb(60_92_72_/_0.85),0_6px_28px_rgb(60_92_72_/_0.55)]"
             >
               Welcome to HackBU
             </h1>
-            <p className="text-lede text-cloud mt-3 font-medium text-pretty sm:mt-4 [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
+            <p className="text-lede text-cloud animate-intro-rise motion-reduce:animate-none mt-3 font-medium text-pretty sm:mt-4 [animation-delay:0.6s] [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
               Binghamton University&apos;s Premier Hackathon
             </p>
           </div>
