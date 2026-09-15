@@ -356,7 +356,13 @@ export const CLOCK_TOWER = {
  * Group photo (already shipped):
  *   team.jpg
  */
-function organizerPhoto(file: string, alt: string, ready = false): {
+function organizerPhoto(
+  file: string,
+  alt: string,
+  ready = false,
+  width = 800,
+  height = 1000,
+): {
   jpg: string
   webp: string
   avif: string
@@ -370,9 +376,8 @@ function organizerPhoto(file: string, alt: string, ready = false): {
     jpg: `${base}.jpg`,
     webp: `${base}.webp`,
     avif: `${base}.avif`,
-    /** Placeholder intrinsic size — replace with real dimensions when cropping. */
-    width: 800,
-    height: 1000,
+    width,
+    height,
     alt,
     ready,
   }
@@ -408,7 +413,10 @@ export const ORGANIZER_PHOTOS = {
   ),
   'gianni-zaccarelli': organizerPhoto(
     'gianni-zaccarelli',
-    'Portrait of Gianni Zaccarelli, HackBU Vice President of Logistics.',
+    'Portrait of Gianni Zaccarelli, HackBU Vice President of Logistics, arms open in a lecture hall wearing a HackBU bag.',
+    true,
+    768,
+    1024,
   ),
   'joseph-costa': organizerPhoto(
     'joseph-costa',
