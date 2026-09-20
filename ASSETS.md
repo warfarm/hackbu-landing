@@ -120,32 +120,36 @@ Dimensions were read from each file's header; sizes are from the filesystem.
 
 Five JPEGs, in two directories that hold no PNG at all. They are the source files, so
 unlike the illustration and the cutouts there is nothing in `artwork/` behind them. Each
-is referenced from `src/lib/images.ts` (`ABOUT_PHOTOS`, `SPONSORS_PHOTO`), which also
-carries its `alt` text, and each is rendered inside a `<picture>` with AVIF and WebP
-sources ahead of the JPEG.
+is referenced from `src/lib/images.ts` (`ABOUT_WORKSHOP_PHOTOS`, `SPONSORS_PHOTO`), which
+also carries its `alt` text, and each is rendered inside a `<picture>` with AVIF and WebP
+sources ahead of the JPEG. (The 2026-09 About us overhaul dropped the community and
+hackathon carousels; those frames stay on disk unreferenced, per the table below.)
 
 | File | Dimensions (px) | JPEG | AVIF | WebP | Used by |
 | --- | --- | --- | --- | --- | --- |
-| `public/artwork/about/collaborate.jpg` | 1024 × 683 | 166,855 B | 89,543 B | 71,252 B | About us — masthead carousel, eager |
-| `public/artwork/about/table.jpg` | 1024 × 768 | 266,257 B | 127,648 B | 136,812 B | About us — workshops, `loading="lazy"` |
-| `public/artwork/about/hackathon.jpg` | 1024 × 683 | 214,391 B | 120,341 B | 116,448 B | About us — hackathon, `loading="lazy"` |
-| `public/artwork/about/hall.jpg` | 1024 × 683 | 224,970 B | 121,151 B | 120,930 B | About us — masthead carousel, eager |
-| `public/artwork/about/{code,side-by-side,monitor,waiting}.jpg` | 1619 × 1080 | 197–269 KB | | | About us — masthead carousel, lazy |
-| `public/artwork/about/{python-workshop,expo,tech-talk,study-room,debugging}.jpg` | 1440 × 1080 | 162–284 KB | | | About us — section carousels, lazy |
+| `public/artwork/about/collaborate.jpg` | 1024 × 683 | 166,855 B | 89,543 B | 71,252 B | unreferenced (old masthead carousel) |
+| `public/artwork/about/table.jpg` | 1024 × 768 | 266,257 B | 127,648 B | 136,812 B | About us — workshops carousel, `loading="lazy"` |
+| `public/artwork/about/hackathon.jpg` | 1024 × 683 | 214,391 B | 120,341 B | 116,448 B | unreferenced (old hackathon carousel) |
+| `public/artwork/about/hall.jpg` | 1024 × 683 | 224,970 B | 121,151 B | 120,930 B | unreferenced (old masthead carousel) |
+| `public/artwork/about/{code,side-by-side,monitor,waiting}.jpg` | 1619 × 1080 | 197–269 KB | | | unreferenced (old masthead/hackathon carousels) |
+| `public/artwork/about/{python-workshop,tech-talk,study-room}.jpg` | 1440 × 1080 | 162–284 KB | | | About us — workshops carousel, lazy |
+| `public/artwork/about/{expo,debugging}.jpg` | 1440 × 1080 | 162–284 KB | | | unreferenced (old hackathon carousel) |
 | `public/artwork/sponsors/workshop.jpg` | 1024 × 768 | 240,688 B | 131,221 B | 135,700 B | Sponsors — masthead, eager |
 
 15 files, 2,284,207 bytes (2.18 MiB) on disk; what a visitor downloads is one derivative
-per photo the page renders, so About us costs 337,532 B of AVIF across its three and
-Sponsors 131,221 B for its one.
+per photo the page renders — the About us workshop strip is fully lazy, and Sponsors costs
+131,221 B of AVIF for its one.
 
-**Every About us section is a carousel** (`src/about/PhotoCarousel.tsx`), fed by
-`ABOUT_CAROUSELS` in `src/lib/images.ts` — community (masthead), workshops, hackathon — with
-no photo repeated. `collaborate`, `table`, `hackathon` and the formerly unreferenced `hall`
-were already here; nine were added on 2026-09-14 from the HackBU 2023 album on hackbu.org
-(`/img/hackathon/2023/` — `20230204_hackathon{21,17,19,03}_jwc.jpg`,
-`20230204_{150216,170706,152838,152903}.jpg`, `20230205_140800.jpg`), resized to 1080px
-tall because each landscape frame is cropped into a portrait panel. Only the masthead's
-first two panels load eagerly; the lower carousels are fully lazy.
+**One About us carousel remains** (`src/about/PhotoCarousel.tsx`), fed by
+`ABOUT_WORKSHOP_PHOTOS` in `src/lib/images.ts` — the workshops strip (`table`,
+`python-workshop`, `tech-talk`, `study-room`), fully lazy. The rest of the directory —
+the old community (`collaborate`, `hall`, `code`, `waiting`) and hackathon (`hackathon`,
+`side-by-side`, `debugging`, `monitor`, `expo`) carousels — is unreferenced since the
+2026-09 About us overhaul but kept on disk for reuse. Nine of the frames were added on
+2026-09-14 from the HackBU 2023 album on hackbu.org (`/img/hackathon/2023/` —
+`20230204_hackathon{21,17,19,03}_jwc.jpg`, `20230204_{150216,170706,152838,152903}.jpg`,
+`20230205_140800.jpg`), resized to 1080px tall because each landscape frame is cropped
+into a portrait panel.
 
 Both directories predate the AVIF/WebP quality settings being written down for photographs
 specifically: `scripts/generate-images.mjs` uses the same encoder settings (`AVIF`

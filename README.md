@@ -94,17 +94,17 @@ which makes passing one through an error at every spread site; see the note in
 **Tailwind scanning** is scoped to `src/` by `@import 'tailwindcss' source('.')` in
 `src/index.css`. Left unscoped, Tailwind's automatic detection reads every file the repo does
 not gitignore — including Markdown — and any utility name that appears as prose in one of them
-becomes a rule in the shipped stylesheet. None of the six HTML entries carries a `class`
+becomes a rule in the shipped stylesheet. None of the five HTML entries carries a `class`
 attribute; if one ever does, it needs an explicit `@source` line.
 
-There are **three stylesheet roots**, and every page reaches `src/index.css` through one of
-them: `src/landing.css` (landing page, About us, Sponsors), `src/schedule/schedule.css`,
+There are **two stylesheet roots**, and every page reaches `src/index.css` through one of
+them: `src/landing.css` (landing page, About us, Sponsors) and
 `src/hackathons/hackathons.css` — each `src/index.css` plus `@source not` lines — and the
 component sheet, which imports `src/index.css` directly. That is what gives every page
 exactly **one** `<link rel="stylesheet">`, `@font-face` rules included: a CSS-level
 `@import` is inlined before Vite sees a module, so no stylesheet becomes a shared JS
-dependency and no second, render-blocking link is emitted. The three page roots currently
-produce byte-identical CSS, so Vite deduplicates them into one hashed file that all five
+dependency and no second, render-blocking link is emitted. The two page roots currently
+produce byte-identical CSS, so Vite deduplicates them into one hashed file that all four
 public pages link.
 
 ## Deploying
@@ -130,7 +130,7 @@ are stable across `npm run images` and a day-old copy has to be able to notice.
 ### When the custom domain lands
 
 **Nothing in this repo needs editing.** The only places the site's own origin appears are
-`index.html`'s `og:url` and `og:image` and the `og:image` on the four other public pages,
+`index.html`'s `og:url` and `og:image` and the `og:image` on the three other public pages,
 which have to be absolute; every one of them is written as
 `%SITE_ORIGIN%`. The `siteOrigin` plugin in `vite.config.ts` substitutes it at build time
 from **`VERCEL_PROJECT_PRODUCTION_URL`** — a variable Vercel sets on every build to the
@@ -144,18 +144,17 @@ If the domain ever moves somewhere without that variable, change the fallback co
 
 ### The pages, and how they are routed
 
-The build has **six** entry points, declared in `vite.config.ts`:
+The build has **five** entry points, declared in `vite.config.ts`:
 
 | Entry | Page | Client entry | Prerendered by |
 | --- | --- | --- | --- |
 | `index.html` | the landing page | `src/main.tsx` | `renderIndex()` |
-| `about.html` | About us | `src/about/main.tsx` | `renderAbout()` |
-| `schedule.html` | the weekly workshop schedule | `src/schedule/main.tsx` | `renderSchedule()` |
+| `about.html` | About us — the club, the weekly workshops + event calendar, and the organizer rosters | `src/about/main.tsx` | `renderAbout()` |
 | `sponsors.html` | sponsorship | `src/sponsors/main.tsx` | `renderSponsors()` |
 | `hackathons.html` | the annual hackathon + registration | `src/hackathons/main.tsx` | `renderHackathons()` |
 | `components.html` | an internal component sheet — every token, every primitive with its variants, and the composed sections rendered live | `src/sheet/main.tsx` | `renderComponents()` |
 
-All six are prerendered: `npm run build` ends with `node scripts/prerender.mjs`, which
+All five are prerendered: `npm run build` ends with `node scripts/prerender.mjs`, which
 renders one export from `src/entry-server.tsx` per page and writes the markup into that
 page's `<div id="root">`; the client then **hydrates** it rather than rebuilding it. Adding
 a page means three edits together — a `rollupOptions.input` entry, a `render*` export, and a
@@ -163,24 +162,25 @@ a page means three edits together — a `rollupOptions.input` entry, a `render*`
 
 They share the component tree, so Rollup hoists what they all import into one `shared` chunk
 (plus `vendor` for `node_modules`) and each page's own entry chunk carries only its own code;
-nothing under `src/sheet/` reaches any other page's bundle, and the two per-page section
-directories (`src/components/sections/schedule/`, `.../hackathons/`) are deliberately kept
-out of `shared` so only their own page downloads them. The sheet's Tailwind utilities are
-kept out of the public pages' stylesheet by `src/landing.css` and the two sibling roots.
+nothing under `src/sheet/` reaches any other page's bundle, and the per-page section
+directory (`src/components/sections/hackathons/`) is deliberately kept out of `shared` so
+only its own page downloads it. The sheet's Tailwind utilities are kept out of the public
+pages' stylesheet by `src/landing.css` and its sibling root.
 
-Routing the five clean URLs needs the **ten** rewrites in `vercel.json` — one per page, with
-and without a trailing slash — and those are the **only** rules there; there is no catch-all.
-Every row below is what that file now does:
+Routing the four clean URLs needs the **eight** rewrites in `vercel.json` — one per page,
+with and without a trailing slash. Beside them sits a `redirects` block: `/schedule` and
+`/organizers` (with and without a trailing slash) 308 to `/about`, because those pages'
+content now lives there. There is no catch-all. Every row below is what that file now does:
 
 | Request | Served by |
 | --- | --- |
 | `/` | the filesystem — `dist/index.html` as the directory index. No rewrite involved. |
 | `/about`, `/about/` | two exact-match rewrites in `vercel.json`, both pointing at `/about.html` |
-| `/schedule`, `/schedule/` | the same, at `/schedule.html` |
 | `/sponsors`, `/sponsors/` | the same, at `/sponsors.html` |
 | `/hackathons`, `/hackathons/` | the same, at `/hackathons.html` |
 | `/components`, `/components/` | the same, at `/components.html` |
-| `/about.html` and the other four `.html` paths | the filesystem — Vercel gives a real file precedence over `rewrites`. Each page therefore has a second URL; harmless for the sheet, which is `noindex, nofollow`. |
+| `/schedule`, `/schedule/`, `/organizers`, `/organizers/` | a permanent redirect (308) to `/about` — the retired pages' content lives there now |
+| `/about.html` and the other three `.html` paths | the filesystem — Vercel gives a real file precedence over `rewrites`. Each page therefore has a second URL; harmless for the sheet, which is `noindex, nofollow`. |
 | any other real file (`/assets/…`, `/artwork/…`, `/brand/…`) | the filesystem |
 | **anything else** — `/nonexistent`, `/componentsfoo`, `/favicon.ico` | nothing. No file, no matching rewrite → **404**, with `public/404.html` (shipped as `dist/404.html`) as the body. |
 
@@ -193,8 +193,8 @@ every stale inbound link into a soft 404 and an indexable duplicate of the home 
 `index.html` fallback, so `/nonexistent` and `/componentsfoo` render the landing page with a
 200 under `npm run dev` and `npm run preview` alike, and `dist/404.html` is never reached — 404 behaviour can only be
 checked against a real deployment. The clean URLs themselves *are* emulated in `vite dev`, by
-the `cleanHtmlUrls` plugin in `vite.config.ts`, which carries the same ten paths as
-`vercel.json`; `npm run preview` serves `dist/` and wants the `.html` suffix.
+the `cleanHtmlUrls` plugin in `vite.config.ts`, which carries the same eight paths as
+`vercel.json`'s rewrites; `npm run preview` serves `dist/` and wants the `.html` suffix.
 
 The sheet is `noindex, nofollow` and is not linked from any public page.
 
@@ -346,14 +346,14 @@ or buttons; those live in the sections below, on cloud and frost.
 
 ## Layout
 
-Six HTML entries sit at the repo root — `index.html`, `about.html`, `schedule.html`,
-`sponsors.html`, `hackathons.html`, `components.html` — one per page, each pointing at a
-client entry under `src/`.
+Five HTML entries sit at the repo root — `index.html`, `about.html`, `sponsors.html`,
+`hackathons.html`, `components.html` — one per page, each pointing at a client entry under
+`src/`.
 
 ```
 src/
   main.tsx                   landing entry: hydrateRoot in prod, createRoot in dev
-  entry-server.tsx           build-time SSR render of all six pages, read by
+  entry-server.tsx           build-time SSR render of all five pages, read by
                              scripts/prerender.mjs
   App.tsx                    landing page composition
   index.css                  Tailwind theme: colour tokens, type scale, @font-face
@@ -369,19 +369,16 @@ src/
     Reveal.tsx               whileInView reveals (enter-once, staggered)
     Layout.tsx               Container / Section / Eyebrow / SectionHeader
     SiteHeader.tsx           fixed header, collapses to a menu below `md` (768px)
-    SiteFooter.tsx           all eight site pages, contact, socials
+    SiteFooter.tsx           the site pages in two columns, contact, socials
     SnowdriftDivider.tsx     inline SVG snowdrift dividers
     ButtonLink.tsx           the site's one button treatment
     ExternalLink.tsx         same-site vs new-tab routing + the two text-link treatments
     controls.ts              TOGGLE_ON_CLOUD — the outlined pill button
     Wordmark.tsx             the logo lockup, as masked fern marks
     sections/                About, GetInvolved, Questions, Contact (landing)
-      schedule/              Intro, WorkshopDetails, Calendar, StayUpdated
       hackathons/            HackathonIntro, Registration
   about/                     the About us page at /about
-    main.tsx, AboutPage.tsx
-  schedule/                  the schedule page at /schedule
-    main.tsx, ScheduleApp.tsx, schedule.css
+    main.tsx, AboutPage.tsx, PhotoCarousel.tsx, OrganizersSection.tsx
   sponsors/                  the sponsors page at /sponsors
     main.tsx, SponsorsPage.tsx
   hackathons/                the hackathons page at /hackathons
@@ -394,7 +391,7 @@ hackbuimage/                 the four delivered photographs — read-only source
                              "Swapping the artwork")
 scripts/
   generate-images.mjs        photo derivatives + brand masks and app icons
-  prerender.mjs              build-time prerender of all six pages, run after `vite build`
+  prerender.mjs              build-time prerender of all five pages, run after `vite build`
 public/
   artwork/                   photos/ (hero + section photographs and their derivatives),
                              plus the About us and Sponsors photographs
@@ -407,6 +404,6 @@ Every page's client entry follows the same three-part shape: check `#root` by na
 than asserting it, build the tree once, then `hydrateRoot` in production and `createRoot`
 under `import.meta.env.DEV` (the dev server serves the source HTML, whose root div is
 empty, and hydrating an empty root is itself a mismatch). The page-root component — `App`,
-`AboutPage`, `ScheduleApp`, `SponsorsPage`, `HackathonsApp`, `ComponentSheet` — carries its
+`AboutPage`, `SponsorsPage`, `HackathonsApp`, `ComponentSheet` — carries its
 own `<LazyMotion features={domAnimation} strict>` **inside** the component, so the client
 tree and the `src/entry-server.tsx` tree are the same tree.

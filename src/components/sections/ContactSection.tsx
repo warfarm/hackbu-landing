@@ -1,7 +1,7 @@
 import { Eyebrow, Section, SectionHeader } from '../Layout'
 import { ExternalLink, LINK_ON_CLOUD, MailLink } from '../ExternalLink'
 import { Reveal, RevealGroup, RevealItem } from '../Reveal'
-import { CONTACT_EMAIL, ORGANIZERS_PATH } from '../../lib/links'
+import { CONTACT_EMAIL, ORGANIZERS_ANCHOR } from '../../lib/links'
 
 /* This section is on cloud, so brick is the hover. */
 const LINK_CLASSES =
@@ -39,7 +39,7 @@ export function ContactSection() {
         <RevealItem>
           <Eyebrow>Meet the team</Eyebrow>
           <ExternalLink
-            href={ORGANIZERS_PATH}
+            href={ORGANIZERS_ANCHOR}
             className={`${LINK_CLASSES} mt-4 inline-block`}
           >
             Organizers

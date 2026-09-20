@@ -1,7 +1,7 @@
 /**
  * Build-time prerender — the last step of `npm run build`.
  *
- * `vite build` writes seven HTML files whose entire body is `<div id="root">`,
+ * `vite build` writes five HTML files whose entire body is `<div id="root">`,
  * so nothing paints until ~100 KB gzip of JavaScript has downloaded, parsed and
  * executed, and the LCP element — the hero photograph — does not exist in
  * the HTML response at all (P5-1). This script renders every page to a string
@@ -17,7 +17,7 @@
  * pipeline and no second build output. The alternative, `vite build --ssr`,
  * would emit a server bundle that has to be written somewhere, kept out of
  * `dist/` (Vercel deploys `dist/` verbatim), kept out of git, and cleaned up.
- * Nothing here writes a file except the six HTML files it rewrites.
+ * Nothing here writes a file except the five HTML files it rewrites.
  *
  * It rewrites the *built* HTML rather than the source template, so everything
  * `vite build` put in the head survives untouched: the hashed script and
@@ -31,7 +31,7 @@
  * ---------------------------------------------------------------------------
  * What it does not do
  * ---------------------------------------------------------------------------
- * There is no data fetching, no router and no per-request state: all seven pages
+ * There is no data fetching, no router and no per-request state: all five pages
  * are the same for every visitor, which is what makes a build-time render
  * enough. Nothing from this file, from `src/entry-server.tsx`, or from
  * `react-dom/server` reaches the browser bundle — no HTML entry imports
@@ -62,10 +62,8 @@ const ROOT_DIV = '<div id="root"></div>'
 const PAGES = [
   { file: 'dist/index.html', render: 'renderIndex' },
   { file: 'dist/about.html', render: 'renderAbout' },
-  { file: 'dist/schedule.html', render: 'renderSchedule' },
   { file: 'dist/sponsors.html', render: 'renderSponsors' },
   { file: 'dist/hackathons.html', render: 'renderHackathons' },
-  { file: 'dist/organizers.html', render: 'renderOrganizers' },
   { file: 'dist/components.html', render: 'renderComponents' },
 ]
 

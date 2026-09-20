@@ -14,14 +14,13 @@
  * classes. A negated `@source` in the shared file would have travelled with it
  * and deleted the sheet's utilities from the sheet.
  *
- * The page directories below are excluded for the same reason and are
- * safe to exclude only while they add no utility of their own: `src/schedule/`
- * and `src/hackathons/` have their own roots (`schedule.css`,
- * `hackathons.css`, which exclude only the sheet), and `src/sponsors/` plus
- * `src/organizers/` reuse this one — organizers is *not* excluded so its
- * classes stay in the scan. Vite emits one deduplicated stylesheet for these
- * public pages, which is the check that this still holds: if the pages ever
- * link two different files, one of them is short a rule.
+ * The page directory below is excluded for the same reason and is safe to
+ * exclude only while it adds no utility of its own: `src/hackathons/` has its
+ * own root (`hackathons.css`, which excludes only the sheet), while
+ * `src/about/` and `src/sponsors/` reuse this one, so neither is excluded and
+ * their classes stay in the scan. Vite emits one deduplicated stylesheet for
+ * these public pages, which is the check that this still holds: if the pages
+ * ever link two different files, one of them is short a rule.
  *
  * Net effect: the landing page's CSS is byte-for-byte what it was before the
  * sheet existed, and the sheet pays for itself on its own page.
@@ -29,5 +28,4 @@
 @import './index.css';
 
 @source not "./sheet";
-@source not "./schedule";
 @source not "./hackathons";

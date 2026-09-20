@@ -2,7 +2,7 @@ import { Eyebrow, Section, SectionHeader } from '../components/Layout'
 import { ExternalLink, LINK_ON_CLOUD, MailLink } from '../components/ExternalLink'
 import { ButtonLink } from '../components/ButtonLink'
 import { Reveal, RevealGroup, RevealItem } from '../components/Reveal'
-import { CONTACT_EMAIL, ORGANIZERS_PATH, DISCORD_URL } from '../lib/links'
+import { CONTACT_EMAIL, ORGANIZERS_ANCHOR, DISCORD_URL } from '../lib/links'
 
 const LINK_CLASSES =
   'font-display text-display-md font-semibold underline underline-offset-8 ' +
@@ -74,7 +74,7 @@ export function SponsorsContactSection() {
                 <Eyebrow>Meet the team</Eyebrow>
                 <div className="mt-4">
                   <ExternalLink
-                    href={ORGANIZERS_PATH}
+                    href={ORGANIZERS_ANCHOR}
                     className={`${LINK_CLASSES} text-display-sm inline-block`}
                   >
                     View organizers

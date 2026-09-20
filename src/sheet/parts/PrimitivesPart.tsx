@@ -13,7 +13,7 @@ import { Wordmark } from '../../components/Wordmark'
 import { SnowdriftDivider } from '../../components/SnowdriftDivider'
 import { Reveal, RevealGroup, RevealItem } from '../../components/Reveal'
 import { usePrefersReducedMotion } from '../../lib/motion'
-import { CONTACT_EMAIL, DISCORD_URL, ORGANIZERS_PATH } from '../../lib/links'
+import { CONTACT_EMAIL, DISCORD_URL, ORGANIZERS_ANCHOR } from '../../lib/links'
 
 /**
  * Part 2 — the standalone primitives, in isolation, with every variant.
@@ -213,7 +213,7 @@ function LinkEntry() {
           <Ground tone="cloud" label="LINK_ON_CLOUD">
             <ul className="flex flex-col gap-3">
               <li>
-                <ExternalLink href={ORGANIZERS_PATH} className={`text-body ${LINK_ON_CLOUD}`}>
+                <ExternalLink href={ORGANIZERS_ANCHOR} className={`text-body ${LINK_ON_CLOUD}`}>
                   Organizers
                 </ExternalLink>
               </li>
@@ -229,7 +229,7 @@ function LinkEntry() {
           <Ground tone="frost" label="LINK_ON_FROST">
             <ul className="flex flex-col gap-3">
               <li>
-                <ExternalLink href={ORGANIZERS_PATH} className={`text-body ${LINK_ON_FROST}`}>
+                <ExternalLink href={ORGANIZERS_ANCHOR} className={`text-body ${LINK_ON_FROST}`}>
                   Organizers
                 </ExternalLink>
               </li>

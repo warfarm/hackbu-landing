@@ -167,7 +167,10 @@ export const WORDMARK_MARK = { width: 7690, height: 1080 } as const
 
 /**
  * Event photos on the About us page. Sources live in `public/artwork/about/`;
- * AVIF + WebP sit beside each JPEG and are rebuilt by `npm run images`.
+ * AVIF + WebP sit beside each JPEG and are rebuilt by `npm run images`. The
+ * directory holds more frames than the page uses — the old community and
+ * hackathon carousels stay on disk for reuse, but only the workshop strip
+ * below is referenced.
  */
 function aboutPhoto(file: string, width: number, height: number, alt: string) {
   const base = `/artwork/about/${file}`
@@ -183,108 +186,38 @@ function aboutPhoto(file: string, width: number, height: number, alt: string) {
 
 export type AboutPhoto = ReturnType<typeof aboutPhoto>
 
-export const ABOUT_PHOTOS = {
-  collaborate: aboutPhoto(
-    'collaborate',
-    1024,
-    683,
-    'Three students huddled around a laptop at a HackBU event, smiling as they work through a problem together.',
-  ),
-  table: aboutPhoto(
+/**
+ * The workshops-and-events carousel — the one photo strip on the About us
+ * page. `table` was already in the directory; the rest are from the HackBU
+ * 2023 album on hackbu.org (`/img/hackathon/2023/`), resized to 1080px tall so
+ * they stay sharp when a landscape frame is cropped into a portrait panel.
+ */
+export const ABOUT_WORKSHOP_PHOTOS: readonly AboutPhoto[] = [
+  aboutPhoto(
     'table',
     1024,
     768,
     'Students collaborating at workshop tables with laptops in a bright room with floor-to-ceiling windows at a HackBU event.',
   ),
-  hackathon: aboutPhoto(
-    'hackathon',
-    1024,
-    683,
-    'Students coding at a HackBU hackathon, with a HackBU tote bag on a chair and Binghamton gear in the room.',
+  aboutPhoto(
+    'python-workshop',
+    1440,
+    1080,
+    'A Python workshop at HackBU 2023: students at tables around a wide room, facing a projector screen.',
   ),
-} as const
-
-/**
- * One carousel per About us section, no photo repeated across them.
- * `collaborate`, `table`, `hackathon` and `hall` were already in the
- * directory; the rest are from the HackBU 2023 album on hackbu.org
- * (`/img/hackathon/2023/`), resized to 1080px tall so they stay sharp when a
- * landscape frame is cropped into a portrait panel.
- */
-export const ABOUT_CAROUSELS = {
-  /** Masthead — the community. */
-  community: [
-    ABOUT_PHOTOS.collaborate,
-    aboutPhoto(
-      'hall',
-      1024,
-      683,
-      'Rows of hackers with laptops and HackBU tote bags filling a lecture hall before the HackBU 2023 opening ceremony.',
-    ),
-    aboutPhoto(
-      'code',
-      1619,
-      1080,
-      'A student in a grey Binghamton sweatshirt writes code on a laptop, with other hackers at tables behind.',
-    ),
-    aboutPhoto(
-      'waiting',
-      1619,
-      1080,
-      'Students seated in rows with laptops and red coffee cups, waiting for the HackBU 2023 opening ceremony.',
-    ),
-  ],
-  /** Every week — workshops and talks. */
-  workshops: [
-    ABOUT_PHOTOS.table,
-    aboutPhoto(
-      'python-workshop',
-      1440,
-      1080,
-      'A Python workshop at HackBU 2023: students at tables around a wide room, facing a projector screen.',
-    ),
-    aboutPhoto(
-      'tech-talk',
-      1440,
-      1080,
-      'A sponsor tech talk at HackBU 2023: presenters beside a projected slide at the front of a lecture room full of students.',
-    ),
-    aboutPhoto(
-      'study-room',
-      1440,
-      1080,
-      'Students working on laptops at tables spread through a large study room, one wearing headphones in the foreground.',
-    ),
-  ],
-  /** Every year — the hackathon. */
-  hackathon: [
-    ABOUT_PHOTOS.hackathon,
-    aboutPhoto(
-      'side-by-side',
-      1619,
-      1080,
-      'Four students coding side by side at a long table during HackBU 2023.',
-    ),
-    aboutPhoto(
-      'debugging',
-      1440,
-      1080,
-      'Hackers at a shared table with laptops and an external monitor, debugging over snacks during HackBU 2023.',
-    ),
-    aboutPhoto(
-      'monitor',
-      1619,
-      1080,
-      'A hacker types on a laptop beside a second monitor in a busy study room during HackBU 2023.',
-    ),
-    aboutPhoto(
-      'expo',
-      1440,
-      1080,
-      'The packed judging expo at HackBU 2023: rows of students with laptops in a glass-walled hall overlooking a snowy campus.',
-    ),
-  ],
-} as const satisfies Record<string, readonly AboutPhoto[]>
+  aboutPhoto(
+    'tech-talk',
+    1440,
+    1080,
+    'A sponsor tech talk at HackBU 2023: presenters beside a projected slide at the front of a lecture room full of students.',
+  ),
+  aboutPhoto(
+    'study-room',
+    1440,
+    1080,
+    'Students working on laptops at tables spread through a large study room, one wearing headphones in the foreground.',
+  ),
+]
 
 /* -------------------------------------------------------------------------- */
 /* Sponsors photo                                                             */
@@ -333,7 +266,8 @@ export const CLOCK_TOWER = {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Headshots on the Organizers page. Sources live in `public/artwork/organizers/`.
+ * Headshots in the organizer rosters at the bottom of the About us page.
+ * Sources live in `public/artwork/organizers/`.
  *
  * Drop a JPG for each person using the filenames below, run `npm run images`
  * (writes AVIF + WebP beside each JPG), then pass `true` as the third argument
@@ -383,7 +317,7 @@ function organizerPhoto(
   }
 }
 
-/** Group photo beside the organizers intro — always ready once team.jpg ships. */
+/** Group photo beside the About us intro — always ready once team.jpg ships. */
 export const ORGANIZERS_TEAM_PHOTO = {
   jpg: '/artwork/organizers/team.jpg',
   webp: '/artwork/organizers/team.webp',
