@@ -7,14 +7,14 @@ import { ButtonLink } from './ButtonLink'
 import { DISCORD_URL, NAV_LINKS } from '../lib/links'
 
 /**
- * Fixed page header: the HackBU logo lockup + five destinations + the
+ * Fixed page header: the HackBU logo lockup + six destinations + the
  * Discord CTA.
  *
  * The bar is `h-16` (4rem) below `sm` and `h-20` (5rem) from `sm` up; anything
  * that needs to clear it (the hero content, scroll anchors) uses those numbers.
  *
- * Below `md` (768px) the five links and the CTA collapse behind a toggle, so
- * the 390px layout is the lockup plus a menu button.
+ * Below `lg` (1024px) the six links and the CTA collapse behind a toggle —
+ * six links don't fit beside the lockup at tablet widths.
  *
  * The toggle is a real <button> — Enter/Space operate it, Escape closes it,
  * and the panel it controls stays in the DOM so `aria-controls` always
@@ -81,7 +81,7 @@ export function SiteHeader({
           <Wordmark className="text-2xl sm:text-3xl" />
         </a>
 
-        <nav aria-label="Primary" className="hidden items-center gap-8 md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-5 lg:flex">
           {NAV_LINKS.map((link) => (
             <NavItem
               key={link.label}
@@ -103,7 +103,7 @@ export function SiteHeader({
           aria-expanded={menuOpen}
           aria-controls="primary-menu"
           onClick={() => setMenuOpen((open) => !open)}
-          className={`${TOGGLE_ON_CLOUD} -mr-2 inline-flex items-center justify-center rounded-full p-2 md:hidden`}
+          className={`${TOGGLE_ON_CLOUD} -mr-2 inline-flex items-center justify-center rounded-full p-2 lg:hidden`}
         >
           <span className="sr-only">
             {menuOpen ? 'Close menu' : 'Open menu'}
@@ -116,7 +116,7 @@ export function SiteHeader({
       <div
         id="primary-menu"
         hidden={!menuOpen}
-        className="border-frost bg-cloud border-t md:hidden"
+        className="border-frost bg-cloud border-t lg:hidden"
       >
         <Container className="py-4">
           <nav aria-label="Primary — compact" className="flex flex-col gap-1">

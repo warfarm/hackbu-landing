@@ -45,6 +45,22 @@
       "destination": "/organizers.html"
     },
     {
+      "source": "/register",
+      "destination": "/register.html"
+    },
+    {
+      "source": "/register/",
+      "destination": "/register.html"
+    },
+    {
+      "source": "/application",
+      "destination": "/application.html"
+    },
+    {
+      "source": "/application/",
+      "destination": "/application.html"
+    },
+    {
       "source": "/components",
       "destination": "/components.html"
     },

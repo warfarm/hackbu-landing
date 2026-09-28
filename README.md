@@ -20,8 +20,9 @@ track shrank from 260dvh to 180dvh with it.)
 Five public pages live here now: the landing page plus **About us**, **Schedule**,
 **Sponsors** and **Hackathons**, each a separate HTML entry with its own bundle (see
 "The pages, and how they are routed" below). The blog, photos, organizers and resources
-pages stay on `hackbu.org` and are linked from the header and footer; registration is an
-anchor on the hackathons page.
+pages stay on `hackbu.org` and are linked from the header and footer. Hackathon
+registration is its own page, `/register`, backed by a Google Sheet — see
+`google-apps-script/README.md` for how to connect it.
 
 ## Stack
 

@@ -9,25 +9,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="HackBU runs an annual hackathon at Binghamton University. No experience required."
+      content="Check your HackBU application status and RSVP."
     />
-
-    <meta
-      property="og:image"
-      content="%SITE_ORIGIN%/brand/og-image.png"
-    />
-    <meta property="og:image:width" content="732" />
-    <meta property="og:image:height" content="732" />
-    <meta property="og:image:alt" content="The HackBU bearcat logo" />
-    <meta name="twitter:card" content="summary" />
+    <!-- Per-applicant page; nothing here for search engines. -->
+    <meta name="robots" content="noindex" />
 
     <!-- Same page ground as the landing page: `cloud` (#f7f5ee) — see index.html. -->
     <meta name="theme-color" content="#f7f5ee" />
 
-    <title>Hackathons · HackBU</title>
+    <title>My Application · HackBU</title>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/hackathons/main.tsx"></script>
+    <script type="module" src="/src/application/main.tsx"></script>
   </body>
 </html>

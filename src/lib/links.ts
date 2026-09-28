@@ -49,8 +49,14 @@ export const ABOUT_PATH = '/about'
 /** In-site Sponsors page. Clean URL; Vite and Vercel rewrite it to sponsors.html. */
 export const SPONSORS_PATH = '/sponsors'
 
-/** In-site hackathons and registration page. */
+/** In-site hackathons page. */
 export const HACKATHONS_PATH = '/hackathons'
+
+/** In-site hackathon registration form. Clean URL; Vite and Vercel rewrite it to register.html. */
+export const REGISTER_PATH = '/register'
+
+/** Applicant portal: sign in with an email code, view status, RSVP. */
+export const APPLICATION_PATH = '/application'
 
 /** In-site organizers page. Clean URL; Vite and Vercel rewrite it to organizers.html. */
 export const ORGANIZERS_PATH = '/organizers'
@@ -62,6 +68,7 @@ export const NAV_LINKS = [
   { label: 'Sponsors', href: SPONSORS_PATH },
   { label: 'Organizers', href: ORGANIZERS_PATH },
   { label: 'Hackathons', href: HACKATHONS_PATH },
+  { label: 'Registration', href: REGISTER_PATH },
 ] as const
 
 /** Site pages split into two footer columns. */
@@ -69,7 +76,8 @@ export const SITE_PAGES = [
   { label: 'Schedule', href: SCHEDULE_URL },
   { label: 'Organizers', href: ORGANIZERS_PATH },
   { label: 'Hackathons', href: HACKATHONS_PATH },
-  { label: 'Registration', href: `${HACKATHONS_PATH}#register` },
+  { label: 'Registration', href: REGISTER_PATH },
+  { label: 'My Application', href: APPLICATION_PATH },
   { label: 'Blog', href: 'https://hackbu.org/blog' },
   { label: 'Photos', href: 'https://hackbu.org/photos' },
   { label: 'About Us', href: ABOUT_PATH },

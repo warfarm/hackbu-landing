@@ -6,6 +6,8 @@ import ScheduleApp from './schedule/ScheduleApp.tsx'
 import { SponsorsPage } from './sponsors/SponsorsPage'
 import HackathonsApp from './hackathons/HackathonsApp.tsx'
 import { OrganizersPage } from './organizers/OrganizersPage'
+import RegisterApp from './register/RegisterApp.tsx'
+import ApplicationApp from './application/ApplicationApp.tsx'
 import { ComponentSheet } from './sheet/ComponentSheet'
 
 /**
@@ -70,7 +72,25 @@ export function renderSponsors(): string {
   )
 }
 
-/** `hackathons.html` — the hackathon and registration page. */
+/** `register.html` — the hackathon registration form. */
+export function renderRegister(): string {
+  return renderToString(
+    <StrictMode>
+      <RegisterApp />
+    </StrictMode>,
+  )
+}
+
+/** `application.html` — the applicant portal. */
+export function renderApplication(): string {
+  return renderToString(
+    <StrictMode>
+      <ApplicationApp />
+    </StrictMode>,
+  )
+}
+
+/** `hackathons.html` — the hackathon page. */
 export function renderHackathons(): string {
   return renderToString(
     <StrictMode>

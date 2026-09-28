@@ -3,11 +3,10 @@ import { SiteHeader } from '../components/SiteHeader'
 import { SnowdriftDivider } from '../components/SnowdriftDivider'
 import { SiteFooter } from '../components/SiteFooter'
 import { HackathonIntroSection } from '../components/sections/hackathons/HackathonIntroSection'
-import { RegistrationSection } from '../components/sections/hackathons/RegistrationSection'
 import { HACKATHONS_PATH } from '../lib/links'
 
 /**
- * Hackathons — what the annual event is, and where registration will open.
+ * Hackathons — what the annual event is. Registration is its own page.
  *
  * One `<LazyMotion features={domAnimation} strict>` around the whole tree, for
  * the reason written out in `src/App.tsx` and `src/about/AboutPage.tsx`: the
@@ -30,9 +29,6 @@ export default function HackathonsApp() {
 
         <main id="main" className="pt-16 sm:pt-20">
           <HackathonIntroSection />
-
-          <SnowdriftDivider variant="drift-a" />
-          <RegistrationSection />
         </main>
 
         <SnowdriftDivider variant="cloud-to-frost" />
