@@ -13,11 +13,15 @@ import {
   rangeProgress,
   usePrefersReducedMotion,
 } from '../lib/motion'
+import { HACKATHON_DATES, REGISTER_PATH, VENUE } from '../lib/links'
+import { ExternalLink } from './ExternalLink'
 
 /**
  * The hero: a real aerial photograph of the whole campus under snow, settling
  * from a slight zoom to its full frame as the reader scrolls, with the page's
- * welcome headline across the top of the frame.
+ * welcome headline across the top of the frame — the banner of the HackBU
+ * 2027 landing page, so the headline is followed by the hackathon's dates,
+ * its venue and the Register link.
  *
  * Layer contract:
  *
@@ -26,7 +30,8 @@ import {
  *     <div data-hero-stage>        sticky top-0, exactly one viewport tall.
  *       <div data-hero-artwork>    the photograph, as a <picture> — opened a
  *                                  little magnified and eased back to 1.
- *       <div data-hero-copy>       welcome headline + lede, above the photo.
+ *       <div data-hero-copy>       welcome headline + lede + date/Register
+ *                                  row, above the photo.
  *
  * A pine wash and text-shadow keep cloud (cream) type readable over the
  * hills that fill the top of the photograph. (Until 2026-09 this was a
@@ -282,9 +287,35 @@ export function Hero() {
          *
          * On load the headline and lede rise into place behind the header's
          * slide-in (`intro-rise` / `intro-bar`, src/index.css): the bar lands
-         * at 0.7s, the headline starts at 0.45s and the lede at 0.6s, so the
-         * three overlap into one gesture rather than queueing. Reduced
-         * motion drops the animation and shows the resting frame.
+         * at 0.7s, the headline starts at 0.45s, the lede at 0.6s and the
+         * date + Register row at 0.75s — the same 0.15s step again — so the
+         * four overlap into one gesture rather than queueing. Reduced motion
+         * drops the animation and shows the resting frame.
+         *
+         * The date line and the Register link are what make this the
+         * hackathon's banner rather than the club's: the one fact a visitor
+         * needs first, and the one action the page exists for. The wash is
+         * taller than it was for the two-line welcome (20rem, 24rem from
+         * `sm`; it was 14rem and 16rem) so it still runs past the bottom of
+         * the copy block and the button sits on pine, not on bare photograph.
+         * (Written in rem, not as class names: Tailwind scans comments too,
+         * and an old class name quoted here would ship as a dead rule.)
+         *
+         * Below `sm` the row is kept to one line — the date alone beside a
+         * smaller button, with the venue left to the overview section — because
+         * on a phone the focal crop (HERO_OBJECT_POSITION) puts the Library
+         * Tower directly under the copy, and a stacked date and button sat
+         * across the top of it.
+         *
+         * The copy block is `pointer-events-none` so it never swallows a
+         * click meant for the page; the link opts back in. It is the only
+         * control on the photograph, and it cannot take the site's one
+         * button treatment (<ButtonLink>): a pine fill on the pine wash has
+         * no edge, and its pine focus ring would vanish into the wash. So it
+         * inverts — cloud fill, pine label (6.83:1), brick fill with a cloud
+         * label on hover (4.78:1) — and its focus ring is cloud, offset
+         * clear of the fill, which is what reads against the washed photo.
+         * README's "Text over the photograph" records the exception.
          */}
         <div
           data-hero-copy
@@ -292,7 +323,7 @@ export function Hero() {
         >
           <div
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-pine/80 via-pine/45 to-transparent sm:h-64"
+            className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-pine/80 via-pine/45 to-transparent sm:h-96"
           />
           <div className="relative max-w-3xl text-center">
             <h1
@@ -304,6 +335,24 @@ export function Hero() {
             <p className="text-lede text-cloud animate-intro-rise motion-reduce:animate-none mt-3 font-medium text-pretty sm:mt-4 [animation-delay:0.6s] [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
               Binghamton University&apos;s Premier Hackathon
             </p>
+            <div className="animate-intro-rise motion-reduce:animate-none mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 sm:mt-6 sm:gap-x-6 [animation-delay:0.75s]">
+              <p className="text-body text-cloud font-medium [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
+                <time dateTime={HACKATHON_DATES.start}>
+                  {HACKATHON_DATES.short}
+                </time>
+                <span className="hidden sm:inline">
+                  <span aria-hidden="true"> · </span>
+                  <span className="sr-only">, at the </span>
+                  {VENUE.name}
+                </span>
+              </p>
+              <ExternalLink
+                href={REGISTER_PATH}
+                className="bg-cloud text-pine hover:bg-brick hover:text-cloud focus-visible:outline-cloud text-body pointer-events-auto inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium shadow-[0_4px_18px_rgb(28_44_36_/_0.35)] focus-visible:outline-2 focus-visible:outline-offset-4 sm:px-6 sm:py-3"
+              >
+                Register now
+              </ExternalLink>
+            </div>
           </div>
         </div>
       </div>

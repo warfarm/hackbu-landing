@@ -1,16 +1,35 @@
 # HackBU landing page
 
-A redesigned landing page for [HackBU](https://hackbu.org), the student tech club at
-Binghamton University. One job: get undergrads — most of them with no programming
-experience — into the Discord.
+A redesigned site for [HackBU](https://hackbu.org), the student tech club at Binghamton
+University. The home page is the landing page for **HackBU 2027**, the club's hackathon —
+Saturday January 30 to Sunday January 31, 2027, in the University Union — and it has one
+job: get students, most of them with no hackathon experience, to register. The club itself
+(weekly workshops, the calendar, the organizers) lives on About us.
+
+The landing page runs, top to bottom (see the doc comment in `src/App.tsx`):
+
+1. **Banner** — the hero photograph with the page's heading, the dates, the venue and a
+   Register link (`Hero.tsx`).
+2. **What HackBU 2027 is** — when, where, who and team size, and a link to the schedule on
+   the Hackathons page (`EventOverviewSection.tsx`).
+3. **Sponsors** — 2027 sponsors are not confirmed yet, so it says "Coming soon" and points
+   companies at the Sponsors page (`SponsorsPreviewSection.tsx`).
+4. **Prize tracks** — a carousel built on a separate branch; `src/App.tsx` marks its slot.
+5. **Registration** — the main Register button, and a link to My Application for people
+   who have already applied (`RegisterSection.tsx`).
+6. **FAQ** — hackathon questions as disclosures, beside an embedded Google Map of the
+   University Union with a "Get directions" link (`QuestionsSection.tsx`).
+
+Then the footer. Snowdrift dividers separate the sections.
 
 The hero is a real aerial photograph of the whole campus under snow — the Library Tower at
 the centre, brick buildings and dormitories around it, forested hills behind. On load it
 opens at a slight zoom (`PAN_START_SCALE = 1.2`) with its top edge pinned to the top of the
 screen;
 scrolling eases it back to its full frame, holds for a beat, then scrolls away to the
-content below. Each content section then carries one more campus photograph, set into the
-page with feathered edges (`SectionPhoto.tsx` and `.photo-feather` in `src/index.css`).
+content below. The event overview and the registration section each carry one more campus
+photograph, set into the page with feathered edges (`SectionPhoto.tsx` and
+`.photo-feather` in `src/index.css`); the FAQ carries the venue map in that place instead.
 
 (The photograph replaced a cel-shaded illustration that opened at 3.8x on a sky band with
 a drifting cloud parallax over it. A photograph cannot take that magnification and has no
@@ -129,6 +148,11 @@ filename cannot change meaning and never needs revalidating; `/artwork/(.*)` and
 `/brand/(.*)` get `public, max-age=86400, must-revalidate` instead, because those filenames
 are stable across `npm run images` and a day-old copy has to be able to notice.
 
+There is no `Content-Security-Policy` or `X-Frame-Options` header, and two pages depend on
+that: the landing page's FAQ embeds a Google Map of the University Union and About us embeds
+the Google Calendar. If a CSP is ever added, it needs `frame-src https://www.google.com
+https://calendar.google.com`.
+
 ### When the custom domain lands
 
 **Nothing in this repo needs editing.** The only places the site's own origin appears are
@@ -211,9 +235,9 @@ The files the site actually ships are in `public/artwork/`.
 ```
 hackbuimage/                    read-only photographs, as delivered
   hero.jpg                      the hero — winter aerial of campus at dusk, 2048 x 1151
-  winter-header.jpg             About — the clock tower and plaza from the air, 1600 x 600
-  1-KS1-WEB-2-1024x683.jpg      Get involved — two students on a snowy path
-  47065170581_63875cf429_b.jpg  Questions — winter walkway from above, 658 x 1024
+  winter-header.jpg             About section (sheet only) — the clock tower and plaza, 1600 x 600
+  1-KS1-WEB-2-1024x683.jpg      Registration — two students on a snowy path
+  47065170581_63875cf429_b.jpg  Event overview — winter walkway from above, 658 x 1024
 artwork/                        read-only originals, no longer shipped
   campus/                       the retired illustration + its 4x Real-ESRGAN master
   clouds/                       the retired cloud cutouts + their contact sheet
@@ -341,12 +365,16 @@ links, one for the outlined button, and no fourth without a line here.
 rest, and the hero's tall scroll track collapses so no dead scroll space is left
 behind.
 
-**Text over the photograph.** The hero carries the page's `<h1>` and its lede over the sky
-of the photograph — under a pine gradient wash and a text-shadow confined to the top band
-of the frame — and nothing else: no CTA, and nothing in the tab order (the section carries
-`tabIndex={-1}` only so the logo link's `#top` target can take focus programmatically).
-The photograph is the signature moment and is never used as a background behind body copy
-or buttons; those live in the sections below, on cloud and frost.
+**Text over the photograph.** The hero carries the page's `<h1>`, its lede, the
+hackathon's dates and venue, and one link — Register — over the top of the photograph,
+under a pine gradient wash and a text-shadow confined to the top band of the frame. That
+link is the only thing in the hero's tab order (the section itself carries `tabIndex={-1}`
+only so the logo link's `#top` target can take focus programmatically), and it is the one
+button on the site that does not use `ButtonLink`: a pine button on the pine wash has no
+edge and its pine focus ring disappears, so it inverts — cloud fill with a pine label
+(6.83:1), brick fill with a cloud label on hover (4.78:1), and a cloud focus ring. Nothing
+else sits on the photograph: body copy and every other button live in the sections below,
+on cloud and frost.
 
 ## Layout
 
@@ -364,7 +392,8 @@ src/
   landing.css                index.css plus `@source not` lines; the stylesheet root for
                              the landing page, About us and Sponsors
   lib/
-    links.ts                 every URL — off-site and in-site — centralised
+    links.ts                 every URL — off-site and in-site — centralised, plus the
+                             HackBU 2027 dates and venue the map URLs are built from
     motion.ts                usePrefersReducedMotion, the hero pan's easing + range helpers
     images.ts                <picture> source sets + brand mark geometry
   components/
@@ -379,7 +408,10 @@ src/
     ExternalLink.tsx         same-site vs new-tab routing + the two text-link treatments
     controls.ts              TOGGLE_ON_CLOUD — the outlined pill button
     Wordmark.tsx             the logo lockup, as masked fern marks
-    sections/                About, GetInvolved, Questions, Contact (landing)
+    sections/                the landing page's sections: EventOverview, SponsorsPreview,
+                             Register, Questions (the FAQ + venue map); About,
+                             GetInvolved and Contact are no longer on the page but are
+                             still rendered on the component sheet
       hackathons/            HackathonIntro
   about/                     the About us page at /about
     main.tsx, AboutPage.tsx, PhotoCarousel.tsx, OrganizersSection.tsx

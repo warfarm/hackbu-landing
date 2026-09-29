@@ -4,17 +4,48 @@ import { Hero } from './components/Hero'
 import { SnowdriftDivider } from './components/SnowdriftDivider'
 import { ScrollTwistLogo } from './components/ScrollTwistLogo'
 import { Snowfall } from './components/Snowfall'
-import { AboutSection } from './components/sections/AboutSection'
-import { GetInvolvedSection } from './components/sections/GetInvolvedSection'
+import { EventOverviewSection } from './components/sections/EventOverviewSection'
+import { SponsorsPreviewSection } from './components/sections/SponsorsPreviewSection'
+import { RegisterSection } from './components/sections/RegisterSection'
 import { QuestionsSection } from './components/sections/QuestionsSection'
-import { ContactSection } from './components/sections/ContactSection'
 import { SiteFooter } from './components/SiteFooter'
 
 /**
- * Page shell.
+ * Page shell — the HackBU 2027 landing page.
  *
- * Order is: fixed header -> the hero's scroll track (with the page <h1>) ->
- * content sections on cloud, separated by snowdrift dividers -> footer on frost.
+ * The home page is the hackathon's page now (Saturday 30 – Sunday 31 January
+ * 2027, in the University Union). The club itself — the weekly workshops, the
+ * calendar, the organizers — lives on About us (/about), and the sections that
+ * used to introduce it here (About, Get involved, Contact) are no longer on
+ * this page; they are still showcased on the component sheet, which is why
+ * their files remain.
+ *
+ * Order, top to bottom:
+ *
+ *   fixed header
+ *   Hero                    the banner: campus photograph, <h1>, dates,
+ *                           venue and the Register link
+ *   EventOverviewSection    what HackBU 2027 is — when, where, who, teams —
+ *                           and the link to the schedule on /hackathons
+ *   SponsorsPreviewSection  2027 sponsors: "coming soon", and /sponsors
+ *   (prize tracks)          the carousel — built on another branch, see the
+ *                           PRIZE_TRACKS_SLOT comment below
+ *   RegisterSection         the conversion point: /register, and /application
+ *                           for people who already applied
+ *   QuestionsSection        the hackathon FAQ, with the map of the Union
+ *   footer on frost
+ *
+ * The order is the reader's: first what the event is, then who is behind it
+ * and what can be won, then the ask, then the leftover doubts — with the
+ * questions last because "where exactly is it?" is the one people still have
+ * after deciding to come. The banner carries a Register link too, so nobody
+ * has to scroll to act.
+ *
+ * Content sections all sit on cloud, separated by the `drift-*` snowdrift
+ * dividers (a frost bank with cloud drifts either side). SnowdriftDivider's
+ * rule is to add a variant rather than repeat one in a row, so the three are
+ * rotated a → b → c down the page, starting from `drift-c` under the hero (the
+ * reasoning for that one is at the divider).
  *
  * The hero is the only element the scroll work touches; see
  * src/components/Hero.tsx for its layer contract.
@@ -79,21 +110,32 @@ export default function App() {
            * The `drift-*` variants band `bg-frost` with cloud-coloured drifts top
            * and bottom, which under the plaza reads as a bank of settled snow
            * carrying the eye into the page — the thing the component was built to
-           * do. `drift-c` specifically, so that its other use (questions ->
-           * contact) is as far away as the page allows and no shape repeats in a
-           * row.
+           * do. `drift-c` specifically, so the rotation below can run a → b → c
+           * and its next use (prizes -> registration) is as far down the page
+           * as three shapes allow.
            */}
           <SnowdriftDivider variant="drift-c" />
-          <AboutSection />
+          <EventOverviewSection />
 
           <SnowdriftDivider variant="drift-a" />
-          <GetInvolvedSection />
+          <SponsorsPreviewSection />
 
+          {/*
+           * Prize tracks. The carousel is being built on a separate branch and
+           * lands here when the branches merge: it exports `PrizeTracksSection`,
+           * a complete `<Section id="prizes">`. The `drift-b` divider above the
+           * slot is its top edge. When the slot is filled, add
+           * `<SnowdriftDivider variant="drift-c" />` between it and
+           * RegisterSection — until then that divider is left out, because two
+           * snowdrift bands stacked with nothing between them read as a
+           * rendering fault rather than a boundary.
+           */}
           <SnowdriftDivider variant="drift-b" />
-          <QuestionsSection />
+          {/* PRIZE_TRACKS_SLOT: <PrizeTracksSection /> from ./components/sections/PrizeTracksSection */}
+          <RegisterSection />
 
-          <SnowdriftDivider variant="drift-c" />
-          <ContactSection />
+          <SnowdriftDivider variant="drift-a" />
+          <QuestionsSection />
         </main>
 
         <SnowdriftDivider variant="cloud-to-frost" />
