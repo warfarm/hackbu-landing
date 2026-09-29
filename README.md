@@ -153,7 +153,7 @@ The build has **five** entry points, declared in `vite.config.ts`:
 | `index.html` | the landing page | `src/main.tsx` | `renderIndex()` |
 | `about.html` | About us — the club, the weekly workshops + event calendar, and the organizer rosters | `src/about/main.tsx` | `renderAbout()` |
 | `sponsors.html` | sponsorship | `src/sponsors/main.tsx` | `renderSponsors()` |
-| `hackathons.html` | the annual hackathon + registration | `src/hackathons/main.tsx` | `renderHackathons()` |
+| `hackathons.html` | the annual hackathon — what it is, then the weekend timeline at `#timeline` (tentative: past years' times until the 2027 schedule is out) | `src/hackathons/main.tsx` | `renderHackathons()` |
 | `components.html` | an internal component sheet — every token, every primitive with its variants, and the composed sections rendered live | `src/sheet/main.tsx` | `renderComponents()` |
 
 All five are prerendered: `npm run build` ends with `node scripts/prerender.mjs`, which
@@ -380,7 +380,8 @@ src/
     controls.ts              TOGGLE_ON_CLOUD — the outlined pill button
     Wordmark.tsx             the logo lockup, as masked fern marks
     sections/                About, GetInvolved, Questions, Contact (landing)
-      hackathons/            HackathonIntro
+      hackathons/            HackathonIntro, Timeline + timeline.ts (the schedule
+                             data, each time with the source it came from)
   about/                     the About us page at /about
     main.tsx, AboutPage.tsx, PhotoCarousel.tsx, OrganizersSection.tsx
   sponsors/                  the sponsors page at /sponsors
