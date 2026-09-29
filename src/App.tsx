@@ -6,6 +6,7 @@ import { ScrollTwistLogo } from './components/ScrollTwistLogo'
 import { Snowfall } from './components/Snowfall'
 import { EventOverviewSection } from './components/sections/EventOverviewSection'
 import { SponsorsPreviewSection } from './components/sections/SponsorsPreviewSection'
+import { PrizeTracksSection } from './components/sections/PrizeTracksSection'
 import { RegisterSection } from './components/sections/RegisterSection'
 import { QuestionsSection } from './components/sections/QuestionsSection'
 import { SiteFooter } from './components/SiteFooter'
@@ -28,8 +29,8 @@ import { SiteFooter } from './components/SiteFooter'
  *   EventOverviewSection    what HackBU 2027 is — when, where, who, teams —
  *                           and the link to the schedule on /hackathons
  *   SponsorsPreviewSection  2027 sponsors: "coming soon", and /sponsors
- *   (prize tracks)          the carousel — built on another branch, see the
- *                           PRIZE_TRACKS_SLOT comment below
+ *   PrizeTracksSection      last year's five prize tracks on a spinning ring;
+ *                           hover, tap or focus a track to read it
  *   RegisterSection         the conversion point: /register, and /application
  *                           for people who already applied
  *   QuestionsSection        the hackathon FAQ, with the map of the Union
@@ -120,18 +121,10 @@ export default function App() {
           <SnowdriftDivider variant="drift-a" />
           <SponsorsPreviewSection />
 
-          {/*
-           * Prize tracks. The carousel is being built on a separate branch and
-           * lands here when the branches merge: it exports `PrizeTracksSection`,
-           * a complete `<Section id="prizes">`. The `drift-b` divider above the
-           * slot is its top edge. When the slot is filled, add
-           * `<SnowdriftDivider variant="drift-c" />` between it and
-           * RegisterSection — until then that divider is left out, because two
-           * snowdrift bands stacked with nothing between them read as a
-           * rendering fault rather than a boundary.
-           */}
           <SnowdriftDivider variant="drift-b" />
-          {/* PRIZE_TRACKS_SLOT: <PrizeTracksSection /> from ./components/sections/PrizeTracksSection */}
+          <PrizeTracksSection />
+
+          <SnowdriftDivider variant="drift-c" />
           <RegisterSection />
 
           <SnowdriftDivider variant="drift-a" />

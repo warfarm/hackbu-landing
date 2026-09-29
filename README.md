@@ -14,7 +14,9 @@ The landing page runs, top to bottom (see the doc comment in `src/App.tsx`):
    the Hackathons page (`EventOverviewSection.tsx`).
 3. **Sponsors** — 2027 sponsors are not confirmed yet, so it says "Coming soon" and points
    companies at the Sponsors page (`SponsorsPreviewSection.tsx`).
-4. **Prize tracks** — a carousel built on a separate branch; `src/App.tsx` marks its slot.
+4. **Prize tracks** — last year's five tracks on a slowly spinning ring of cards; hovering,
+   tapping or focusing one stops the ring and types its description into a popover beside
+   it (`PrizeTracksSection.tsx`).
 5. **Registration** — the main Register button, and a link to My Application for people
    who have already applied (`RegisterSection.tsx`).
 6. **FAQ** — hackathon questions as disclosures, beside an embedded Google Map of the
@@ -409,7 +411,7 @@ src/
     controls.ts              TOGGLE_ON_CLOUD — the outlined pill button
     Wordmark.tsx             the logo lockup, as masked fern marks
     sections/                the landing page's sections: EventOverview, SponsorsPreview,
-                             Register, Questions (the FAQ + venue map); About,
+                             PrizeTracks, Register, Questions (the FAQ + venue map); About,
                              GetInvolved and Contact are no longer on the page but are
                              still rendered on the component sheet
       hackathons/            HackathonIntro, Timeline + timeline.ts (the schedule

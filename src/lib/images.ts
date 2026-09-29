@@ -79,13 +79,16 @@ export const HERO_ALT =
 /* -------------------------------------------------------------------------- */
 
 /**
- * One real campus photograph per content section — About, Get involved and
- * Questions — set into the layout with feathered edges (see
+ * Campus photographs set into content sections with feathered edges (see
  * src/components/SectionPhoto.tsx). Sources are the files delivered in
  * `hackbuimage/`; `npm run images` writes the JPEG + AVIF + WebP copies into
- * `public/artwork/photos/` at the source's own size. Contact, the page's quiet
- * landing, deliberately carries none: there were three photographs for four
- * sections, and it is the one built to have nothing competing in it.
+ * `public/artwork/photos/` at the source's own size.
+ *
+ * On the landing page `campusPath` sits beside the event overview and
+ * `snowWalk` beside registration; the FAQ carries the venue map instead of a
+ * photo. `plazaWinter` (About) and `snowWalk` (Get involved) are also still
+ * used by those two sections, which now appear only on the component sheet.
+ * The per-key notes below name the section each photo was first chosen for.
  */
 export type SitePhoto = {
   jpg: string
