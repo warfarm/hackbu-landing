@@ -433,3 +433,328 @@
     mask-image: url('/brand/wordmark-mask-768.png');
   }
 }
+
+/* ========================================================================== */
+/* BEGIN prize-tracks ring (src/components/sections/PrizeTracksSection.tsx)   */
+/* ========================================================================== */
+/*
+ * The 3D ring of prize-track cards, the popover beside it, and the static
+ * arrangement that replaces both under reduced motion. The component's own doc
+ * comment explains the behaviour; this block is only the geometry.
+ *
+ * Nesting, outermost first:
+ *
+ *   .prize-viewport  the perspective. Owns the sizes as custom properties —
+ *                    card width/height, ring radius — stepped up at `sm` and
+ *                    `lg`, so the geometry is declared once and nothing in
+ *                    the component measures it.
+ *   .prize-scene     one card-sized box, centred; pushed back by the radius so
+ *                    the front card sits at z = 0 (drawn at its real size),
+ *                    and tipped back 8° so we look down onto the ring.
+ *   .prize-ring      the part that turns. Its `transform` is written every
+ *                    frame by the component and by nothing here.
+ *   .prize-slot      one per card: turned `i × 360° / n` and pushed out by the
+ *                    radius. `--i` is set per slot, `--n` on the ring.
+ *   .prize-card      the front face (a <button>), and .prize-back behind it.
+ *                    Both hide their backfaces, so exactly one shows.
+ *
+ * `transform-style: preserve-3d` has to be restated on every level: it is not
+ * inherited, and any level without it flattens everything below into a plane.
+ * For the same reason nothing inside the scene may carry `opacity < 1`,
+ * `filter` or `overflow: hidden` on a preserve-3d element — each of those
+ * forces flattening. The card's own `overflow-hidden` is fine: the card is a
+ * leaf, not a 3D container.
+ *
+ * The popover lives outside the viewport (the perspective opens a stacking
+ * context), so its z-index competes on the page, above whatever follows the
+ * section.
+ */
+@layer components {
+  .prize-viewport {
+    --card-w: 11.5rem;
+    --card-h: 14rem;
+    --ring-r: 9.5rem;
+    position: relative;
+    height: calc(var(--card-h) + 5rem);
+    perspective: 1000px;
+    perspective-origin: 50% 35%;
+
+    @variant sm {
+      --card-w: 13rem;
+      --card-h: 15.5rem;
+      --ring-r: 12rem;
+      perspective: 1300px;
+    }
+
+    @variant lg {
+      --card-w: 15rem;
+      --card-h: 17rem;
+      --ring-r: 17rem;
+      perspective: 1700px;
+    }
+  }
+
+  /* A soft pine shadow where the ring meets the ground. */
+  .prize-floor {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--card-h));
+    width: min(100%, calc(var(--ring-r) * 2 + var(--card-w)));
+    height: 5rem;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      closest-side,
+      rgb(60 92 72 / 0.2),
+      rgb(60 92 72 / 0.07) 55%,
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  .prize-scene {
+    position: absolute;
+    top: 2.5rem;
+    left: 50%;
+    width: var(--card-w);
+    height: var(--card-h);
+    margin-left: calc(var(--card-w) / -2);
+    transform-style: preserve-3d;
+    transform: translateZ(calc(var(--ring-r) * -1)) rotateX(-8deg);
+  }
+
+  .prize-ring {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  .prize-slot {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateY(calc(var(--i) * 360deg / var(--n)))
+      translateZ(var(--ring-r));
+  }
+
+  .prize-card,
+  .prize-back {
+    position: absolute;
+    inset: 0;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Hovered or open, the card lifts out of the ring towards the viewer. */
+  .prize-card {
+    transition:
+      transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1),
+      border-color 0.2s ease;
+  }
+
+  .prize-card[data-active='true'] {
+    transform: translateZ(1.25rem);
+  }
+
+  @media (hover: hover) {
+    .prize-card:hover {
+      transform: translateZ(1.25rem);
+    }
+  }
+
+  .prize-back {
+    transform: rotateY(180deg);
+  }
+
+  /*
+   * Fake lighting: a dark overlay whose opacity the component writes as
+   * `--shade` (0 facing the viewer, darker as the face turns edge-on). A
+   * custom property rather than an inline `opacity` — see the component.
+   */
+  .prize-shade {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgb(22 36 28);
+    opacity: var(--shade, 0);
+    pointer-events: none;
+  }
+
+  /*
+   * The open card is lit whatever angle the ring stopped it at. The
+   * transition is declared only here, so it runs once on the way in and never
+   * chases the per-frame `--shade` writes while the ring turns.
+   */
+  .prize-card[data-active='true'] .prize-shade {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  /*
+   * The popover. Positioned by the component (`left`/`top`, `data-side`,
+   * `--arrow`); it slides in a few pixels from the card's side as it fades.
+   * `visibility` flips last on the way out, so a closed popover takes no
+   * pointer events and is never read.
+   */
+  .prize-popover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    width: min(21rem, 100%);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(var(--enter-x, 0), var(--enter-y, 0));
+    transition:
+      opacity 0.16s ease,
+      transform 0.24s cubic-bezier(0.22, 0.61, 0.36, 1),
+      visibility 0s linear 0.24s;
+  }
+
+  .prize-popover[data-side='right'] {
+    --enter-x: -0.5rem;
+  }
+
+  .prize-popover[data-side='left'] {
+    --enter-x: 0.5rem;
+  }
+
+  .prize-popover[data-side='below'] {
+    --enter-y: -0.5rem;
+  }
+
+  .prize-popover[data-open='true'] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  /* The notch pointing back at the card. */
+  .prize-popover::before {
+    content: '';
+    position: absolute;
+    display: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 0.125rem;
+    background: inherit;
+    transform: rotate(45deg);
+  }
+
+  .prize-popover[data-side='right']::before {
+    display: block;
+    top: calc(var(--arrow, 2rem) - 0.4375rem);
+    left: -0.4375rem;
+  }
+
+  .prize-popover[data-side='left']::before {
+    display: block;
+    top: calc(var(--arrow, 2rem) - 0.4375rem);
+    right: -0.4375rem;
+  }
+
+  .prize-popover[data-side='below']::before {
+    display: block;
+    top: -0.4375rem;
+    left: calc(var(--arrow, 2rem) - 0.4375rem);
+  }
+
+  /*
+   * The typed copy sits over an invisible copy of the whole text in one grid
+   * cell, so the popover is its final size from the first character.
+   */
+  .prize-popover-text {
+    display: grid;
+  }
+
+  .prize-popover-sizer,
+  .prize-popover-typed {
+    grid-area: 1 / 1;
+  }
+
+  .prize-popover-sizer {
+    visibility: hidden;
+  }
+
+  /* Solid while typing, blinking once the line is complete. */
+  .prize-caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    margin-left: 1px;
+    vertical-align: -0.15em;
+  }
+
+  .prize-popover[data-typing='false'] .prize-caret {
+    animation: prize-caret-blink 1.05s steps(1, end) infinite;
+  }
+
+  /*
+   * Reduced motion: no ring. The five cards stand flat in a wrapping row —
+   * two to a row on a phone — with no backs, no shading and no lift, and the
+   * popover appears without a transition and without a caret. This is the
+   * media query and not the component's hook, so the prerendered first paint
+   * is already this layout. `!important` only where the component writes an
+   * inline style while it runs (the ring's transform).
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .prize-viewport {
+      height: auto;
+      perspective: none;
+    }
+
+    .prize-floor,
+    .prize-back,
+    .prize-shade,
+    .prize-caret {
+      display: none;
+    }
+
+    .prize-scene,
+    .prize-ring {
+      position: static;
+      width: auto;
+      height: auto;
+      margin: 0;
+      transform: none !important;
+      transform-style: flat;
+    }
+
+    .prize-ring {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .prize-slot {
+      position: relative;
+      width: min(var(--card-w), calc(50% - 0.5rem));
+      height: var(--card-h);
+      transform: none;
+      transform-style: flat;
+    }
+
+    .prize-card,
+    .prize-card:hover,
+    .prize-card[data-active='true'] {
+      transform: none;
+      transition: none;
+    }
+
+    .prize-popover,
+    .prize-popover[data-open='true'] {
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+@keyframes prize-caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+/* ========================================================================== */
+/* END prize-tracks ring                                                      */
+/* ========================================================================== */

@@ -6,6 +6,7 @@ import { AboutSection } from '../../components/sections/AboutSection'
 import { GetInvolvedSection } from '../../components/sections/GetInvolvedSection'
 import { QuestionsSection } from '../../components/sections/QuestionsSection'
 import { ContactSection } from '../../components/sections/ContactSection'
+import { PrizeTracksSection } from '../../components/sections/PrizeTracksSection'
 
 /**
  * Part 3 — the composed pieces, rendered exactly as the page renders them.
@@ -32,7 +33,7 @@ export function ComposedPart() {
       id="composed"
       number="3"
       title="Composed, as used"
-      intro="The header, the four content sections and the footer — imported from src/components/ and rendered here unmodified. Page order is: header, hero, drift-c, About, drift-a, Get involved, drift-b, Questions, drift-c, Contact, cloud-to-frost, footer."
+      intro="The header, content sections and the footer — imported from src/components/ and rendered here unmodified. The landing page now runs: header, hero, drift-c, EventOverview, drift-a, SponsorsPreview, drift-b, PrizeTracks, drift-c, Register, drift-a, Questions, cloud-to-frost, footer. About, Get involved and Contact are no longer on the landing page and are kept here for reference."
     >
       <Entry
         name="SiteHeader"
@@ -166,6 +167,44 @@ export function ComposedPart() {
             questions are the content, and a paragraph introducing them would
             only delay them. Answers stay collapsed until opened so eight items
             stay scannable.
+          </Caption>
+        </Block>
+      </Entry>
+
+      <Entry
+        name="PrizeTracksSection"
+        path="src/components/sections/PrizeTracksSection.tsx"
+        use="The prize tracks, on a ring of cards that turns continuously. Hover, tap or tab to a track and the ring stops while its description types into a popover beside the card. It sits between the sponsors and registration sections on the landing page."
+      >
+        <NoProps>
+          The five tracks, their descriptions and the judging criteria are
+          const arrays inside the file, sourced from HackBU 2026’s event post
+          and Devpost page.
+        </NoProps>
+        <Block title="As rendered">
+          <Stage
+            label="PrizeTracksSection — on cloud"
+            note="Live: hover a card (or tab to one) to stop the ring and read it; move away and it carries on from the same angle. Under prefers-reduced-motion the five cards stand flat in a row instead."
+          >
+            <PrizeTracksSection />
+          </Stage>
+        </Block>
+        <Block title="Notes">
+          <Rule>
+            Nothing re-renders to turn the ring: one <b>requestAnimationFrame</b>{' '}
+            loop writes its <b>transform</b> directly and stops whenever
+            anything holds it — a hovered, focused or tapped card, the pause
+            button, the section being off-screen, the tab being hidden. Cards
+            turned more than about 70° away take <b>pointer-events: none</b>, so
+            nothing on the far side can be hovered through the gaps.
+          </Rule>
+          <Caption>
+            Each card is a <b>&lt;button&gt;</b> whose <b>aria-describedby</b>{' '}
+            points at a visually hidden copy of the full description, so a
+            screen reader never meets the half-typed text; the popover itself
+            is <b>aria-hidden</b>. The 3D geometry and the reduced-motion
+            layout are the <b>.prize-*</b> block at the end of{' '}
+            <b>src/index.css</b>.
           </Caption>
         </Block>
       </Entry>
