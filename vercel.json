@@ -3,6 +3,28 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/schedule",
+      "destination": "/about",
+      "statusCode": 308
+    },
+    {
+      "source": "/schedule/",
+      "destination": "/about",
+      "statusCode": 308
+    },
+    {
+      "source": "/organizers",
+      "destination": "/about",
+      "statusCode": 308
+    },
+    {
+      "source": "/organizers/",
+      "destination": "/about",
+      "statusCode": 308
+    }
+  ],
   "rewrites": [
     {
       "source": "/about",
@@ -11,14 +33,6 @@
     {
       "source": "/about/",
       "destination": "/about.html"
-    },
-    {
-      "source": "/schedule",
-      "destination": "/schedule.html"
-    },
-    {
-      "source": "/schedule/",
-      "destination": "/schedule.html"
     },
     {
       "source": "/sponsors",
@@ -35,14 +49,6 @@
     {
       "source": "/hackathons/",
       "destination": "/hackathons.html"
-    },
-    {
-      "source": "/organizers",
-      "destination": "/organizers.html"
-    },
-    {
-      "source": "/organizers/",
-      "destination": "/organizers.html"
     },
     {
       "source": "/register",

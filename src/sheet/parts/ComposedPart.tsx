@@ -176,7 +176,7 @@ export function ComposedPart() {
         use="The last content section: the organisers’ address and the workshop archive, both as display-sized links."
       >
         <NoProps>
-          Reads CONTACT_EMAIL and ORGANIZERS_PATH from src/lib/links.ts.
+          Reads CONTACT_EMAIL and ORGANIZERS_ANCHOR from src/lib/links.ts.
         </NoProps>
         <Block title="As rendered">
           <Stage

@@ -6,8 +6,7 @@ import { fileURLToPath } from 'node:url'
 /**
  * The deployed origin, for the absolute URLs in the public pages' social
  * preview (`index.html`'s `og:url` and `og:image`, and the `og:image` on
- * `about|schedule|sponsors|hackathons|organizers.html` — scrapers do not resolve a
- * relative one).
+ * `about|sponsors|hackathons.html` — scrapers do not resolve a relative one).
  *
  * Vercel sets `VERCEL_PROJECT_PRODUCTION_URL` on every build to the project's
  * production hostname with no scheme (`hackbu-landing.vercel.app`, and the
@@ -90,13 +89,13 @@ const PRELOADED_FONTS = [
  * the end of the head, so the three font requests are queued ahead of the
  * request that would otherwise have to complete before they could start.
  *
- * Every entry but `components.html`. The six public pages all set their body
+ * Every entry but `components.html`. The four public pages all set their body
  * copy in Inter 400/500 above the fold and their headings in Fraunces 600, and
  * each is a plausible cold first visit — an inbound link to `/about` or
- * `/schedule` has exactly the same problem `index.html` had. The component
+ * `/sponsors` has exactly the same problem `index.html` had. The component
  * sheet is excluded because it is internal, is `noindex`, and is never a cold
  * first visit that matters. The three faces are the same three assets on every
- * page, so the hints cost nothing beyond the six head tags themselves.
+ * page, so the hints cost nothing beyond the head tags themselves.
  */
 function fontPreload(): Plugin {
   let base = '/'
@@ -134,22 +133,17 @@ function fontPreload(): Plugin {
 }
 
 /**
- * Serve `/about`, `/schedule`, `/sponsors`, `/hackathons`, `/organizers` and
- * `/components` without the `.html` suffix in `vite dev`, matching the Vercel
- * rewrites in vercel.json.
+ * Serve `/about`, `/sponsors`, `/hackathons` and `/components` without the
+ * `.html` suffix in `vite dev`, matching the Vercel rewrites in vercel.json.
  */
 function cleanHtmlUrls(): Plugin {
   const rewrites: Record<string, string> = {
     '/about': '/about.html',
     '/about/': '/about.html',
-    '/schedule': '/schedule.html',
-    '/schedule/': '/schedule.html',
     '/sponsors': '/sponsors.html',
     '/sponsors/': '/sponsors.html',
     '/hackathons': '/hackathons.html',
     '/hackathons/': '/hackathons.html',
-    '/organizers': '/organizers.html',
-    '/organizers/': '/organizers.html',
     '/register': '/register.html',
     '/register/': '/register.html',
     '/application': '/application.html',
@@ -173,14 +167,12 @@ function cleanHtmlUrls(): Plugin {
 }
 
 /**
- * Seven entry points, seven pages:
+ * Five entry points, five pages:
  *
  *   index.html       the landing page          -> dist/index.html
  *   about.html       the About us page         -> dist/about.html
- *   schedule.html    the schedule page         -> dist/schedule.html
  *   sponsors.html    the sponsors page         -> dist/sponsors.html
  *   hackathons.html  the hackathons page       -> dist/hackathons.html
- *   organizers.html  the organizers page       -> dist/organizers.html
  *   register.html    the registration form     -> dist/register.html
  *   application.html the applicant portal      -> dist/application.html
  *   components.html  the component sheet       -> dist/components.html
@@ -212,23 +204,22 @@ function cleanHtmlUrls(): Plugin {
  *           (`src/sheet/parts/ComposedPart.tsx`), so nothing landing-only is
  *           being pushed into the sheet's download by naming it this way.
  *
- * `src/components/sections/schedule/` and `src/components/sections/hackathons/`
- * are the exception, and they are why `SECTIONS_ONE_PAGE` exists. They sit
- * under `src/components/` by the merge's filing convention, but each directory
- * is rendered by exactly one page — `ScheduleApp` and `HackathonsApp` — and a
- * module in `shared` is downloaded by *every* page, so the plain rule put the
- * schedule's calendar copy and the hackathon's registration copy into the
- * landing page's critical path. Excluded here, they fall into their own page's
- * entry chunk instead, where the same bytes are paid for once by the one page
- * that renders them. (`src/components/sections/` itself stays in `shared`: the
- * landing sections really are rendered by two entries.)
+ * `src/components/sections/hackathons/` is the exception, and it is why
+ * `SECTIONS_ONE_PAGE` exists. It sits under `src/components/` by the merge's
+ * filing convention, but the directory is rendered by exactly one page —
+ * `HackathonsApp` — and a module in `shared` is downloaded by *every* page, so
+ * the plain rule put the hackathon's registration copy into the landing page's
+ * critical path. Excluded here, it falls into its own page's entry chunk
+ * instead, where the same bytes are paid for once by the one page that renders
+ * them. (`src/components/sections/` itself stays in `shared`: the landing
+ * sections really are rendered by two entries.)
  *
  * Nothing under `src/sheet/` matches either rule, so the sheet's own code stays
  * in the `components` entry chunk and out of the landing page, exactly as
  * before. CSS is left to Vite: assigning stylesheets a JS chunk would take
  * Vite's stylesheet handling out of the loop for no gain.
  */
-const SECTIONS_ONE_PAGE = /\/src\/components\/sections\/(schedule|hackathons)\//
+const SECTIONS_ONE_PAGE = /\/src\/components\/sections\/hackathons\//
 
 function manualChunks(id: string): string | undefined {
   const path = id.replaceAll('\\', '/')
@@ -254,10 +245,8 @@ export default defineConfig({
       input: {
         index: fileURLToPath(new URL('./index.html', import.meta.url)),
         about: fileURLToPath(new URL('./about.html', import.meta.url)),
-        schedule: fileURLToPath(new URL('./schedule.html', import.meta.url)),
         sponsors: fileURLToPath(new URL('./sponsors.html', import.meta.url)),
         hackathons: fileURLToPath(new URL('./hackathons.html', import.meta.url)),
-        organizers: fileURLToPath(new URL('./organizers.html', import.meta.url)),
         register: fileURLToPath(new URL('./register.html', import.meta.url)),
         application: fileURLToPath(new URL('./application.html', import.meta.url)),
         components: fileURLToPath(new URL('./components.html', import.meta.url)),

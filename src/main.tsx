@@ -6,9 +6,8 @@ import { createRoot, hydrateRoot } from 'react-dom/client'
  * component sheet's utilities are not emitted into the stylesheet this page
  * downloads. Everything else — tokens, type scale, brand marks, and the three
  * `@font-face` rules — is unchanged and still lives in `./index.css`, which
- * every page reaches, directly or through one of the three roots that
- * `@import` it (`./landing.css`, `./schedule/schedule.css`,
- * `./hackathons/hackathons.css`).
+ * every page reaches, directly or through one of the two roots that
+ * `@import` it (`./landing.css`, `./hackathons/hackathons.css`).
  */
 import './landing.css'
 import App from './App.tsx'

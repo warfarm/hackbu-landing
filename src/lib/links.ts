@@ -8,9 +8,6 @@
 export const DISCORD_URL = 'https://discord.gg/Xka5uUh'
 export const CONTACT_EMAIL = 'hello@hackbu.org'
 
-/** The redesigned schedule page on this deployment. */
-export const SCHEDULE_URL = '/schedule'
-
 /** Public HackBU Google Calendar id (group calendar). */
 const GOOGLE_CALENDAR_ID =
   'c_mjq1vimjo2ofofmoefpfri03e4@group.calendar.google.com'
@@ -46,6 +43,12 @@ export const MAILING_LIST_URL = 'https://hackbu.org/mailing-list'
 /** In-site About us page. Clean URL; Vite and Vercel rewrite it to about.html. */
 export const ABOUT_PATH = '/about'
 
+/**
+ * The organizer rosters at the bottom of the About us page — where the retired
+ * Organizers page's content now lives (src/about/OrganizersSection.tsx).
+ */
+export const ORGANIZERS_ANCHOR = `${ABOUT_PATH}#organizers`
+
 /** In-site Sponsors page. Clean URL; Vite and Vercel rewrite it to sponsors.html. */
 export const SPONSORS_PATH = '/sponsors'
 
@@ -58,30 +61,23 @@ export const REGISTER_PATH = '/register'
 /** Applicant portal: sign in with an email code, view status, RSVP. */
 export const APPLICATION_PATH = '/application'
 
-/** In-site organizers page. Clean URL; Vite and Vercel rewrite it to organizers.html. */
-export const ORGANIZERS_PATH = '/organizers'
-
 /** Header nav destinations (the Discord CTA is separate). */
 export const NAV_LINKS = [
   { label: 'About Us', href: ABOUT_PATH },
-  { label: 'Schedule', href: SCHEDULE_URL },
   { label: 'Sponsors', href: SPONSORS_PATH },
-  { label: 'Organizers', href: ORGANIZERS_PATH },
   { label: 'Hackathons', href: HACKATHONS_PATH },
   { label: 'Registration', href: REGISTER_PATH },
 ] as const
 
 /** Site pages split into two footer columns. */
 export const SITE_PAGES = [
-  { label: 'Schedule', href: SCHEDULE_URL },
-  { label: 'Organizers', href: ORGANIZERS_PATH },
+  { label: 'About Us', href: ABOUT_PATH },
   { label: 'Hackathons', href: HACKATHONS_PATH },
   { label: 'Registration', href: REGISTER_PATH },
   { label: 'My Application', href: APPLICATION_PATH },
+  { label: 'Sponsors', href: SPONSORS_PATH },
   { label: 'Blog', href: 'https://hackbu.org/blog' },
   { label: 'Photos', href: 'https://hackbu.org/photos' },
-  { label: 'About Us', href: ABOUT_PATH },
-  { label: 'Sponsors', href: SPONSORS_PATH },
 ] as const
 
 export const SOCIAL_LINKS = [

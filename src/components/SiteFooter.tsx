@@ -13,8 +13,9 @@ import { CONTACT_EMAIL, SITE_PAGES, SOCIAL_LINKS } from '../lib/links'
    turning brick — see LINK_ON_FROST in ExternalLink.tsx. */
 const FOOTER_LINK_CLASSES = `text-caption ${LINK_ON_FROST}`
 
-const COLUMN_ONE = SITE_PAGES.slice(0, 4)
-const COLUMN_TWO = SITE_PAGES.slice(4)
+const SPLIT = Math.ceil(SITE_PAGES.length / 2)
+const COLUMN_ONE = SITE_PAGES.slice(0, SPLIT)
+const COLUMN_TWO = SITE_PAGES.slice(SPLIT)
 
 export function SiteFooter() {
   return (
