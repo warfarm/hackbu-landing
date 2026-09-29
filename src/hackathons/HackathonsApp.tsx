@@ -3,10 +3,16 @@ import { SiteHeader } from '../components/SiteHeader'
 import { SnowdriftDivider } from '../components/SnowdriftDivider'
 import { SiteFooter } from '../components/SiteFooter'
 import { HackathonIntroSection } from '../components/sections/hackathons/HackathonIntroSection'
+import { TimelineSection } from '../components/sections/hackathons/TimelineSection'
 import { HACKATHONS_PATH } from '../lib/links'
 
 /**
- * Hackathons — what the annual event is. Registration is its own page.
+ * Hackathons — what the annual event is, then the weekend's timeline
+ * (`#timeline`, which the landing page links to). Registration is its own page.
+ *
+ * The two sections are both on `cloud`, so a `drift-a` snowdrift separates
+ * them — the first divider on the page, as on About us and Sponsors — and the
+ * `cloud-to-frost` drift below still settles the last section into the footer.
  *
  * One `<LazyMotion features={domAnimation} strict>` around the whole tree, for
  * the reason written out in `src/App.tsx` and `src/about/AboutPage.tsx`: the
@@ -29,6 +35,8 @@ export default function HackathonsApp() {
 
         <main id="main" className="pt-16 sm:pt-20">
           <HackathonIntroSection />
+          <SnowdriftDivider variant="drift-a" />
+          <TimelineSection />
         </main>
 
         <SnowdriftDivider variant="cloud-to-frost" />
