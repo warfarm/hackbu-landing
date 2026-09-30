@@ -40,6 +40,7 @@ const SENIOR_ORGANIZERS: {
   {
     role: 'Vice President of Outreach',
     name: 'Carinna Lee',
+    email: 'clee91@binghamton.edu',
     photo: 'carinna-lee',
   },
   {
@@ -51,11 +52,13 @@ const SENIOR_ORGANIZERS: {
   {
     role: 'Vice President of Logistics',
     name: 'Gianni Zaccarelli',
+    email: 'gzaccarelli@binghamton.edu',
     photo: 'gianni-zaccarelli',
   },
   {
     role: 'Vice President of Event Planning',
     name: 'Joseph Costa',
+    email: 'jcosta2@binghamton.edu',
     photo: 'joseph-costa',
   },
 ]
@@ -66,6 +69,11 @@ const ORGANIZERS = [
   { name: 'Hewitt Wang', photo: 'hewitt-wang' },
   { name: 'Rijaa Zaidi', photo: 'rijaa-zaidi' },
   { name: 'Raymond Chen', photo: 'raymond-chen' },
+  { name: 'Thomas Mandel', photo: 'thomas-mandel' },
+  { name: 'Aditya Kumar', photo: 'aditya-kumar' },
+  { name: 'Jessica Ha', photo: 'jessica-ha' },
+  { name: 'Adam Babayev', photo: 'adam-babayev' },
+  { name: 'Zuri Chan', photo: 'zuri-chan' },
 ] as const
 
 /**

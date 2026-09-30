@@ -45,26 +45,28 @@ export default function RegisterApp() {
                     right away, and we’ll email you again once your application
                     has been reviewed.
                   </p>
-                  <p className="text-body text-pine mt-4">
-                    New to hackathons?{' '}
-                    <ExternalLink
-                      href={HACKATHONS_PATH}
-                      className={`${LINK_ON_CLOUD} underline underline-offset-4`}
-                    >
-                      Read about the event
-                    </ExternalLink>
-                    . No experience required.
-                  </p>
-                  <p className="text-body text-pine mt-2">
-                    Already registered?{' '}
-                    <ExternalLink
-                      href={APPLICATION_PATH}
-                      className={`${LINK_ON_CLOUD} underline underline-offset-4`}
-                    >
-                      Check your application
-                    </ExternalLink>
-                    .
-                  </p>
+                  <div className="border-pine/70 mt-6 border-l-4 pl-4">
+                    <p className="text-body text-pine">
+                      <span className="font-medium">New to hackathons?</span>{' '}
+                      <ExternalLink
+                        href={HACKATHONS_PATH}
+                        className={`${LINK_ON_CLOUD} font-semibold underline underline-offset-4`}
+                      >
+                        Read about the event
+                      </ExternalLink>
+                      . No experience required.
+                    </p>
+                    <p className="text-body text-pine mt-2">
+                      <span className="font-medium">Already registered?</span>{' '}
+                      <ExternalLink
+                        href={APPLICATION_PATH}
+                        className={`${LINK_ON_CLOUD} font-semibold underline underline-offset-4`}
+                      >
+                        Check your application
+                      </ExternalLink>
+                      .
+                    </p>
+                  </div>
                 </div>
               </Reveal>
 

@@ -289,6 +289,11 @@ export const CLOCK_TOWER = {
  *   hewitt-wang.jpg
  *   rijaa-zaidi.jpg
  *   raymond-chen.jpg
+ *   thomas-mandel.jpg
+ *   aditya-kumar.jpg
+ *   jessica-ha.jpg
+ *   adam-babayev.jpg
+ *   zuri-chan.jpg
  *
  * Group photo (already shipped):
  *   team.jpg
@@ -334,19 +339,31 @@ export const ORGANIZERS_TEAM_PHOTO = {
 export const ORGANIZER_PHOTOS = {
   'matthew-ham': organizerPhoto(
     'matthew-ham',
-    'Portrait of Matthew Ham, HackBU President.',
+    'Portrait of Matthew Ham, HackBU President, smiling and giving a thumbs up outdoors in a navy polka-dot shirt.',
+    true,
+    682,
+    1024,
   ),
   'samuel-yu': organizerPhoto(
     'samuel-yu',
-    'Portrait of Samuel Yu, HackBU Vice President of Communications.',
+    'Portrait of Samuel Yu, HackBU Vice President of Communications, grinning in a gray hoodie in front of rocky mountain peaks.',
+    true,
+    614,
+    834,
   ),
   'carinna-lee': organizerPhoto(
     'carinna-lee',
-    'Portrait of Carinna Lee, HackBU Vice President of Outreach.',
+    'Portrait of Carinna Lee, HackBU Vice President of Outreach, smiling in a gray denim jacket and hoop earrings.',
+    true,
+    1024,
+    1024,
   ),
   'daniel-zheng': organizerPhoto(
     'daniel-zheng',
-    'Portrait of Daniel Zheng, HackBU Vice President of Software.',
+    'Portrait of Daniel Zheng, HackBU Vice President of Software, in profile in a dark suit and tie beside a river at sunset.',
+    true,
+    420,
+    525,
   ),
   'gianni-zaccarelli': organizerPhoto(
     'gianni-zaccarelli',
@@ -357,27 +374,80 @@ export const ORGANIZER_PHOTOS = {
   ),
   'joseph-costa': organizerPhoto(
     'joseph-costa',
-    'Portrait of Joseph Costa, HackBU Vice President of Event Planning.',
+    'Portrait of Joseph Costa, HackBU Vice President of Event Planning, smiling outdoors above a sprawling city skyline.',
+    true,
+    876,
+    1024,
   ),
   'tianna-balkam': organizerPhoto(
     'tianna-balkam',
-    'Portrait of Tianna Balkam, HackBU organizer.',
+    'Portrait of Tianna Balkam, HackBU organizer, smiling against a plain backdrop in a black-and-white patterned blouse.',
+    true,
+    682,
+    1024,
   ),
   'zak-sujkovic': organizerPhoto(
     'zak-sujkovic',
-    'Portrait of Zak Sujkovic, HackBU organizer.',
+    'Portrait of Zak Sujkovic, HackBU organizer, standing by the East River beneath the Manhattan Bridge.',
+    true,
+    800,
+    800,
   ),
   'hewitt-wang': organizerPhoto(
     'hewitt-wang',
-    'Portrait of Hewitt Wang, HackBU organizer.',
+    'Portrait of Hewitt Wang, HackBU organizer, close-up at a busy hackathon with a laptop in front of him.',
+    true,
+    800,
+    800,
   ),
   'rijaa-zaidi': organizerPhoto(
     'rijaa-zaidi',
-    'Portrait of Rijaa Zaidi, HackBU organizer.',
+    'Portrait of Rijaa Zaidi, HackBU organizer, smiling in a navy headscarf and white collared shirt with a light blue scarf.',
+    true,
+    768,
+    1024,
   ),
   'raymond-chen': organizerPhoto(
     'raymond-chen',
-    'Portrait of Raymond Chen, HackBU organizer.',
+    'Portrait of Raymond Chen, HackBU organizer, seated on a wooden chair in a white T-shirt against a sunlit gray wall.',
+    true,
+    610,
+    766,
+  ),
+  'thomas-mandel': organizerPhoto(
+    'thomas-mandel',
+    'Portrait of Thomas Mandel, HackBU organizer, smiling in a dark suit and tie in front of a floral arch.',
+    true,
+    768,
+    1024,
+  ),
+  'aditya-kumar': organizerPhoto(
+    'aditya-kumar',
+    'Portrait of Aditya Kumar, HackBU organizer, grinning in clear-framed glasses outside a campus building.',
+    true,
+    819,
+    1024,
+  ),
+  'jessica-ha': organizerPhoto(
+    'jessica-ha',
+    'Portrait of Jessica Ha, HackBU organizer, in a black top and pendant necklace against a plain backdrop.',
+    true,
+    682,
+    1024,
+  ),
+  'adam-babayev': organizerPhoto(
+    'adam-babayev',
+    'Portrait of Adam Babayev, HackBU organizer, in clear-framed glasses, a dark suit, and a navy tie.',
+    true,
+    768,
+    1024,
+  ),
+  'zuri-chan': organizerPhoto(
+    'zuri-chan',
+    'Portrait of Zuri Chan, HackBU organizer, smiling softly in a cream blouse against a marble wall.',
+    true,
+    1024,
+    576,
   ),
 } as const
 

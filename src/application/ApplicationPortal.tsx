@@ -4,6 +4,7 @@ import { ExternalLink, LINK_ON_FROST, MailLink } from '../components/ExternalLin
 import { CONTACT_EMAIL, REGISTER_PATH } from '../lib/links'
 import { callScript, type Application } from '../register/api'
 import { BUTTON, BUTTON_SECONDARY, ERROR_BOX, INPUT } from '../register/styles'
+import { CodeInput } from './CodeInput'
 
 const SESSION_KEY = 'hackbu:session'
 
@@ -13,6 +14,7 @@ const LINK = `${LINK_ON_FROST} underline underline-offset-4`
 const ERRORS: Record<string, string> = {
   invalid_email: 'Enter a valid email address.',
   not_found: 'We couldn’t find a registration for that email. Check the spelling, or register first.',
+  incomplete_code: 'Enter all 6 digits of the code from your email.',
   wrong_code: 'That code isn’t right. Check the email and try again.',
   code_expired: 'That code has expired. Request a new one.',
   unauthorized: 'Your session expired. Sign in again.',
@@ -53,6 +55,8 @@ export function ApplicationPortal() {
   const [view, setView] = useState<View>({ step: 'loading' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [code, setCode] = useState('')
+  const [codeRequests, setCodeRequests] = useState(0)
   const errorRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -88,6 +92,8 @@ export function ApplicationPortal() {
     const result = await callScript({ action: 'requestCode', email })
     setBusy(false)
     if (!result.ok) return fail(result.error)
+    setCode('')
+    setCodeRequests((count) => count + 1)
     setView({ step: 'code', email })
   }
 
@@ -97,9 +103,10 @@ export function ApplicationPortal() {
     await requestCode(email)
   }
 
-  async function handleCode(event: FormEvent<HTMLFormElement>, email: string) {
-    event.preventDefault()
-    const code = String(new FormData(event.currentTarget).get('code') ?? '').trim()
+  async function verifyCode(email: string, entered: string) {
+    if (busy) return
+    if (entered.length !== 6) return fail('incomplete_code')
+    const code = entered
     setBusy(true)
     setError('')
     const result = await callScript<{ token: string }>({ action: 'verifyCode', email, code })
@@ -153,7 +160,7 @@ export function ApplicationPortal() {
 
   if (view.step === 'email') {
     return (
-      <form onSubmit={handleEmail} className={`${CARD} max-w-xl`}>
+      <form key="email" onSubmit={handleEmail} className={`${CARD} max-w-xl`}>
         <Eyebrow>Sign in</Eyebrow>
         <p className="font-display text-display-md text-pine mt-4 font-semibold">
           Check your application
@@ -189,7 +196,14 @@ export function ApplicationPortal() {
 
   if (view.step === 'code') {
     return (
-      <form onSubmit={(event) => handleCode(event, view.email)} className={`${CARD} max-w-xl`}>
+      <form
+        key="code"
+        onSubmit={(event) => {
+          event.preventDefault()
+          void verifyCode(view.email, code)
+        }}
+        className={`${CARD} max-w-xl`}
+      >
         <Eyebrow>Sign in</Eyebrow>
         <p className="font-display text-display-md text-pine mt-4 font-semibold">
           Enter your code
@@ -198,21 +212,23 @@ export function ApplicationPortal() {
           We sent a 6-digit code to <strong className="font-medium">{view.email}</strong>. It
           expires in 10 minutes. Check your spam folder if you don’t see it.
         </p>
-        <label htmlFor="portal-code" className="text-body text-pine mt-6 block font-medium">
+        <label
+          id="portal-code-label"
+          htmlFor="portal-code"
+          className="text-body text-pine mt-6 block font-medium"
+        >
           Code
         </label>
-        <input
-          id="portal-code"
-          name="code"
-          type="text"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          pattern="[0-9]{6}"
-          maxLength={6}
-          required
-          disabled={busy}
-          className={`${INPUT} mt-2 max-w-48 text-center tracking-[0.4em]`}
-        />
+        <div className="mt-3">
+          <CodeInput
+            key={codeRequests}
+            id="portal-code"
+            labelledBy="portal-code-label"
+            disabled={busy}
+            onChange={setCode}
+            onComplete={(full) => void verifyCode(view.email, full)}
+          />
+        </div>
         {errorBox}
         <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
           <button type="submit" className={BUTTON} disabled={busy}>

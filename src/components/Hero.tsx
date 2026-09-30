@@ -335,7 +335,7 @@ export function Hero() {
             <p className="text-lede text-cloud animate-intro-rise motion-reduce:animate-none mt-3 font-medium text-pretty sm:mt-4 [animation-delay:0.6s] [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
               Binghamton University&apos;s Premier Hackathon
             </p>
-            <div className="animate-intro-rise motion-reduce:animate-none mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 sm:mt-6 sm:gap-x-6 [animation-delay:0.75s]">
+            <div className="animate-intro-rise motion-reduce:animate-none mt-4 flex flex-col items-center gap-5 sm:mt-6 sm:gap-6 [animation-delay:0.75s]">
               <p className="text-body text-cloud font-medium [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
                 <time dateTime={HACKATHON_DATES.start}>
                   {HACKATHON_DATES.short}
@@ -348,9 +348,15 @@ export function Hero() {
               </p>
               <ExternalLink
                 href={REGISTER_PATH}
-                className="bg-cloud text-pine hover:bg-brick hover:text-cloud focus-visible:outline-cloud text-body pointer-events-auto inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium shadow-[0_4px_18px_rgb(28_44_36_/_0.35)] focus-visible:outline-2 focus-visible:outline-offset-4 sm:px-6 sm:py-3"
+                className="group bg-pine text-cloud ring-cloud/80 hover:bg-brick focus-visible:outline-cloud pointer-events-auto inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-xl font-bold shadow-[0_6px_24px_rgb(28_44_36_/_0.5)] ring-2 transition-[background-color,transform] duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:px-9 sm:py-4"
               >
                 Register now
+                <span
+                  aria-hidden
+                  className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
+                >
+                  →
+                </span>
               </ExternalLink>
             </div>
           </div>
