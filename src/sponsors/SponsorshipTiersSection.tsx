@@ -142,11 +142,8 @@ export function SponsorshipTiersSection() {
                     scope="col"
                     className="border-frost/60 bg-frost/15 p-5 text-center sm:p-6 w-[20%] border-l align-bottom"
                   >
-                    <span className="font-display text-display-sm text-pine font-semibold block">
+                    <span className="font-display text-display-md text-pine font-bold block">
                       Silver
-                    </span>
-                    <span className="font-display text-display-md text-pine font-bold block mt-1">
-                      $2,000
                     </span>
                   </th>
                   <th
@@ -156,11 +153,8 @@ export function SponsorshipTiersSection() {
                     <span className="text-eyebrow text-pine/80 font-medium uppercase tracking-wider block mb-1">
                       Popular
                     </span>
-                    <span className="font-display text-display-sm text-pine font-semibold block">
+                    <span className="font-display text-display-md text-pine font-bold block">
                       Gold
-                    </span>
-                    <span className="font-display text-display-md text-pine font-bold block mt-1">
-                      $3,000
                     </span>
                   </th>
                   <th
@@ -170,11 +164,8 @@ export function SponsorshipTiersSection() {
                     <span className="text-eyebrow text-pine/80 font-medium uppercase tracking-wider block mb-1">
                       Complete
                     </span>
-                    <span className="font-display text-display-sm text-pine font-semibold block">
+                    <span className="font-display text-display-md text-pine font-bold block">
                       Platinum
-                    </span>
-                    <span className="font-display text-display-md text-pine font-bold block mt-1">
-                      $4,000
                     </span>
                   </th>
                 </tr>
@@ -217,23 +208,13 @@ export function SponsorshipTiersSection() {
           </div>
 
           {/* Add-ons and custom packages footer bar */}
-          <div className="border-frost bg-frost/35 mt-6 flex flex-col items-start justify-between gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:p-6">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="bg-pine text-cloud text-caption font-medium rounded-full px-4 py-1.5 shadow-xs">
-                Custom Packages Available
-              </span>
-              <p className="text-body text-pine/90 text-sm">
-                Have specific recruitment goals? We will customize a package to suit you.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-caption text-pine font-medium">
-              <span className="border-stone/60 bg-cloud rounded-lg border px-3 py-1.5 shadow-xs">
-                Add-On: $500
-              </span>
-              <span className="border-stone/60 bg-cloud rounded-lg border px-3 py-1.5 shadow-xs">
-                Deduct: $200
-              </span>
-            </div>
+          <div className="border-frost bg-frost/35 mt-6 flex flex-wrap items-center gap-3 rounded-2xl border p-5 sm:p-6">
+            <span className="bg-pine text-cloud text-caption font-medium rounded-full px-4 py-1.5 shadow-xs">
+              Custom Packages Available
+            </span>
+            <p className="text-body text-pine/90 text-sm">
+              Have specific recruitment goals? We will customize a package to suit you.
+            </p>
           </div>
         </div>
       </Reveal>
