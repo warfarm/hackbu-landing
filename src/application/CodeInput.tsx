@@ -70,7 +70,7 @@ export function CodeInput({
   }
 
   return (
-    <div role="group" aria-labelledby={labelledBy} className="flex gap-2 sm:gap-3">
+    <fieldset aria-labelledby={labelledBy} className="flex gap-2 sm:gap-3">
       {digits.map((digit, index) => (
         <input
           key={index}
@@ -90,6 +90,6 @@ export function CodeInput({
           className={CIRCLE}
         />
       ))}
-    </div>
+    </fieldset>
   )
 }
