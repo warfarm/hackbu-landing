@@ -174,7 +174,7 @@ export function ComposedPart() {
       <Entry
         name="PrizeTracksSection"
         path="src/components/sections/PrizeTracksSection.tsx"
-        use="The prize tracks, on a ring of cards that turns continuously. Hover, tap or tab to a track and the ring stops while its description types into a popover beside the card. It sits between the sponsors and registration sections on the landing page."
+        use="The prize tracks, on a ring of wide cards that turns continuously. Hover, tap or tab to a track and the ring turns it to the front, where the card types its description in — every line at once, each a beat behind the one above. It sits between the sponsors and registration sections on the landing page."
       >
         <NoProps>
           The five tracks, their descriptions and the judging criteria are
@@ -184,7 +184,7 @@ export function ComposedPart() {
         <Block title="As rendered">
           <Stage
             label="PrizeTracksSection — on cloud"
-            note="Live: hover a card (or tab to one) to stop the ring and read it; move away and it carries on from the same angle. Under prefers-reduced-motion the five cards stand flat in a row instead."
+            note="Live: hover a card (or tab to one) to turn it to the front and read it; move away and the ring carries on from the same angle. Under prefers-reduced-motion the five cards stand flat in a wrapping row instead."
           >
             <PrizeTracksSection />
           </Stage>
@@ -195,14 +195,14 @@ export function ComposedPart() {
             loop writes its <b>transform</b> directly and stops whenever
             anything holds it — a hovered, focused or tapped card, the pause
             button, the section being off-screen, the tab being hidden. Cards
-            turned more than about 70° away take <b>pointer-events: none</b>, so
+            turned more than about 75° away take <b>pointer-events: none</b>, so
             nothing on the far side can be hovered through the gaps.
           </Rule>
           <Caption>
             Each card is a <b>&lt;button&gt;</b> whose <b>aria-describedby</b>{' '}
             points at a visually hidden copy of the full description, so a
-            screen reader never meets the half-typed text; the popover itself
-            is <b>aria-hidden</b>. The 3D geometry and the reduced-motion
+            screen reader never meets the half-typed text; the typed copy in
+            the card is <b>aria-hidden</b>. The 3D geometry and the reduced-motion
             layout are the <b>.prize-*</b> block at the end of{' '}
             <b>src/index.css</b>.
           </Caption>

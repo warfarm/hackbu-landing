@@ -1,4 +1,5 @@
 import {
+  Fragment,
   useCallback,
   useEffect,
   useId,
@@ -7,6 +8,7 @@ import {
   useState,
   type CSSProperties,
   type FocusEvent,
+  type PointerEvent,
   type ReactNode,
 } from 'react'
 import { Eyebrow, Section, SectionHeader } from '../Layout'
@@ -16,11 +18,12 @@ import { usePrefersReducedMotion } from '../../lib/motion'
 import { BEARCAT_MARK } from '../../lib/images'
 
 /**
- * "Prize tracks" — last year's five categories on a ring that turns about its
- * vertical axis. Hovering a track (or focusing it, or tapping it) stops the
- * ring, and the track's description types itself into a popover beside the
- * card; letting go clears the text and the ring carries on from where it
- * stopped.
+ * "Prize tracks" — last year's five categories on a ring of wide cards that
+ * turns about its vertical axis. Hovering a track (or focusing it, or tapping
+ * it) turns the ring the short way round until that card faces front, and
+ * then the card types its description in — every line at once, each starting
+ * a beat after the one above. Letting go folds the description away and the
+ * ring carries on from where it stopped.
  *
  * **What the copy is.** The five tracks and their wording come from HackBU
  * 2026 — the event-information post on hackbu.org
@@ -42,9 +45,9 @@ import { BEARCAT_MARK } from '../../lib/images'
  * turned `i × 72°` and pushed out by the radius. Each slot holds the card (a
  * `<button>`) on its front face and a pine panel with the bearcat on its back,
  * so the ring reads as a solid object going round rather than a set of cards
- * blinking in and out. Card size, radius and perspective are custom
- * properties that step up at `sm` and `lg`; nothing in this file knows a pixel
- * size.
+ * blinking in and out. Card size, radius (a multiple of the card's width) and
+ * perspective are custom properties that step up at `sm` and `lg`; nothing in
+ * this file knows a pixel size.
  *
  * **Nothing re-renders to animate it.** `createSpinner()` below owns one
  * `requestAnimationFrame` loop that writes the ring's `transform` directly and
@@ -54,78 +57,87 @@ import { BEARCAT_MARK } from '../../lib/images'
  * facing and writes two things per card, only when they change: a `--shade`
  * custom property on an overlay (cards darken as they turn edge-on, which is
  * most of what sells the depth), and `pointer-events: none` on any card
- * turned more than ~70° away, so a card on the far side of the ring can never
- * be hovered or clicked through the gap between the front ones. `--shade` is a
- * custom property rather than an inline `opacity` on purpose: the component
- * sheet pins every element with an inline opacity to 1 (`src/sheet/sheet.css`),
- * which would paint every overlay solid.
+ * turned more than ~75° away, so a card on the far side of the ring can never
+ * be hovered or clicked through the gap between the front ones. The two
+ * neighbours of a centred card sit at 72°, inside that, so they stay
+ * hoverable. `--shade` is a custom property rather than an inline `opacity`
+ * on purpose: the component sheet pins every element with an inline opacity
+ * to 1 (`src/sheet/sheet.css`), which would paint every overlay solid.
  *
  * The loop only runs while something is moving. It stops for any *hold* —
  * a track being hovered, focused or tapped; the visitor's pause button; the
  * section being off-screen (an IntersectionObserver, not a scroll listener);
  * the tab being hidden — and restarts with a zero first step when the last
- * hold lifts. Frame steps are clamped, so a long frame never lurches.
+ * hold lifts. Frame steps are clamped, so a long frame never lurches. A turn
+ * to the front (`seekTo`) runs whatever is holding the ring.
  *
  * ---------------------------------------------------------------------------
  * Hover, focus, touch
  * ---------------------------------------------------------------------------
- * One piece of state, `active`, says which popover is showing, and a ref
- * records what opened it:
+ * Every way in ends the same way: `center()` holds the ring, turns the card
+ * to the front and, once it lands, makes it `active` — the one piece of
+ * state, which opens that card's description. A ref records what opened it:
  *
- *   mouse     pointer enters a card → open; leaves → close after a 120ms
- *             grace, cancelled if the pointer reaches the popover or another
- *             card. The grace is what lets the pointer cross onto the popover
- *             without it vanishing (WCAG 1.4.13, "hoverable").
+ *   mouse     resting on a card for 130ms centres it (so a pointer crossing
+ *             the ring on its way somewhere else turns nothing); a click
+ *             centres it at once. The description stays open while the
+ *             pointer is anywhere over the ring — resting on a neighbour
+ *             centres that one instead — and closes 160ms after it leaves.
+ *             Only a pointer that actually moves counts as hovering: the turn
+ *             carries a new card under a resting pointer, and that card is
+ *             ignored until the pointer has been somewhere else, or every
+ *             centring would set off the next.
  *   keyboard  focus on a card (`:focus-visible` only, so a mouse click that
- *             focuses a button does not count) turns the ring the short way
- *             round until that card faces front, then opens. Blur closes and
- *             lets the ring go. Escape closes the popover but the ring stays
- *             still while focus is on it — "Escape dismisses, blur resumes".
- *   touch     tap toggles; a tap anywhere else closes. `click`, not
- *             `pointerdown`, is what closes it, so scrolling to read a long
- *             description does not dismiss it.
- *
- * Escape dismisses the popover whichever way it opened.
+ *             focuses a button does not count) centres it. Blur closes and
+ *             lets the ring go. Escape closes but the ring stays still while
+ *             focus is on it — "Escape dismisses, blur resumes".
+ *   touch     tap centres; tapping the open card again, or anywhere else,
+ *             closes. `click`, not `pointerdown`, is what closes it, so
+ *             scrolling past does not.
  *
  * **What a screen reader gets.** Each card is a real `<button>` named by its
  * track ("Best Personal Finance, Sponsored track") and described, through
  * `aria-describedby`, by a visually hidden paragraph holding the full
  * description — so the whole text is there the moment focus lands, never a
- * half-typed one. The popover is a visual duplicate and is `aria-hidden`.
- * WCAG 2.2.2 wants a way to stop motion that runs for more than five seconds,
- * so there is a "Pause spinning" button under the ring as well as the hover
- * and focus pauses.
+ * half-typed one. The typed copy in the card is a visual duplicate and is
+ * `aria-hidden`. WCAG 2.2.2 wants a way to stop motion that runs for more
+ * than five seconds, so there is a "Pause spinning" button under the ring as
+ * well as the hover and focus pauses.
  *
  * ---------------------------------------------------------------------------
- * The popover
+ * The description
  * ---------------------------------------------------------------------------
- * Always mounted (so its text node exists for the typewriter to write into),
- * shown with `data-open`, and positioned imperatively in a layout effect: it
- * measures the card's on-screen box and goes on the side facing away from the
- * ring's centre, the other side if that does not fit, and underneath the card
- * when neither does (tablet and phone widths). It is clamped to 16px inside
- * the window, and the section is `overflow-x-clip`, so neither the ring's
- * outer cards nor the popover can make the page scroll sideways.
+ * Each card carries its kicker (one line, readable while the ring turns) and
+ * its description, each in a one-row grid that opens and closes between
+ * `0fr` and `1fr` (src/index.css). Opening a card folds the kicker away and
+ * unfolds the description beneath the name, which rides up to make room.
  *
- * The typed copy is laid over an invisible copy of the full text in the same
- * grid cell, so the popover is its final size from the first character and
- * never grows line by line. Characters land every 14ms from a rAF loop that
- * writes `textContent` — again, no React render per character.
+ * The description is typed over an invisible copy of itself — the sizer — in
+ * the same grid cell, so it is its final size from the first character. The
+ * sizer wraps each word in a span; `typeLines()` reads the spans' offsets to
+ * find where the browser broke the lines, writes one block per line, and one
+ * rAF loop types all of them together, line k starting `k × LINE_STAGGER_MS`
+ * after the first, each with its own caret while it types and the last caret
+ * blinking once they are all done. It writes `Text.data`, so there is no
+ * React render per character. Copied from the sizer's layout, the lines never
+ * re-wrap; a resize that changes the width re-reads them and shows the text
+ * whole.
  *
  * ---------------------------------------------------------------------------
  * Prerender and reduced motion
  * ---------------------------------------------------------------------------
- * The server and the first client render agree: angle 0, nothing active, the
- * popover holding track one's text and hidden. Everything that touches the
- * browser happens in effects. The ring's resting 3D arrangement is pure CSS,
- * so the prerendered HTML already paints the ring before any script runs.
+ * The server and the first client render agree: angle 0, nothing active,
+ * every description folded away with its lines empty. Everything that
+ * touches the browser happens in effects. The ring's resting 3D arrangement is
+ * pure CSS, so the prerendered HTML already paints the ring before any script
+ * runs.
  *
  * Reduced motion is handled in two places for the reason Hero's intro gives
  * (src/index.css): the *layout* switches in CSS under the media query, so the
  * first paint is already the static arrangement — the five cards flat in a
- * wrapping row, no backs, no shading — and the *behaviour* reads
- * `usePrefersReducedMotion()`: no loop is started, focus does not turn
- * anything, and the description appears whole instead of being typed.
+ * wrapping row, no backs, no shading, the sizer itself showing as the
+ * description — and the *behaviour* reads `usePrefersReducedMotion()`: no
+ * loop is started, nothing turns, and nothing is typed.
  */
 
 type TrackTag = 'sponsored' | 'unclaimed'
@@ -139,7 +151,7 @@ type Track = {
   name: string
   /** One line on the card itself, readable while the ring turns. */
   kicker: string
-  /** What the popover types, and what `aria-describedby` reads in full. */
+  /** What the open card types, and what `aria-describedby` reads in full. */
   description: string
   tag?: TrackTag
   icon: TrackIconName
@@ -211,23 +223,25 @@ const CRITERIA = [
 ] as const
 
 /** One full turn of the ring. Slow enough to read a card as it passes. */
-const REVOLUTION_MS = 32_000
+const REVOLUTION_MS = 40_000
 
-/** Typewriter pace — fast, so it reads as arriving rather than as a wait. */
-const MS_PER_CHAR = 14
+/** Typewriter pace, per line. The lines type side by side, so it can be unhurried. */
+const MS_PER_CHAR = 20
 
-/** How long a mouse-opened popover survives the pointer leaving its card. */
-const CLOSE_GRACE_MS = 120
+/** How far each line starts behind the one above it. */
+const LINE_STAGGER_MS = 90
+
+/** How long the pointer rests on a card before the ring turns to it. */
+const HOVER_INTENT_MS = 130
+
+/** How long an open description survives the pointer leaving the ring. */
+const CLOSE_GRACE_MS = 160
 
 /**
  * A card is hoverable while it faces the viewer by more than this (cosine of
- * its angle, ~70°). Past it the card is edge-on or turned away.
+ * its angle, ~75°). Past it the card is edge-on or turned away.
  */
-const INTERACTIVE_FACING = 0.35
-
-/** Space between a card and its popover, and between the popover and the window edge. */
-const POPOVER_GAP = 18
-const WINDOW_GUTTER = 16
+const INTERACTIVE_FACING = 0.25
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
@@ -238,110 +252,87 @@ export function PrizeTracksSection() {
   const reduced = usePrefersReducedMotion()
   const [spin] = useState(() => createSpinner(TRACKS.length))
 
-  /** The track whose popover is showing, or null. */
+  /** The track whose description is showing, or null. */
   const [active, setActive] = useState<number | null>(null)
-  /** The track the popover holds — kept after closing so it fades out whole. */
-  const [shownTrack, setShownTrack] = useState(0)
   const [userPaused, setUserPaused] = useState(false)
 
-  const stageRef = useRef<HTMLDivElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLUListElement>(null)
-  const popoverRef = useRef<HTMLDivElement>(null)
-  const typedRef = useRef<HTMLSpanElement>(null)
-  const slotRefs = useRef<(HTMLLIElement | null)[]>([])
+  const cardRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   // Mirrors and bookkeeping read synchronously by the handlers.
   const activeRef = useRef<number | null>(null)
+  /** The track turning to the front or already there; `active` once it lands. */
+  const targetRef = useRef<number | null>(null)
   const openedByRef = useRef<OpenedBy | null>(null)
   const focusedRef = useRef<number | null>(null)
   const pointerTypeRef = useRef<string | null>(null)
+  /** Where the mouse last actually was, in client coordinates. */
+  const pointerRef = useRef({ x: Number.NaN, y: Number.NaN })
+  /** A card the ring carried under a resting pointer; ignored until the pointer leaves it. */
+  const staleRef = useRef<number | null>(null)
+  const intentRef = useRef({ index: -1, timer: 0 })
   const closeTimerRef = useRef(0)
 
-  const open = useCallback(
-    (index: number, openedBy: OpenedBy) => {
-      window.clearTimeout(closeTimerRef.current)
-      activeRef.current = index
-      openedByRef.current = openedBy
-      // Held synchronously, before React renders, so the ring stops on the
-      // angle it had when the pointer arrived and the popover measures that.
-      spin.hold('interaction', true)
-      setActive(index)
-      setShownTrack(index)
-    },
-    [spin],
-  )
+  const clearIntent = useCallback(() => {
+    window.clearTimeout(intentRef.current.timer)
+    intentRef.current = { index: -1, timer: 0 }
+  }, [])
+
+  /** Let the ring go, unless a card is still centring, open or focused. */
+  const releaseIfIdle = useCallback(() => {
+    spin.hold(
+      'interaction',
+      targetRef.current !== null || focusedRef.current !== null,
+    )
+  }, [spin])
 
   const close = useCallback(() => {
     window.clearTimeout(closeTimerRef.current)
+    clearIntent()
+    spin.cancelSeek()
     activeRef.current = null
+    targetRef.current = null
     openedByRef.current = null
     // A keyboard-focused card keeps the ring still after Escape; blur lets it go.
-    spin.hold('interaction', focusedRef.current !== null)
+    releaseIfIdle()
     setActive(null)
-  }, [spin])
+  }, [clearIntent, releaseIfIdle, spin])
+
+  /** Turn track `index` to the front, then open its description. */
+  const center = useCallback(
+    (index: number, openedBy: OpenedBy) => {
+      window.clearTimeout(closeTimerRef.current)
+      clearIntent()
+      targetRef.current = index
+      openedByRef.current = openedBy
+      // Held synchronously, before React renders, so the turn starts from the
+      // angle the ring had when the pointer arrived.
+      spin.hold('interaction', true)
+      // Whatever was open folds away while the ring turns.
+      if (activeRef.current !== null && activeRef.current !== index) {
+        activeRef.current = null
+        setActive(null)
+      }
+      const land = () => {
+        if (targetRef.current !== index) return
+        if (openedBy === 'hover') {
+          const under = cardAt(pointerRef.current)
+          staleRef.current = under === index ? null : under
+        }
+        activeRef.current = index
+        setActive(index)
+      }
+      if (reduced) land()
+      else spin.seekTo(index, land)
+    },
+    [clearIntent, reduced, spin],
+  )
 
   const scheduleClose = useCallback(() => {
     window.clearTimeout(closeTimerRef.current)
     closeTimerRef.current = window.setTimeout(close, CLOSE_GRACE_MS)
   }, [close])
-
-  const cancelClose = useCallback(() => {
-    window.clearTimeout(closeTimerRef.current)
-  }, [])
-
-  /** Put the popover beside (or under) track `index`'s card. */
-  const place = useCallback((index: number) => {
-    const stage = stageRef.current
-    const popover = popoverRef.current
-    const slot = slotRefs.current[index]
-    if (!stage || !popover || !slot) return
-
-    const s = stage.getBoundingClientRect()
-    const c = slot.getBoundingClientRect()
-    const width = popover.offsetWidth
-    const height = popover.offsetHeight
-    const windowWidth = document.documentElement.clientWidth
-
-    // Everything below is in the stage's coordinates.
-    const minX = Math.max(0, WINDOW_GUTTER - s.left)
-    const maxX = Math.min(s.width, windowWidth - WINDOW_GUTTER - s.left)
-    const cardLeft = c.left - s.left
-    const cardRight = c.right - s.left
-    const cardMidX = (cardLeft + cardRight) / 2
-    const cardTop = c.top - s.top
-    const cardMidY = (cardTop + c.bottom - s.top) / 2
-
-    const rightX = cardRight + POPOVER_GAP
-    const leftX = cardLeft - POPOVER_GAP - width
-    const fits = {
-      right: rightX + width <= maxX,
-      left: leftX >= minX,
-    }
-    // Outward first: a card left of centre opens to the left, over empty page
-    // rather than over the rest of the ring.
-    const order: ('left' | 'right')[] =
-      cardMidX < s.width / 2 ? ['left', 'right'] : ['right', 'left']
-    const side = order.find((candidate) => fits[candidate]) ?? 'below'
-
-    let x: number
-    let y: number
-    let arrow: number
-    if (side === 'below') {
-      x = clamp(cardMidX - width / 2, minX, Math.max(minX, maxX - width))
-      y = c.bottom - s.top + POPOVER_GAP
-      arrow = clamp(cardMidX - x, 24, width - 24)
-    } else {
-      x = side === 'right' ? rightX : leftX
-      y = cardMidY - height / 2
-      arrow = clamp(cardMidY - y, 24, height - 24)
-    }
-
-    popover.dataset.side = side
-    popover.style.left = `${Math.round(x)}px`
-    popover.style.top = `${Math.round(y)}px`
-    popover.style.setProperty('--arrow', `${Math.round(arrow)}px`)
-  }, [])
 
   /* The ring: one rAF loop, held while anything wants it still. */
   useEffect(() => {
@@ -373,50 +364,21 @@ export function PrizeTracksSection() {
     }
   }, [reduced, spin])
 
-  /* Position the popover before the frame that shows it. */
+  /*
+   * The typewriter. A layout effect, so the open card's lines are rebuilt
+   * (empty) before the frame that starts unfolding it — never a flash of the
+   * last time's text.
+   */
   useLayoutEffect(() => {
-    if (active !== null) place(active)
-  }, [active, place])
-
-  /* The typewriter. */
-  useEffect(() => {
-    const node = typedRef.current
-    const popover = popoverRef.current
-    if (!node || !popover || active === null) return
-    const text = TRACKS[active]?.description ?? ''
-
-    if (reduced) {
-      node.textContent = text
-      popover.dataset.typing = 'false'
-      return
-    }
-
-    node.textContent = ''
-    popover.dataset.typing = 'true'
-    let frame = 0
-    let start = 0
-    let shown = 0
-    const step = (now: number) => {
-      if (!start) start = now
-      const count = Math.min(
-        text.length,
-        Math.floor((now - start) / MS_PER_CHAR) + 1,
-      )
-      if (count !== shown) {
-        shown = count
-        node.textContent = text.slice(0, count)
-      }
-      if (count < text.length) frame = requestAnimationFrame(step)
-      else popover.dataset.typing = 'false'
-    }
-    frame = requestAnimationFrame(step)
-    return () => {
-      cancelAnimationFrame(frame)
-      popover.dataset.typing = 'false'
-    }
+    if (active === null || reduced) return
+    const card = cardRefs.current[active]
+    const sizer = card?.querySelector<HTMLElement>('[data-prize-sizer]')
+    const lines = card?.querySelector<HTMLElement>('[data-prize-lines]')
+    if (!sizer || !lines) return
+    return typeLines(sizer, lines)
   }, [active, reduced])
 
-  /* While a popover is open: Escape, tap-outside, and re-placing on resize. */
+  /* While a description is open: Escape, and tap-outside. */
   useEffect(() => {
     if (active === null) return
     const onKeyDown = (event: KeyboardEvent) => {
@@ -427,50 +389,81 @@ export function PrizeTracksSection() {
       const target = event.target
       if (!(target instanceof Node)) return
       if (ringRef.current?.contains(target)) return
-      if (popoverRef.current?.contains(target)) return
       close()
     }
-    const onResize = () => place(active)
     document.addEventListener('keydown', onKeyDown)
     document.addEventListener('click', onClick)
-    window.addEventListener('resize', onResize)
     return () => {
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('click', onClick)
-      window.removeEventListener('resize', onResize)
     }
-  }, [active, close, place])
+  }, [active, close])
 
-  useEffect(() => () => window.clearTimeout(closeTimerRef.current), [])
+  useEffect(
+    () => () => {
+      window.clearTimeout(closeTimerRef.current)
+      window.clearTimeout(intentRef.current.timer)
+    },
+    [],
+  )
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== 'mouse') return
+    const { clientX: x, clientY: y } = event
+    const last = pointerRef.current
+    // Only a pointer that actually moved counts. A browser may replay a move
+    // when the ring slides a card under a resting pointer; that card is not
+    // being hovered.
+    if (x === last.x && y === last.y) return
+    pointerRef.current = { x, y }
+    window.clearTimeout(closeTimerRef.current)
+
+    const index = cardIndexOf(event.target)
+    if (index !== staleRef.current) staleRef.current = null
+    if (
+      index === null ||
+      index === staleRef.current ||
+      index === targetRef.current
+    ) {
+      if (intentRef.current.index !== -1) {
+        clearIntent()
+        releaseIfIdle()
+      }
+      return
+    }
+    // Mid-turn the cards are sliding under the pointer: let them.
+    if (spin.isSeeking() || intentRef.current.index === index) return
+
+    clearIntent()
+    // Stopped now, so the card stays under the pointer while the intent waits.
+    spin.hold('interaction', true)
+    intentRef.current = {
+      index,
+      timer: window.setTimeout(() => center(index, 'hover'), HOVER_INTENT_MS),
+    }
+  }
+
+  function handlePointerLeave(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== 'mouse') return
+    staleRef.current = null
+    if (intentRef.current.index !== -1) {
+      clearIntent()
+      releaseIfIdle()
+    }
+    if (openedByRef.current === 'hover') scheduleClose()
+  }
 
   function handleFocus(index: number, event: FocusEvent<HTMLButtonElement>) {
     if (!event.currentTarget.matches(':focus-visible')) return
     focusedRef.current = index
-    cancelClose()
-    spin.hold('interaction', true)
-    if (reduced) {
-      open(index, 'focus')
-      return
-    }
-    // Hide whatever is open while the ring turns — this card's own popover
-    // too, if the mouse opened it, since the card is about to move out from
-    // under it — and show this one when it lands.
-    if (activeRef.current !== null) {
-      activeRef.current = null
-      openedByRef.current = null
-      setActive(null)
-    }
-    spin.seekTo(index, () => {
-      if (focusedRef.current === index) open(index, 'focus')
-    })
+    center(index, 'focus')
   }
 
   function handleBlur(index: number) {
     if (focusedRef.current !== index) return
     focusedRef.current = null
-    spin.cancelSeek()
     if (openedByRef.current === 'focus') close()
-    else spin.hold('interaction', activeRef.current !== null)
+    else releaseIfIdle()
   }
 
   function handleClick(index: number, detail: number) {
@@ -481,16 +474,16 @@ export function PrizeTracksSection() {
     // Keyboard activation (Enter/Space): toggle, as a way to put it back.
     if (detail === 0 || pointerType === null) {
       if (isOpen) close()
-      else open(index, 'focus')
+      else center(index, 'focus')
       return
     }
-    // A mouse already opened it on the way in; a click should not close it.
+    // A mouse click is a hover that does not wait; it never closes.
     if (pointerType === 'mouse') {
-      if (!isOpen) open(index, 'hover')
+      if (targetRef.current !== index) center(index, 'hover')
       return
     }
     if (isOpen) close()
-    else open(index, 'touch')
+    else if (targetRef.current !== index) center(index, 'touch')
   }
 
   function toggleUserPause() {
@@ -498,8 +491,6 @@ export function PrizeTracksSection() {
     spin.hold('user', next)
     setUserPaused(next)
   }
-
-  const shown = TRACKS[shownTrack]
 
   return (
     <Section
@@ -517,80 +508,57 @@ export function PrizeTracksSection() {
       </Reveal>
 
       <Reveal delay={0.05} className="mt-10 sm:mt-14">
-        <div ref={stageRef} className="relative">
-          <div ref={viewportRef} className="prize-viewport">
-            <div className="prize-floor" aria-hidden="true" />
-            <div className="prize-scene">
-              <ul
-                ref={ringRef}
-                aria-label="Prize tracks"
-                className="prize-ring"
-                style={{ '--n': TRACKS.length } as CSSProperties}
-              >
-                {TRACKS.map((track, index) => {
-                  const nameId = `${baseId}-${track.id}-name`
-                  const tagId = `${baseId}-${track.id}-tag`
-                  const descriptionId = `${baseId}-${track.id}-description`
+        <div
+          ref={viewportRef}
+          className="prize-viewport"
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
+        >
+          <div className="prize-floor" aria-hidden="true" />
+          <div className="prize-scene">
+            <ul
+              ref={ringRef}
+              aria-label="Prize tracks"
+              className="prize-ring"
+              style={{ '--n': TRACKS.length } as CSSProperties}
+            >
+              {TRACKS.map((track, index) => {
+                const nameId = `${baseId}-${track.id}-name`
+                const tagId = `${baseId}-${track.id}-tag`
+                const descriptionId = `${baseId}-${track.id}-description`
 
-                  return (
-                    <li
-                      key={track.id}
+                return (
+                  <li
+                    key={track.id}
+                    className="prize-slot"
+                    style={{ '--i': index } as CSSProperties}
+                  >
+                    <button
                       ref={(element) => {
-                        slotRefs.current[index] = element
+                        cardRefs.current[index] = element
                       }}
-                      className="prize-slot"
-                      style={{ '--i': index } as CSSProperties}
+                      type="button"
+                      data-prize-card={index}
+                      data-active={active === index}
+                      aria-labelledby={
+                        track.tag ? `${nameId} ${tagId}` : nameId
+                      }
+                      aria-describedby={descriptionId}
+                      onPointerDown={(event) => {
+                        pointerTypeRef.current = event.pointerType
+                      }}
+                      onClick={(event) => handleClick(index, event.detail)}
+                      onFocus={(event) => handleFocus(index, event)}
+                      onBlur={() => handleBlur(index)}
+                      className="prize-card border-stone/60 bg-frost text-pine hover:border-pine data-[active=true]:border-pine data-[active=true]:bg-cloud focus-visible:outline-pine flex cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border p-4 text-left focus-visible:outline-2 focus-visible:outline-offset-4 sm:p-6 lg:p-8"
                     >
-                      <button
-                        type="button"
-                        data-prize-card=""
-                        data-active={active === index}
-                        aria-labelledby={
-                          track.tag ? `${nameId} ${tagId}` : nameId
-                        }
-                        aria-describedby={descriptionId}
-                        onPointerEnter={(event) => {
-                          if (event.pointerType !== 'mouse') return
-                          open(index, 'hover')
-                        }}
-                        onPointerLeave={(event) => {
-                          if (event.pointerType !== 'mouse') return
-                          if (openedByRef.current === 'hover') scheduleClose()
-                        }}
-                        onPointerDown={(event) => {
-                          pointerTypeRef.current = event.pointerType
-                        }}
-                        onClick={(event) => handleClick(index, event.detail)}
-                        onFocus={(event) => handleFocus(index, event)}
-                        onBlur={() => handleBlur(index)}
-                        className="prize-card border-stone/60 bg-frost text-pine hover:border-pine data-[active=true]:border-pine data-[active=true]:bg-cloud focus-visible:outline-pine flex cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border p-4 text-left focus-visible:outline-2 focus-visible:outline-offset-4 sm:p-6"
-                      >
-                        <span className="flex items-start justify-between gap-3">
-                          <TrackIcon name={track.icon} />
-                          <span
-                            aria-hidden="true"
-                            className="text-eyebrow text-pine/90 font-medium"
-                          >
-                            {String(index + 1).padStart(2, '0')}
-                          </span>
-                        </span>
-
-                        <span className="block">
-                          <span id={nameId} className="block">
-                            <span className="text-eyebrow text-pine/90 block font-medium uppercase">
-                              Best
-                            </span>{' '}
-                            <span className="font-display text-display-md text-pine mt-2 block font-semibold text-balance">
-                              {track.name}
-                            </span>
-                          </span>
-                          <span className="text-caption text-pine/90 mt-2 hidden sm:block">
-                            {track.kicker}
-                          </span>
+                      <span className="flex items-center justify-between gap-3">
+                        <TrackIcon name={track.icon} />
+                        <span className="flex items-center gap-3 sm:gap-4">
                           {track.tag ? (
                             <span
                               id={tagId}
-                              className={`text-caption mt-3 inline-block rounded-full px-2 py-0.5 font-medium whitespace-nowrap sm:mt-4 sm:px-2.5 ${
+                              className={`text-caption rounded-full px-2 py-0.5 font-medium whitespace-nowrap sm:px-2.5 ${
                                 track.tag === 'sponsored'
                                   ? 'bg-pine text-cloud'
                                   : 'border-pine/70 bg-cloud text-pine border border-dashed'
@@ -599,66 +567,88 @@ export function PrizeTracksSection() {
                               {TAG_LABEL[track.tag]}
                             </span>
                           ) : null}
+                          <span
+                            aria-hidden="true"
+                            className="text-eyebrow text-pine/90 font-medium"
+                          >
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                        </span>
+                      </span>
+
+                      <span className="block">
+                        <span id={nameId} className="block">
+                          <span className="text-eyebrow text-pine/90 block font-medium uppercase">
+                            Best
+                          </span>{' '}
+                          <span className="font-display text-display-md text-pine mt-2 block font-semibold text-balance">
+                            {track.name}
+                          </span>
+                        </span>
+
+                        <span className="prize-fold prize-kicker">
+                          <span>
+                            <span className="text-caption sm:text-body text-pine/90 block pt-1.5 sm:pt-2">
+                              {track.kicker}
+                            </span>
+                          </span>
                         </span>
 
                         <span
-                          data-prize-shade="front"
                           aria-hidden="true"
-                          className="prize-shade"
-                        />
-                      </button>
+                          className="prize-fold prize-description"
+                        >
+                          <span>
+                            <span className="prize-description-text text-caption sm:text-body text-pine pt-2 sm:pt-3">
+                              <span
+                                data-prize-sizer=""
+                                className="prize-description-sizer"
+                              >
+                                {track.description
+                                  .split(' ')
+                                  .map((word, wordIndex) => (
+                                    <Fragment key={wordIndex}>
+                                      {wordIndex > 0 ? ' ' : null}
+                                      <span>{word}</span>
+                                    </Fragment>
+                                  ))}
+                              </span>
+                              <span
+                                data-prize-lines=""
+                                className="prize-description-lines"
+                              />
+                            </span>
+                          </span>
+                        </span>
+                      </span>
 
-                      <div
+                      <span
+                        data-prize-shade="front"
                         aria-hidden="true"
-                        className="prize-back bg-pine grid place-items-center rounded-3xl"
-                      >
-                        <span
-                          className="brand-mark brand-mark-bearcat bg-cloud/20 block h-16 sm:h-20"
-                          style={{
-                            aspectRatio: `${BEARCAT_MARK.width} / ${BEARCAT_MARK.height}`,
-                          }}
-                        />
-                        <span data-prize-shade="back" className="prize-shade" />
-                      </div>
+                        className="prize-shade"
+                      />
+                    </button>
 
-                      <p id={descriptionId} className="sr-only">
-                        {track.description}
-                      </p>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          </div>
+                    <div
+                      aria-hidden="true"
+                      className="prize-back bg-pine grid place-items-center rounded-3xl"
+                    >
+                      <span
+                        className="brand-mark brand-mark-bearcat bg-cloud/20 block h-16 sm:h-24"
+                        style={{
+                          aspectRatio: `${BEARCAT_MARK.width} / ${BEARCAT_MARK.height}`,
+                        }}
+                      />
+                      <span data-prize-shade="back" className="prize-shade" />
+                    </div>
 
-          {/*
-           * The popover. `aria-hidden` because it only repeats, animated, what
-           * each card's `aria-describedby` already exposes in full. The pointer
-           * handlers are the hover grace: reaching it keeps it open.
-           */}
-          <div
-            ref={popoverRef}
-            aria-hidden="true"
-            data-open={active !== null}
-            onPointerEnter={(event) => {
-              if (event.pointerType === 'mouse') cancelClose()
-            }}
-            onPointerLeave={(event) => {
-              if (event.pointerType !== 'mouse') return
-              if (openedByRef.current === 'hover') scheduleClose()
-            }}
-            className="prize-popover bg-pine text-cloud rounded-2xl p-5 shadow-xl sm:p-6"
-          >
-            <p className="text-eyebrow text-cloud/85 font-medium uppercase">
-              Best {shown?.name}
-            </p>
-            <p className="prize-popover-text text-body mt-3">
-              <span className="prize-popover-sizer">{shown?.description}</span>
-              <span className="prize-popover-typed">
-                <span ref={typedRef} />
-                <span className="prize-caret bg-stone" />
-              </span>
-            </p>
+                    <p id={descriptionId} className="sr-only">
+                      {track.description}
+                    </p>
+                  </li>
+                )
+              })}
+            </ul>
           </div>
         </div>
 
@@ -694,6 +684,125 @@ export function PrizeTracksSection() {
       </Reveal>
     </Section>
   )
+}
+
+/** The track index of the card `target` is in, if it is in one. */
+function cardIndexOf(target: EventTarget | null): number | null {
+  if (!(target instanceof Element)) return null
+  const card = target.closest<HTMLElement>('[data-prize-card]')
+  const index = Number(card?.dataset.prizeCard)
+  return Number.isInteger(index) ? index : null
+}
+
+/** The track index of the card under a client point, if any. */
+function cardAt({ x, y }: { x: number; y: number }): number | null {
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  return cardIndexOf(document.elementFromPoint(x, y))
+}
+
+/* -------------------------------------------------------------------------- */
+/* The typewriter                                                             */
+/* -------------------------------------------------------------------------- */
+
+type TypedLine = {
+  text: string
+  /** The line's text node — written per character, never re-created. */
+  node: Text
+  element: HTMLElement
+  /** Characters showing; -1 before the first frame. */
+  shown: number
+}
+
+/**
+ * Type the sizer's text into `host` — every line at once, line k starting
+ * `k × LINE_STAGGER_MS` after the first. Returns the cancel function, which
+ * leaves whatever has been typed where it is (the card is folding it away).
+ */
+function typeLines(sizer: HTMLElement, host: HTMLElement): () => void {
+  let frame = 0
+  let start = 0
+  let width = sizer.offsetWidth
+  let lines = buildLines(sizer, host)
+  host.dataset.typing = 'true'
+
+  const step = (now: number) => {
+    if (!start) start = now
+    let typing = false
+    lines.forEach((line, k) => {
+      const elapsed = now - start - k * LINE_STAGGER_MS
+      const count =
+        elapsed < 0
+          ? 0
+          : Math.min(line.text.length, Math.floor(elapsed / MS_PER_CHAR) + 1)
+      if (count !== line.shown) {
+        line.shown = count
+        line.node.data = line.text.slice(0, count)
+        line.element.dataset.state =
+          count === 0 ? 'waiting' : count < line.text.length ? 'typing' : 'done'
+      }
+      if (count < line.text.length) typing = true
+    })
+    if (typing) frame = requestAnimationFrame(step)
+    else host.dataset.typing = 'false'
+  }
+  frame = requestAnimationFrame(step)
+
+  // A new width means new line breaks: read them again and show the text whole.
+  const onResize = () => {
+    if (sizer.offsetWidth === width) return
+    width = sizer.offsetWidth
+    cancelAnimationFrame(frame)
+    lines = buildLines(sizer, host)
+    for (const line of lines) {
+      line.node.data = line.text
+      line.element.dataset.state = 'done'
+    }
+    host.dataset.typing = 'false'
+  }
+  window.addEventListener('resize', onResize)
+
+  return () => {
+    cancelAnimationFrame(frame)
+    window.removeEventListener('resize', onResize)
+    host.dataset.typing = 'false'
+  }
+}
+
+/** Replace `host`'s children with one empty line per line of the sizer. */
+function buildLines(sizer: HTMLElement, host: HTMLElement): TypedLine[] {
+  const lines = measureLines(sizer).map((text): TypedLine => {
+    const element = document.createElement('span')
+    element.className = 'prize-line'
+    const node = document.createTextNode('')
+    const caret = document.createElement('span')
+    caret.className = 'prize-caret'
+    element.append(node, caret)
+    return { text, node, element, shown: -1 }
+  })
+  host.replaceChildren(...lines.map((line) => line.element))
+  return lines
+}
+
+/**
+ * The sizer's text, split where the browser broke it: its words are spans,
+ * and a word whose top differs from the one before it starts a new line.
+ * `offsetTop` is layout, not paint, so the ring's 3D transforms don't touch
+ * it, and it works while the description is folded to zero height.
+ */
+function measureLines(sizer: HTMLElement): string[] {
+  const lines: string[] = []
+  let top = Number.NEGATIVE_INFINITY
+  for (const word of sizer.children) {
+    if (!(word instanceof HTMLElement)) continue
+    const text = word.textContent ?? ''
+    if (Math.abs(word.offsetTop - top) > 2 || lines.length === 0) {
+      lines.push(text)
+      top = word.offsetTop
+    } else {
+      lines[lines.length - 1] += ` ${text}`
+    }
+  }
+  return lines
 }
 
 /* -------------------------------------------------------------------------- */
@@ -864,15 +973,16 @@ function createSpinner(count: number) {
     cancelSeek() {
       seek = null
     },
+
+    /** True while a `seekTo` turn is under way. */
+    isSeeking() {
+      return seek !== null
+    },
   }
 }
 
 function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return value < min ? min : value > max ? max : value
 }
 
 /* -------------------------------------------------------------------------- */
