@@ -63,6 +63,7 @@ const PAGES = [
   { file: 'dist/index.html', render: 'renderIndex' },
   { file: 'dist/about.html', render: 'renderAbout' },
   { file: 'dist/sponsors.html', render: 'renderSponsors' },
+  { file: 'dist/photos.html', render: 'renderPhotos' },
   { file: 'dist/hackathons.html', render: 'renderHackathons' },
   { file: 'dist/register.html', render: 'renderRegister' },
   { file: 'dist/application.html', render: 'renderApplication' },

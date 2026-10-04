@@ -56,6 +56,9 @@ export const ORGANIZERS_ANCHOR = `${ABOUT_PATH}#organizers`
 /** In-site Sponsors page. Clean URL; Vite and Vercel rewrite it to sponsors.html. */
 export const SPONSORS_PATH = '/sponsors'
 
+/** In-site Photos page. Clean URL; Vite and Vercel rewrite it to photos.html. */
+export const PHOTOS_PATH = '/photos'
+
 /** In-site hackathons page. */
 export const HACKATHONS_PATH = '/hackathons'
 
@@ -160,7 +163,7 @@ export const SITE_PAGES = [
   { label: 'My Application', href: APPLICATION_PATH },
   { label: 'Sponsors', href: SPONSORS_PATH },
   { label: 'Blog', href: 'https://hackbu.org/blog' },
-  { label: 'Photos', href: 'https://hackbu.org/photos' },
+  { label: 'Photos', href: PHOTOS_PATH },
 ] as const
 
 export const SOCIAL_LINKS = [

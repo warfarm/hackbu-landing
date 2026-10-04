@@ -246,6 +246,248 @@ export const SPONSORS_PHOTO = sponsorsPhoto(
 )
 
 /* -------------------------------------------------------------------------- */
+/* Photos page gallery                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Past event photos on `/photos`. Sources live in `public/artwork/gallery/`;
+ * AVIF + WebP sit beside each JPEG and are rebuilt by `npm run images`.
+ */
+function galleryPhoto(file: string, width: number, height: number, alt: string) {
+  const base = `/artwork/gallery/${encodeURIComponent(file)}`
+  return {
+    jpg: `${base}.jpg`,
+    webp: `${base}.webp`,
+    avif: `${base}.avif`,
+    width,
+    height,
+    alt,
+  } as const
+}
+
+export type GalleryPhoto = ReturnType<typeof galleryPhoto>
+
+/** HackBU 2023 (February 4–5). JPEGs live in `public/artwork/gallery/`. */
+export const GALLERY_PHOTOS: readonly GalleryPhoto[] = [
+  galleryPhoto(
+    '20230204_152838',
+    1600,
+    1200,
+    'Students working on laptops at tables in a classroom during HackBU, with a projector screen at the front of the room.',
+  ),
+  galleryPhoto(
+    '20230204_152903',
+    300,
+    300,
+    'Three students at a table with laptops during HackBU, one wearing headphones and another in a red hoodie.',
+  ),
+  galleryPhoto(
+    '20230204_154117',
+    1600,
+    1200,
+    'HackBU participants working on laptops in a classroom during the February 2023 hackathon.',
+  ),
+  galleryPhoto(
+    '20230204_170706',
+    1600,
+    1200,
+    'A DevOps workshop in a lecture hall: three presenters at the front beside a slide about deploying an application, with students at laptops.',
+  ),
+  galleryPhoto(
+    '20230204_hackathon03_jwc',
+    300,
+    300,
+    'Two students working side by side on a laptop in a crowded HackBU room.',
+  ),
+  galleryPhoto(
+    '20230204_hackathon08_jwc',
+    300,
+    300,
+    'Rows of HackBU participants at long tables with laptops in a bright room with tall windows.',
+  ),
+  galleryPhoto(
+    '20230204_hackathon10_jwc',
+    300,
+    300,
+    'Students at laptops in a packed HackBU workspace, with a line of people along the back wall.',
+  ),
+  galleryPhoto(
+    '20230204_hackathon13_jwc',
+    300,
+    300,
+    'Students smiling together over a laptop during HackBU.',
+  ),
+  galleryPhoto(
+    '20230204_hackathon17_jwc',
+    300,
+    300,
+    'Four students at two pushed-together tables, each working on a laptop during HackBU.',
+  ),
+  galleryPhoto(
+    '20230204_hackathon19_jwc',
+    300,
+    300,
+    'A student at a laptop connected to an external monitor showing a pink interface, with more participants working behind him.',
+  ),
+  galleryPhoto(
+    '20230204_hackathon21_jwc',
+    300,
+    300,
+    'A student in a Binghamton hoodie working at a monitor that shows lines of code.',
+  ),
+  galleryPhoto(
+    '20230205_140747',
+    1600,
+    1200,
+    'An overhead view of HackBU participants at long tables with laptops in a glass-walled atrium, snow visible outside.',
+  ),
+  galleryPhoto(
+    '20230205_140800 (1)',
+    1600,
+    1200,
+    'HackBU participants at tables with laptops in the glass-walled atrium during the February 2023 hackathon.',
+  ),
+  galleryPhoto(
+    '20230205_140810',
+    1600,
+    1200,
+    'HackBU participants at tables with laptops in the glass-walled atrium during the February 2023 hackathon.',
+  ),
+  galleryPhoto(
+    '20230205_140958',
+    1600,
+    1200,
+    'HackBU participants at tables with laptops in the glass-walled atrium during the February 2023 hackathon.',
+  ),
+  galleryPhoto(
+    '20230205_141002',
+    1600,
+    1200,
+    'HackBU participants at tables with laptops in the glass-walled atrium during the February 2023 hackathon.',
+  ),
+  galleryPhoto(
+    '20230205_141012',
+    1600,
+    1200,
+    'HackBU participants at tables with laptops in the glass-walled atrium during the February 2023 hackathon.',
+  ),
+  galleryPhoto(
+    '20230205_141018',
+    1600,
+    1200,
+    'HackBU participants at tables with laptops in the glass-walled atrium during the February 2023 hackathon.',
+  ),
+  galleryPhoto(
+    '20230205_141023',
+    1600,
+    1200,
+    'HackBU participants at tables with laptops in the glass-walled atrium during the February 2023 hackathon.',
+  ),
+  galleryPhoto(
+    '20230205_154126 (1)',
+    1600,
+    1200,
+    'An overhead view of HackBU participants collaborating at long tables with laptops in the glass-walled atrium.',
+  ),
+  galleryPhoto(
+    '20230205_164609',
+    300,
+    300,
+    'Five people posing with prize jackets in front of a screen that reads LendaHand, sponsored by J.P. Morgan.',
+  ),
+  galleryPhoto(
+    '20230205_164612',
+    1600,
+    1200,
+    'Five people posing in front of a screen with the HackBU bearcat logo, three of them holding black-and-white prize jackets.',
+  ),
+  galleryPhoto(
+    'IMG_6845',
+    300,
+    300,
+    'A HackBU check-in table with pastries, a handwritten whiteboard, and participants in a glass-walled room.',
+  ),
+  galleryPhoto(
+    'IMG_6857',
+    300,
+    300,
+    'The HackBU organizing team posing in matching purple shirts in front of a projection screen.',
+  ),
+  galleryPhoto(
+    'IMG_9171',
+    300,
+    300,
+    'Five people posing at HackBU closing, one holding a folded prize jacket.',
+  ),
+  galleryPhoto(
+    'IMG_9174',
+    300,
+    300,
+    'Six people posing at HackBU closing, two of them holding prize jackets.',
+  ),
+  galleryPhoto(
+    'IMG_9176',
+    300,
+    300,
+    'Two students posing in front of a screen labeled Router Runner.',
+  ),
+  galleryPhoto(
+    'IMG_9181',
+    300,
+    300,
+    'The LendaHand team posing with blue drawstring bags in front of their project slide.',
+  ),
+  galleryPhoto(
+    'IMG_9188',
+    300,
+    300,
+    'Four students posing in front of a screen labeled Complimentary.',
+  ),
+  galleryPhoto(
+    'IMG_9191',
+    300,
+    300,
+    'Two students posing in front of a screen labeled DRM on steroids.',
+  ),
+  galleryPhoto(
+    'IMG_9194',
+    300,
+    300,
+    'Four students posing in front of a screen labeled Charizzma.',
+  ),
+  galleryPhoto(
+    'IMG_9197',
+    300,
+    300,
+    'A student posing in front of a screen labeled Glucose Prediction.',
+  ),
+  galleryPhoto(
+    'IMG_9202',
+    300,
+    300,
+    'Two students posing in front of a screen labeled DRM on steroids, one giving a thumbs up.',
+  ),
+  galleryPhoto(
+    'IMG_9206',
+    300,
+    300,
+    'Four students posing in front of a screen labeled DineTunes.',
+  ),
+  galleryPhoto(
+    'IMG_9208',
+    300,
+    300,
+    'Two students posing in front of a screen labeled DRM on steroids.',
+  ),
+  galleryPhoto(
+    'IMG_9210',
+    300,
+    300,
+    'Two people posing in front of a screen labeled Glucose Prediction.',
+  ),
+]
+
+/* -------------------------------------------------------------------------- */
 /* Campus landmarks (TreeHacks-style side décor)                              */
 /* -------------------------------------------------------------------------- */
 

@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server'
 import App from './App.tsx'
 import { AboutPage } from './about/AboutPage'
 import { SponsorsPage } from './sponsors/SponsorsPage'
+import { PhotosPage } from './photos/PhotosPage'
 import HackathonsApp from './hackathons/HackathonsApp.tsx'
 import RegisterApp from './register/RegisterApp.tsx'
 import ApplicationApp from './application/ApplicationApp.tsx'
@@ -56,6 +57,15 @@ export function renderSponsors(): string {
   return renderToString(
     <StrictMode>
       <SponsorsPage />
+    </StrictMode>,
+  )
+}
+
+/** `photos.html` — past event photos. */
+export function renderPhotos(): string {
+  return renderToString(
+    <StrictMode>
+      <PhotosPage />
     </StrictMode>,
   )
 }

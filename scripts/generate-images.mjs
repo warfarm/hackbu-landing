@@ -183,6 +183,38 @@ async function generateSponsorsPhotos() {
   }
 }
 
+/** Phone originals in the gallery are ~4000px. Cap the long edge before encoding. */
+const GALLERY_MAX = 1600
+
+async function generateGalleryPhotos() {
+  const dir = join(ARTWORK, 'gallery')
+  let names
+  try {
+    names = await readdir(dir)
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      return
+    }
+    throw error
+  }
+  const files = names.filter((name) => name.toLowerCase().endsWith('.jpg')).sort()
+  for (const file of files) {
+    const src = join(dir, file)
+    const base = file.replace(/\.jpe?g$/i, '')
+    const resized = await sharp(src)
+      .rotate()
+      .resize({
+        width: GALLERY_MAX,
+        height: GALLERY_MAX,
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .toBuffer()
+    await emit(sharp(resized).avif(AVIF), join(dir, `${base}.avif`))
+    await emit(sharp(resized).webp(WEBP), join(dir, `${base}.webp`))
+  }
+}
+
 async function generateOrganizerPhotos() {
   const dir = join(ARTWORK, 'organizers')
   let files
@@ -311,6 +343,7 @@ await generateHero()
 await generateSectionPhotos()
 await generateAboutPhotos()
 await generateSponsorsPhotos()
+await generateGalleryPhotos()
 await generateOrganizerPhotos()
 await generateLandmarkPhotos()
 const brandInk = await generateBrandMasks()

@@ -43,6 +43,14 @@
       "destination": "/sponsors.html"
     },
     {
+      "source": "/photos",
+      "destination": "/photos.html"
+    },
+    {
+      "source": "/photos/",
+      "destination": "/photos.html"
+    },
+    {
       "source": "/hackathons",
       "destination": "/hackathons.html"
     },

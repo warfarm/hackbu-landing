@@ -101,6 +101,11 @@
   html {
     scroll-padding-top: 6rem;
   }
+
+  /* A modal photo keeps the page underneath still. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
 }
 
 /*
