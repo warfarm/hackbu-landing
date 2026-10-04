@@ -4,13 +4,16 @@ import { SiteFooter } from '../components/SiteFooter'
 import { SnowdriftDivider } from '../components/SnowdriftDivider'
 import { SPONSORS_PATH } from '../lib/links'
 import { SponsorsComingSoonSection } from './SponsorsComingSoonSection'
+import { PastSponsorsSection } from './PastSponsorsSection'
+import { PastWinnersSection } from './PastWinnersSection'
 import { WhySponsorSection } from './WhySponsorSection'
 import { SponsorshipTiersSection } from './SponsorshipTiersSection'
 import { SponsorsContactSection } from './SponsorsContactSection'
 
 /**
  * Sponsors page:
- * - Coming soon section for sponsors not yet acquired
+ * - Coming soon section for sponsors not yet acquired (2027)
+ * - Last year's (HackBU 2026) sponsors and prize winners
  * - Reasons why organizations should sponsor HackBU
  * - Sponsorship tiers chart matching the HackBU 2027 sponsorship packet
  * - Contact information
@@ -38,12 +41,18 @@ export function SponsorsPage() {
           <SponsorsComingSoonSection />
 
           <SnowdriftDivider variant="drift-a" />
-          <WhySponsorSection />
+          <PastSponsorsSection />
 
           <SnowdriftDivider variant="drift-b" />
-          <SponsorshipTiersSection />
+          <PastWinnersSection />
 
           <SnowdriftDivider variant="drift-c" />
+          <WhySponsorSection />
+
+          <SnowdriftDivider variant="drift-a" />
+          <SponsorshipTiersSection />
+
+          <SnowdriftDivider variant="drift-b" />
           <SponsorsContactSection />
         </main>
 
