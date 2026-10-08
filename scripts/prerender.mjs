@@ -65,8 +65,6 @@ const PAGES = [
   { file: 'dist/sponsors.html', render: 'renderSponsors' },
   { file: 'dist/photos.html', render: 'renderPhotos' },
   { file: 'dist/hackathons.html', render: 'renderHackathons' },
-  { file: 'dist/register.html', render: 'renderRegister' },
-  { file: 'dist/application.html', render: 'renderApplication' },
   { file: 'dist/components.html', render: 'renderComponents' },
 ]
 

@@ -38,13 +38,12 @@ a drifting cloud parallax over it. A photograph cannot take that magnification a
 sky-only band to open on, so the pan is a settle rather than a reveal, and the scroll
 track shrank from 260dvh to 180dvh with it.)
 
-Six public pages live here now: the landing page plus **About us**, **Sponsors**,
-**Hackathons**, **Registration** and **My Application**, each a separate HTML entry with
-its own bundle (see "The pages, and how they are routed" below). The Schedule and Organizers
-pages were folded into About us. The blog, photos and resources pages stay on `hackbu.org`
-and are linked from the header and footer. Hackathon registration is its own page,
-`/register`, backed by a Google Sheet — see `google-apps-script/README.md` for how to
-connect it; `/application` is the applicant portal on the same backend.
+Four public pages live here now: the landing page plus **About us**, **Sponsors** and
+**Hackathons**, each a separate HTML entry with its own bundle (see "The pages, and how they
+are routed" below). The Schedule and Organizers pages were folded into About us. The blog,
+photos and resources pages stay on `hackbu.org` and are linked from the header and footer.
+Hackathon registration (`/register`, the `/application` portal and the Google Apps Script
+backend) lives on the `registration` branch; deploy that branch when registration opens.
 
 ## Stack
 
@@ -206,11 +205,9 @@ content now lives there. There is no catch-all. Every row below is what that fil
 | `/about`, `/about/` | two exact-match rewrites in `vercel.json`, both pointing at `/about.html` |
 | `/sponsors`, `/sponsors/` | the same, at `/sponsors.html` |
 | `/hackathons`, `/hackathons/` | the same, at `/hackathons.html` |
-| `/register`, `/register/` | the same, at `/register.html` |
-| `/application`, `/application/` | the same, at `/application.html` |
 | `/components`, `/components/` | the same, at `/components.html` |
 | `/schedule`, `/schedule/`, `/organizers`, `/organizers/` | a permanent redirect (308) to `/about` — the retired pages' content lives there now |
-| `/about.html` and the other five `.html` paths | the filesystem — Vercel gives a real file precedence over `rewrites`. Each page therefore has a second URL; harmless for the sheet, which is `noindex, nofollow`. |
+| `/about.html` and the other `.html` paths | the filesystem — Vercel gives a real file precedence over `rewrites`. Each page therefore has a second URL; harmless for the sheet, which is `noindex, nofollow`. |
 | any other real file (`/assets/…`, `/artwork/…`, `/brand/…`) | the filesystem |
 | **anything else** — `/nonexistent`, `/componentsfoo`, `/favicon.ico` | nothing. No file, no matching rewrite → **404**, with `public/404.html` (shipped as `dist/404.html`) as the body. |
 

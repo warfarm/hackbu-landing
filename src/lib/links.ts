@@ -62,12 +62,6 @@ export const PHOTOS_PATH = '/photos'
 /** In-site hackathons page. */
 export const HACKATHONS_PATH = '/hackathons'
 
-/** In-site hackathon registration form. Clean URL; Vite and Vercel rewrite it to register.html. */
-export const REGISTER_PATH = '/register'
-
-/** Applicant portal: sign in with an email code, view status, RSVP. */
-export const APPLICATION_PATH = '/application'
-
 /**
  * The HackBU 2027 schedule — the timeline section on the Hackathons page
  * (`<section id="timeline">` there). The landing page's event overview links
@@ -152,15 +146,12 @@ export const NAV_LINKS = [
   { label: 'About Us', href: ABOUT_PATH },
   { label: 'Sponsors', href: SPONSORS_PATH },
   { label: 'Hackathons', href: HACKATHONS_PATH },
-  { label: 'Registration', href: REGISTER_PATH },
 ] as const
 
 /** Site pages split into two footer columns. */
 export const SITE_PAGES = [
   { label: 'About Us', href: ABOUT_PATH },
   { label: 'Hackathons', href: HACKATHONS_PATH },
-  { label: 'Registration', href: REGISTER_PATH },
-  { label: 'My Application', href: APPLICATION_PATH },
   { label: 'Sponsors', href: SPONSORS_PATH },
   { label: 'Blog', href: 'https://hackbu.org/blog' },
   { label: 'Photos', href: PHOTOS_PATH },

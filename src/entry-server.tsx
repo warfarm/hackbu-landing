@@ -5,8 +5,6 @@ import { AboutPage } from './about/AboutPage'
 import { SponsorsPage } from './sponsors/SponsorsPage'
 import { PhotosPage } from './photos/PhotosPage'
 import HackathonsApp from './hackathons/HackathonsApp.tsx'
-import RegisterApp from './register/RegisterApp.tsx'
-import ApplicationApp from './application/ApplicationApp.tsx'
 import { ComponentSheet } from './sheet/ComponentSheet'
 
 /**
@@ -66,24 +64,6 @@ export function renderPhotos(): string {
   return renderToString(
     <StrictMode>
       <PhotosPage />
-    </StrictMode>,
-  )
-}
-
-/** `register.html` — the hackathon registration form. */
-export function renderRegister(): string {
-  return renderToString(
-    <StrictMode>
-      <RegisterApp />
-    </StrictMode>,
-  )
-}
-
-/** `application.html` — the applicant portal. */
-export function renderApplication(): string {
-  return renderToString(
-    <StrictMode>
-      <ApplicationApp />
     </StrictMode>,
   )
 }

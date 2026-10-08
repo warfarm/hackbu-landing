@@ -146,10 +146,6 @@ function cleanHtmlUrls(): Plugin {
     '/photos/': '/photos.html',
     '/hackathons': '/hackathons.html',
     '/hackathons/': '/hackathons.html',
-    '/register': '/register.html',
-    '/register/': '/register.html',
-    '/application': '/application.html',
-    '/application/': '/application.html',
     '/components': '/components.html',
     '/components/': '/components.html',
   }
@@ -175,8 +171,6 @@ function cleanHtmlUrls(): Plugin {
  *   about.html       the About us page         -> dist/about.html
  *   sponsors.html    the sponsors page         -> dist/sponsors.html
  *   hackathons.html  the hackathons page       -> dist/hackathons.html
- *   register.html    the registration form     -> dist/register.html
- *   application.html the applicant portal      -> dist/application.html
  *   components.html  the component sheet       -> dist/components.html
  *
  * They share the component tree, so Rollup hoists what they all import into a
@@ -250,8 +244,6 @@ export default defineConfig({
         sponsors: fileURLToPath(new URL('./sponsors.html', import.meta.url)),
         photos: fileURLToPath(new URL('./photos.html', import.meta.url)),
         hackathons: fileURLToPath(new URL('./hackathons.html', import.meta.url)),
-        register: fileURLToPath(new URL('./register.html', import.meta.url)),
-        application: fileURLToPath(new URL('./application.html', import.meta.url)),
         components: fileURLToPath(new URL('./components.html', import.meta.url)),
       },
       output: { manualChunks },

@@ -13,7 +13,7 @@ import {
   rangeProgress,
   usePrefersReducedMotion,
 } from '../lib/motion'
-import { HACKATHON_DATES, REGISTER_PATH, VENUE } from '../lib/links'
+import { DISCORD_URL, HACKATHON_DATES, VENUE } from '../lib/links'
 import { ExternalLink } from './ExternalLink'
 
 /**
@@ -21,7 +21,7 @@ import { ExternalLink } from './ExternalLink'
  * from a slight zoom to its full frame as the reader scrolls, with the page's
  * welcome headline across the top of the frame — the banner of the HackBU
  * 2027 landing page, so the headline is followed by the hackathon's dates,
- * its venue and the Register link.
+ * its venue and the Discord link.
  *
  * Layer contract:
  *
@@ -30,7 +30,7 @@ import { ExternalLink } from './ExternalLink'
  *     <div data-hero-stage>        sticky top-0, exactly one viewport tall.
  *       <div data-hero-artwork>    the photograph, as a <picture> — opened a
  *                                  little magnified and eased back to 1.
- *       <div data-hero-copy>       welcome headline + lede + date/Register
+ *       <div data-hero-copy>       welcome headline + lede + date/Discord
  *                                  row, above the photo.
  *
  * A pine wash and text-shadow keep cloud (cream) type readable over the
@@ -288,11 +288,11 @@ export function Hero() {
          * On load the headline and lede rise into place behind the header's
          * slide-in (`intro-rise` / `intro-bar`, src/index.css): the bar lands
          * at 0.7s, the headline starts at 0.45s, the lede at 0.6s and the
-         * date + Register row at 0.75s — the same 0.15s step again — so the
+         * date + Discord row at 0.75s — the same 0.15s step again — so the
          * four overlap into one gesture rather than queueing. Reduced motion
          * drops the animation and shows the resting frame.
          *
-         * The date line and the Register link are what make this the
+         * The date line and the Discord link are what make this the
          * hackathon's banner rather than the club's: the one fact a visitor
          * needs first, and the one action the page exists for. The wash is
          * taller than it was for the two-line welcome (20rem, 24rem from
@@ -347,10 +347,10 @@ export function Hero() {
                 </span>
               </p>
               <ExternalLink
-                href={REGISTER_PATH}
+                href={DISCORD_URL}
                 className="group bg-pine text-cloud ring-cloud/80 hover:bg-brick focus-visible:outline-cloud pointer-events-auto inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-xl font-bold shadow-[0_6px_24px_rgb(28_44_36_/_0.5)] ring-2 transition-[background-color,transform] duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:px-9 sm:py-4"
               >
-                Register now
+                Join the Discord
                 <span
                   aria-hidden
                   className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"

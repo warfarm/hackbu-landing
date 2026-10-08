@@ -33,7 +33,7 @@ export function ComposedPart() {
       id="composed"
       number="3"
       title="Composed, as used"
-      intro="The header, content sections and the footer — imported from src/components/ and rendered here unmodified. The landing page now runs: header, hero, drift-c, EventOverview, drift-a, SponsorsPreview, drift-b, PrizeTracks, drift-c, Register, drift-a, Questions, cloud-to-frost, footer. About, Get involved and Contact are no longer on the landing page and are kept here for reference."
+      intro="The header, content sections and the footer — imported from src/components/ and rendered here unmodified. The landing page now runs: header, hero, drift-c, EventOverview, drift-a, SponsorsPreview, drift-b, PrizeTracks, drift-a, Questions, cloud-to-frost, footer. About, Get involved and Contact are no longer on the landing page and are kept here for reference."
     >
       <Entry
         name="SiteHeader"
