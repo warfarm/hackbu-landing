@@ -64,19 +64,18 @@ export function GalleryGrid({ photos }: { photos: readonly GalleryPhoto[] }) {
   function showOffset(offset: number) {
     if (activeIndex < 0 || photos.length === 0) return
     const next = (activeIndex + offset + photos.length) % photos.length
-    setActive(photos[next])
+    setActive(photos[next] ?? null)
   }
 
   useEffect(() => {
-    if (!active) return
+    if (!active || activeIndex < 0) return
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault()
-        showOffset(-1)
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault()
-        showOffset(1)
-      }
+      const offset =
+        event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : 0
+      if (offset === 0) return
+      event.preventDefault()
+      const next = (activeIndex + offset + photos.length) % photos.length
+      setActive(photos[next] ?? null)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
