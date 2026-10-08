@@ -6,7 +6,7 @@ import { ScrollTwistLogo } from './components/ScrollTwistLogo'
 import { Snowfall } from './components/Snowfall'
 import { EventOverviewSection } from './components/sections/EventOverviewSection'
 import { SponsorsPreviewSection } from './components/sections/SponsorsPreviewSection'
-import { PrizeTracksSection } from './components/sections/PrizeTracksSection'
+// import { PrizeTracksSection } from './components/sections/PrizeTracksSection'
 import { QuestionsSection } from './components/sections/QuestionsSection'
 import { SiteFooter } from './components/SiteFooter'
 
@@ -117,8 +117,10 @@ export default function App() {
           <SnowdriftDivider variant="drift-a" />
           <SponsorsPreviewSection />
 
+          {/* Hidden for now.
           <SnowdriftDivider variant="drift-b" />
           <PrizeTracksSection />
+          */}
 
           <SnowdriftDivider variant="drift-a" />
           <QuestionsSection />

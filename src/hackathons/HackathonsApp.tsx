@@ -3,7 +3,7 @@ import { SiteHeader } from '../components/SiteHeader'
 import { SnowdriftDivider } from '../components/SnowdriftDivider'
 import { SiteFooter } from '../components/SiteFooter'
 import { HackathonIntroSection } from '../components/sections/hackathons/HackathonIntroSection'
-import { TimelineSection } from '../components/sections/hackathons/TimelineSection'
+// import { TimelineSection } from '../components/sections/hackathons/TimelineSection'
 import { HACKATHONS_PATH } from '../lib/links'
 
 /**
@@ -35,8 +35,10 @@ export default function HackathonsApp() {
 
         <main id="main" className="pt-16 sm:pt-20">
           <HackathonIntroSection />
+          {/* Hidden for now.
           <SnowdriftDivider variant="drift-a" />
           <TimelineSection />
+          */}
         </main>
 
         <SnowdriftDivider variant="cloud-to-frost" />
