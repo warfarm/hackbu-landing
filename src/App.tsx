@@ -2,7 +2,6 @@ import { domAnimation, LazyMotion } from 'motion/react'
 import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
 import { SnowdriftDivider } from './components/SnowdriftDivider'
-import { ScrollTwistLogo } from './components/ScrollTwistLogo'
 import { Snowfall } from './components/Snowfall'
 import { EventOverviewSection } from './components/sections/EventOverviewSection'
 import { SponsorsPreviewSection } from './components/sections/SponsorsPreviewSection'
@@ -70,9 +69,7 @@ export default function App() {
         </a>
 
         <SiteHeader homeHref="#top" intro />
-        {/* Snow first, bearcat second: both are fixed at z-20, so DOM order puts the logo over the flakes. */}
         <Snowfall />
-        <ScrollTwistLogo />
 
         {/*
          * `tabIndex={-1}` so the skip link above actually moves focus.

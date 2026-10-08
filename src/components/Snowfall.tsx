@@ -7,9 +7,9 @@ import { usePrefersReducedMotion } from '../lib/motion'
  * interactive (`pointer-events-none`).
  *
  * Why a canvas and not DOM particles: one compositor layer whatever the flake
- * count, no per-flake style recalcs, no dependency. It sits at z-20 like the
- * bearcat in `ScrollTwistLogo.tsx` — above section content, below the fixed
- * header (z-50) so snow never falls across the nav bar.
+ * count, no per-flake style recalcs, no dependency. It sits at z-20 — above
+ * section content, below the fixed header (z-50) so snow never falls across
+ * the nav bar.
  *
  * The page background is `cloud` (#f7f5ee), which is near-white, so plain
  * white snow would vanish on it. Each flake is a sprite: white core, frost
