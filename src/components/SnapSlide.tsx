@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { cubicBezier, m, type MotionProps } from 'motion/react'
 import { usePrefersReducedMotion } from '../lib/motion'
 
@@ -19,9 +19,16 @@ import { usePrefersReducedMotion } from '../lib/motion'
  * slides. It wraps the whole section — backdrop photograph included — so the
  * section arrives as one sheet, not as text moving across a still picture.
  *
- * **It replays.** `once: false`, unlike <Reveal>: leaving a section returns it
- * to its starting frame, so arriving again — down *or* back up — slides it in
- * again, which is what makes each stop read as a slide. The <Reveal>s inside
+ * **The outer box is also what is watched.** An IntersectionObserver on the
+ * still outer box decides, and the inner one only follows. Watching the sliding box itself
+ * (`whileInView`) fed back into its own trigger: at the foot of the page the
+ * FAQ is ~20% on screen, under the 25% threshold, so it slid down — which
+ * moved more of it on screen, over 25%, so it slid back up — and it
+ * oscillated there indefinitely (measured: 60–67px, opacity 0.44–0.50).
+ *
+ * **It replays**, unlike <Reveal>: a section that has left the window
+ * entirely returns to its starting frame, so arriving again — down *or* back
+ * up — slides it in again, which is what makes each stop read as a slide. The <Reveal>s inside
  * a section still run once, as before, after the first arrival.
  *
  * Reduced motion: the resting frame, no slide, and src/index.css turns the
@@ -42,7 +49,12 @@ const EASE = cubicBezier(0.22, 0.61, 0.36, 1)
  * Fires once a quarter of the section is on screen — early enough that the
  * slide is under way while the snap is still settling.
  */
-const VIEWPORT: MotionProps['viewport'] = { once: false, amount: 0.25 }
+const IN_VIEW_AMOUNT = 0.25
+
+const VARIANTS = {
+  hidden: { opacity: 0, y: DISTANCE },
+  shown: { opacity: 1, y: 0 },
+} as const
 
 export function SnapSlide({
   children,
@@ -53,18 +65,55 @@ export function SnapSlide({
   align?: 'start' | 'end'
 }) {
   const prefersReducedMotion = usePrefersReducedMotion()
+  const stopRef = useRef<HTMLDivElement>(null)
+
+  /*
+   * Two thresholds, so a section never vanishes while part of it is still on
+   * screen: it slides in once a quarter of it is visible, and is reset for
+   * the next arrival only once it has left the window entirely. With one
+   * threshold the FAQ, ~20% visible above the footer at the foot of the page,
+   * faded out and left a blank band there.
+   */
+  const [shown, setShown] = useState(false)
+
+  useEffect(() => {
+    const stop = stopRef.current
+    if (!stop) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return
+        // A quarter of the section, *or* a quarter of the window: a section
+        // much taller than the window can fill a third of it while still
+        // under 25% of itself — the FAQ above the footer, after a jump
+        // straight to the foot of the page, stayed invisible on the ratio
+        // alone.
+        const windowShare =
+          entry.intersectionRect.height / (entry.rootBounds?.height || innerHeight)
+        if (entry.intersectionRatio >= IN_VIEW_AMOUNT || windowShare >= IN_VIEW_AMOUNT) {
+          setShown(true)
+        } else if (!entry.isIntersecting) {
+          setShown(false)
+        }
+      },
+      // Fine steps up to the quarter mark, so the window-share test is
+      // re-run as the section scrolls in, not only at the two thresholds.
+      { threshold: [0, 0.05, 0.1, 0.15, 0.2, IN_VIEW_AMOUNT] },
+    )
+    observer.observe(stop)
+    return () => observer.disconnect()
+  }, [])
 
   const motionProps: MotionProps = prefersReducedMotion
     ? { animate: REST, transition: REST_TRANSITION }
     : {
-        initial: { opacity: 0, y: DISTANCE },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: VIEWPORT,
+        initial: 'hidden',
+        animate: shown ? 'shown' : 'hidden',
+        variants: VARIANTS,
         transition: { duration: 0.7, ease: EASE },
       }
 
   return (
-    <div className={align === 'end' ? 'snap-end' : 'snap-start'}>
+    <div ref={stopRef} className={align === 'end' ? 'snap-end' : 'snap-start'}>
       <m.div {...motionProps}>{children}</m.div>
     </div>
   )
