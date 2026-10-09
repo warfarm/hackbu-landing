@@ -3,6 +3,7 @@ import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
 import { SnowdriftDivider } from './components/SnowdriftDivider'
 import { Snowfall } from './components/Snowfall'
+import { SnapSlide } from './components/SnapSlide'
 import { EventOverviewSection } from './components/sections/EventOverviewSection'
 import { SponsorsPreviewSection } from './components/sections/SponsorsPreviewSection'
 // import { PrizeTracksSection } from './components/sections/PrizeTracksSection'
@@ -60,7 +61,8 @@ import { SiteFooter } from './components/SiteFooter'
 export default function App() {
   return (
     <LazyMotion features={domAnimation} strict>
-      <div className="bg-cloud font-sans text-pine min-h-screen">
+      {/* `data-snap-page` turns on the snap scroll — see SnapSlide.tsx. */}
+      <div data-snap-page className="bg-cloud font-sans text-pine min-h-screen">
         <a
           href="#main"
           className="bg-cloud text-pine focus:outline-pine sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:px-4 focus:py-2 focus:outline-2"
@@ -89,7 +91,14 @@ export default function App() {
          * elements this appears on carry no other focus treatment to lose.
          */}
         <main id="main" tabIndex={-1} className="focus:outline-none">
-          <Hero />
+          {/*
+           * The hero is the first snap point but does not slide: it is what
+           * the page opens on. Its 180dvh track is an oversized snap area, so
+           * the scroll-driven pan inside it runs freely.
+           */}
+          <div className="snap-start">
+            <Hero />
+          </div>
 
           {/*
            * A `drift-*` variant, not a sky-backed one. The divider is only ever
@@ -109,10 +118,14 @@ export default function App() {
            * as three shapes allow.
            */}
           <SnowdriftDivider variant="drift-c" />
-          <EventOverviewSection />
+          <SnapSlide>
+            <EventOverviewSection />
+          </SnapSlide>
 
           <SnowdriftDivider variant="drift-a" />
-          <SponsorsPreviewSection />
+          <SnapSlide>
+            <SponsorsPreviewSection />
+          </SnapSlide>
 
           {/* Hidden for now.
           <SnowdriftDivider variant="drift-b" />
@@ -120,11 +133,16 @@ export default function App() {
           */}
 
           <SnowdriftDivider variant="drift-a" />
-          <QuestionsSection />
+          <SnapSlide>
+            <QuestionsSection />
+          </SnapSlide>
         </main>
 
-        <SnowdriftDivider variant="cloud-to-frost" />
-        <SiteFooter />
+        {/* The last stop: aligned by its end, so the page can reach the bottom. */}
+        <div className="snap-end">
+          <SnowdriftDivider variant="cloud-to-frost" />
+          <SiteFooter />
+        </div>
       </div>
     </LazyMotion>
   )
