@@ -1,7 +1,9 @@
 import { useId, useState, type ReactNode } from 'react'
 import { Eyebrow, Section, SectionHeader } from '../Layout'
-import { ExternalLink, LINK_ON_CLOUD, MailLink } from '../ExternalLink'
+import { ExternalLink, LINK_ON_FROST, MailLink } from '../ExternalLink'
 import { Reveal, RevealGroup, RevealItem } from '../Reveal'
+import { BACKDROP_PANEL } from '../SectionBackdrop'
+import { BACKDROP_PHOTOS } from '../../lib/images'
 import {
   CONTACT_EMAIL,
   DISCORD_URL,
@@ -53,6 +55,13 @@ import {
  *     to the event overview (EventOverviewSection.tsx), whose tall copy
  *     column suits a portrait frame.
  *
+ * **The backdrop.** The whole section sits on a photograph of the Union
+ * itself, the venue, in snow (`BACKDROP_PHOTOS.union`, SectionBackdrop.tsx),
+ * with the questions and the map card each on a frosted BACKDROP_PANEL. The
+ * map keeps its own hard-edged card inside the panel, for the reasons above.
+ * The question buttons and the links underline on hover rather than turning
+ * brick — see LINK below.
+ *
  * From `lg` up the questions and the map are two columns and the map card is
  * `sticky`, so it stays beside whichever answer is open as the list scrolls
  * past — plain CSS, no scroll listener. (Sticky still works here because the
@@ -68,8 +77,13 @@ import {
  * a map in a frame is not something a screen reader can read.
  */
 
-/** Text links on cloud, inside answers and on the map card: brick hover. */
-const LINK = `${LINK_ON_CLOUD} underline underline-offset-4`
+/**
+ * Text links inside answers and on the map card. Both sit on frosted
+ * BACKDROP_PANELs over the Union backdrop, where brick measures ~4.05:1 against
+ * the darkest composited pixel — the frost situation exactly — so they take
+ * the frost treatment: underline on hover, never brick.
+ */
+const LINK = `${LINK_ON_FROST} underline underline-offset-4`
 
 /** Id of the map card, the target of the in-page "map" links. */
 const VENUE_ID = 'venue'
@@ -163,9 +177,14 @@ export function QuestionsSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <Section id="questions" labelledBy="questions-title" className="bg-cloud">
-      <div className="grid gap-16 lg:grid-cols-2">
-        <div>
+    <Section
+      id="questions"
+      labelledBy="questions-title"
+      className="bg-cloud"
+      backdrop={BACKDROP_PHOTOS.union}
+    >
+      <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
+        <div className={`${BACKDROP_PANEL} p-6 sm:p-10`}>
           <Reveal>
             <SectionHeader
               eyebrow="Hackathon FAQ"
@@ -189,7 +208,7 @@ export function QuestionsSection() {
                       aria-expanded={open}
                       aria-controls={panelId}
                       onClick={() => setOpenIndex(open ? null : index)}
-                      className="font-display text-display-md text-pine hover:text-brick focus-visible:outline-pine flex w-full cursor-pointer items-center justify-between gap-6 py-8 text-left font-semibold text-balance focus-visible:outline-2 focus-visible:outline-offset-4"
+                      className="font-display text-display-md text-pine hover:underline hover:decoration-2 hover:underline-offset-4 focus-visible:outline-pine flex w-full cursor-pointer items-center justify-between gap-6 py-8 text-left font-semibold text-balance focus-visible:outline-2 focus-visible:outline-offset-4"
                     >
                       {item.question}
                       <DisclosureGlyph open={open} />
@@ -213,7 +232,7 @@ export function QuestionsSection() {
          * transform never sits between the sticky box and the page.
          */}
         <div className="lg:sticky lg:top-28 lg:self-start">
-          <Reveal delay={0.05}>
+          <Reveal delay={0.05} className={`${BACKDROP_PANEL} p-4 sm:p-6`}>
             <VenueCard />
           </Reveal>
         </div>

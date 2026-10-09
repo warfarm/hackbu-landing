@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import type { BackdropPhoto } from '../lib/images'
+import { SectionBackdrop } from './SectionBackdrop'
 
 /**
  * Shared layout primitives. Later phases should compose these instead of
@@ -39,24 +41,34 @@ export function Container({
   )
 }
 
-/** A full-width band on the page background, with its content in a Container. */
+/**
+ * A full-width band on the page background, with its content in a Container.
+ *
+ * `backdrop` puts a campus photograph behind the whole band (see
+ * SectionBackdrop.tsx); the section then becomes `relative isolate` so the
+ * photo's `-z-10` layers stack inside it. Text inside such a section belongs
+ * on a BACKDROP_PANEL.
+ */
 export function Section({
   id,
   labelledBy,
   children,
   className = '',
+  backdrop,
 }: {
   id: string
   labelledBy?: string
   children: ReactNode
   className?: string
+  backdrop?: BackdropPhoto
 }) {
   return (
     <section
       id={id}
       aria-labelledby={labelledBy}
-      className={`scroll-mt-24 py-20 sm:py-28 ${className}`}
+      className={`scroll-mt-24 py-20 sm:py-28 ${backdrop ? 'relative isolate' : ''} ${className}`}
     >
+      {backdrop ? <SectionBackdrop photo={backdrop} /> : null}
       <Container>{children}</Container>
     </section>
   )

@@ -389,6 +389,142 @@
       right: calc(50% - 50vw);
     }
   }
+
+  /*
+   * A section backdrop (src/components/SectionBackdrop.tsx) runs edge to edge,
+   * so only its top and bottom dissolve — into the section's cloud ground,
+   * which is also the colour of the snowdrift dividers' facing edges. A fixed
+   * depth rather than a percentage, so a tall section on a phone does not
+   * spend a third of the photograph fading in.
+   */
+  /*
+   * The backdrop's geometry. The stage is a size container, so `cqw`/`cqh`
+   * below are the section's own width and height. By default the photo just
+   * covers the stage, cropped at its `--photo-position`.
+   */
+  .backdrop-stage {
+    container-type: size;
+    overflow: hidden;
+  }
+
+  .backdrop-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: var(--photo-position);
+  }
+
+  /*
+   * A focused photo (`focus` in src/lib/images.ts), from `lg` up: zoom and
+   * shift it so the point `--focus-x` of its width lands at 72% of the
+   * section — the middle of the empty right half beside the copy.
+   *
+   * The box is as tall as the section and `--focus-w` wide, the larger of:
+   *   - `100cqh × aspect`, the width at which the photo covers the section's
+   *     height (a tall section, e.g. 1280 × 1240); and
+   *   - `72cqw / --focus-x`, the narrowest width at which the subject can sit
+   *     at 72% without the photo's left edge coming inside the section.
+   * `left` then places the subject: 72cqw − x × width, which is ≤ 0 by the
+   * second bound, and the right edge always clears the section because the
+   * subject sits left of the photo's 72% (x < 0.72). The box is never
+   * narrower than the photo's own aspect, so `object-fit: cover` crops only
+   * vertically, at `--focus-y`.
+   *
+   * For the Library Tower (x 0.49): wherever the second bound wins — every
+   * section at least about as wide as it is tall, so 1280px windows and up —
+   * the photo is 1.47x the section's width and the tower spans 54–91% of it,
+   * clear of the copy's half. On a 1024px window the section is tall
+   * (1009 × 1547), the first bound wins, and the larger tower starts at ~45%,
+   * just behind the panels' right edge.
+   */
+  .backdrop-focus {
+    @variant lg {
+      --focus-w: max(
+        calc(100cqh * var(--photo-aspect)),
+        calc(72cqw / var(--focus-x))
+      );
+      right: auto;
+      width: var(--focus-w);
+      left: calc(72cqw - var(--focus-x) * var(--focus-w));
+      object-position: 50% var(--focus-y);
+    }
+  }
+
+  /*
+   * <BackdropWindow> (src/components/SectionBackdrop.tsx): a spacer in the
+   * section's flow with the photo hung off its centre.
+   *
+   * The photo is drawn the full window width, or 50rem on a phone so the band
+   * stays big enough to read; its height follows from its aspect. The spacer
+   * is 26% of that height. The mask's brightening runs from 6 points above
+   * the band to 6 points below it — 0.125 + 0.125 of the photo's height for
+   * the Susquehanna band, about the centre — so 26% contains it with a little
+   * to spare, and the content above and below only ever sits on the 50% part.
+   *
+   * `left: 50%` + `translate(-50%)` centres the 100vw-wide photo on the
+   * spacer, which is centred in the <Container> and therefore in the window;
+   * the vertical translate moves the band's centre onto the spacer's centre.
+   * `100vw` includes a classic scrollbar, so the photo overshoots by half of
+   * one — the section's `overflow-clip` takes it.
+   */
+  .backdrop-window {
+    --window-img-w: max(100vw, 50rem);
+    --window-img-h: calc(var(--window-img-w) / var(--photo-aspect));
+    position: relative;
+    height: calc(var(--window-img-h) * 0.26);
+  }
+
+  .backdrop-window-photo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--window-img-w);
+    max-width: none;
+    height: var(--window-img-h);
+    transform: translate(-50%, calc(var(--band-centre) * -100%));
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(0 0 0 / 0.5) 10%,
+      rgb(0 0 0 / 0.5) calc(var(--band-top) * 100% - 6%),
+      rgb(0 0 0 / 0.9) calc(var(--band-top) * 100%),
+      rgb(0 0 0 / 0.9) calc(var(--band-bottom) * 100%),
+      rgb(0 0 0 / 0.5) calc(var(--band-bottom) * 100% + 6%),
+      rgb(0 0 0 / 0.5) 90%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(0 0 0 / 0.5) 10%,
+      rgb(0 0 0 / 0.5) calc(var(--band-top) * 100% - 6%),
+      rgb(0 0 0 / 0.9) calc(var(--band-top) * 100%),
+      rgb(0 0 0 / 0.9) calc(var(--band-bottom) * 100%),
+      rgb(0 0 0 / 0.5) calc(var(--band-bottom) * 100% + 6%),
+      rgb(0 0 0 / 0.5) 90%,
+      transparent
+    );
+  }
+
+  .backdrop-feather {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 6rem,
+      black calc(100% - 6rem),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 6rem,
+      black calc(100% - 6rem),
+      transparent
+    );
+  }
 }
 
 @layer components {

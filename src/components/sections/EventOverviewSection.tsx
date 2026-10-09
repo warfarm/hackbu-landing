@@ -1,14 +1,10 @@
 import type { ReactNode } from 'react'
 import { Eyebrow, Section } from '../Layout'
-import { ExternalLink, LINK_ON_CLOUD } from '../ExternalLink'
+import { LINK_ON_CLOUD } from '../ExternalLink'
 import { Reveal, RevealGroup, RevealItem } from '../Reveal'
-import { SectionPhoto } from '../SectionPhoto'
-import {
-  HACKATHON_DATES,
-  SCHEDULE_ANCHOR,
-  VENUE,
-} from '../../lib/links'
-import { SECTION_PHOTOS } from '../../lib/images'
+import { BACKDROP_PANEL } from '../SectionBackdrop'
+import { HACKATHON_DATES, VENUE } from '../../lib/links'
+import { BACKDROP_PHOTOS } from '../../lib/images'
 
 /**
  * "What HackBU 2027 is" — the first section under the banner, and the one
@@ -27,18 +23,12 @@ import { SECTION_PHOTOS } from '../../lib/images'
  * read too. There is deliberately no prize money, headcount, travel or food
  * promise here — none is written down anywhere yet.
  *
- * **Layout.** The landing page's bleed shape: header, fact cards and schedule
- * link all held to the left half of the column, and from `md` up the
- * campus-walkway photograph as a bleed (`.photo-bleed`, src/index.css)
- * running down the window's right edge for the full height of the section,
- * header included, feathered into the copy. That photograph used to be the
- * FAQ's, which now carries the venue map instead (see QuestionsSection.tsx);
- * it moved here because it is a portrait frame, 658 x 1024, and this section
- * is taller than it is wide beside its copy — the old About section's wide
- * 1600 x 600 plaza shot was tried first and could only fill the height of the
- * cards, leaving the header's half of the window empty. Below `md` the photo
- * is a 4:3 block in flow between the header and the cards, so the copy reads
- * first and the picture answers "where".
+ * **Layout.** The whole section sits on the Library Tower backdrop
+ * (`BACKDROP_PHOTOS.libraryTower`, see SectionBackdrop.tsx). The header is a
+ * frosted BACKDROP_PANEL and the fact cards are opaque cloud, both held to the
+ * left half of the column from `md` up, so the right half of the window is
+ * left to the photograph — the job the campus-walkway bleed photo used to do
+ * here before the backdrops replaced it.
  *
  * **The facts are a <dl>.** When / Where / Who / Teams are name–value pairs,
  * which is what a description list is for; each pair is wrapped in a <div>
@@ -50,9 +40,10 @@ import { SECTION_PHOTOS } from '../../lib/images'
  * and stack one per row in the half column between `md` and `xl`, where two
  * would wrap the date onto three lines.
  *
- * **Schedule.** The hour-by-hour schedule is the Hackathons page's timeline
- * (`SCHEDULE_ANCHOR`, `/hackathons#timeline`); this section links to it rather
- * than keeping a second copy that would fall out of step.
+ * **Schedule.** There is no schedule link for now: the Hackathons page's
+ * timeline (`SCHEDULE_ANCHOR`, `/hackathons#timeline`) is hidden until the
+ * 2027 times are out. When it comes back, link to it from here rather than
+ * keeping a second copy that would fall out of step.
  *
  * **Reveal.** Safe for a first content block: the hero's track is 180dvh (one
  * viewport under reduced motion, where <Reveal> goes straight to rest), so
@@ -109,10 +100,11 @@ export function EventOverviewSection() {
     <Section
       id="event"
       labelledBy="event-title"
-      className="bg-cloud overflow-x-clip"
+      className="bg-cloud"
+      backdrop={BACKDROP_PHOTOS.libraryTower}
     >
       <div className="relative flex flex-col">
-        <Reveal className="relative z-10 md:max-w-[50%]">
+        <Reveal className={`${BACKDROP_PANEL} p-6 sm:p-10 md:max-w-[50%]`}>
           <header>
             <Eyebrow>HackBU 2027</Eyebrow>
             <h2
@@ -134,16 +126,9 @@ export function EventOverviewSection() {
           </header>
         </Reveal>
 
-        <Reveal className="photo-bleed mt-10 md:mt-0" delay={0.05}>
-          <SectionPhoto
-            photo={SECTION_PHOTOS.campusPath}
-            className="aspect-[4/3] w-full md:aspect-auto md:h-full"
-          />
-        </Reveal>
-
         <RevealGroup
           as="dl"
-          className="relative z-10 mt-12 grid gap-6 sm:grid-cols-2 md:max-w-[50%] md:grid-cols-1 xl:grid-cols-2"
+          className="mt-6 grid gap-6 sm:grid-cols-2 md:max-w-[50%] md:grid-cols-1 xl:grid-cols-2"
         >
           {FACTS.map((fact) => (
             <RevealItem key={fact.term} className={CARD}>
@@ -159,15 +144,6 @@ export function EventOverviewSection() {
             </RevealItem>
           ))}
         </RevealGroup>
-
-        <Reveal delay={0.1} className="relative z-10 md:max-w-[50%]">
-          <p className="text-lede text-pine mt-8">
-            <ExternalLink href={SCHEDULE_ANCHOR} className={LINK}>
-              See the weekend’s schedule
-            </ExternalLink>
-            <span aria-hidden="true"> →</span>
-          </p>
-        </Reveal>
       </div>
     </Section>
   )

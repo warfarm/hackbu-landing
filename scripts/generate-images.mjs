@@ -108,6 +108,29 @@ const SECTION_PHOTOS = [
   ['47065170581_63875cf429_b.jpg', 'campus-path'],
 ]
 
+/**
+ * The landing page's section backdrops: delivered file in `hackbuimage/` ->
+ * base name in `public/artwork/photos/`. Each is cut to a srcset ladder,
+ * because a backdrop is drawn the full width of the window. The ladder stops
+ * at 2400: the photo sits under a wash and behind frosted panels, so a
+ * retina-sharp 3840 rung would cost bytes nobody can see. **Keep in step with
+ * `BACKDROP_PHOTOS` / `BACKDROP_WIDTHS` in `src/lib/images.ts`.**
+ */
+const BACKDROP_PHOTOS = [
+  ['52667487153_4b90fbe904_4k.jpg', 'backdrop-library-tower'],
+  ['52561146696_08ee403342_4k.jpg', 'backdrop-susquehanna'],
+  ['53451481308_1328388503_4k.jpg', 'backdrop-union'],
+]
+const BACKDROP_WIDTHS = [960, 1600, 2400]
+/**
+ * Lighter than the photo settings below: a backdrop is half-hidden under a
+ * cloud wash, which hides compression artifacts along with everything else,
+ * and the Susquehanna hillside's bare branches cost 1.1 MB at the photo
+ * settings for detail the wash removes.
+ */
+const BACKDROP_AVIF = { quality: 50, effort: 6 }
+const BACKDROP_WEBP = { quality: 70, effort: 6 }
+
 const AVIF = { quality: 68, effort: 6 }
 const WEBP = { quality: 82, effort: 6 }
 /** The `<img src>` fallbacks are re-encoded from the delivered files (one is a PNG). */
@@ -158,6 +181,22 @@ async function generateSectionPhotos() {
     await emit(sharp(src).jpeg(JPEG), join(PHOTOS_OUT, `${base}.jpg`))
     await emit(sharp(src).avif(AVIF), join(PHOTOS_OUT, `${base}.avif`))
     await emit(sharp(src).webp(WEBP), join(PHOTOS_OUT, `${base}.webp`))
+  }
+}
+
+async function generateBackdrops() {
+  for (const [source, base] of BACKDROP_PHOTOS) {
+    const src = join(PHOTO_SOURCE, source)
+    for (const width of BACKDROP_WIDTHS) {
+      const resized = () => sharp(src).resize({ width, withoutEnlargement: true })
+      await emit(resized().avif(BACKDROP_AVIF), join(PHOTOS_OUT, `${base}-${width}.avif`))
+      await emit(resized().webp(BACKDROP_WEBP), join(PHOTOS_OUT, `${base}-${width}.webp`))
+    }
+    // The `<img src>` fallback is the middle rung, not the 4K source.
+    await emit(
+      sharp(src).resize({ width: 1600 }).jpeg(JPEG),
+      join(PHOTOS_OUT, `${base}.jpg`),
+    )
   }
 }
 
@@ -341,6 +380,7 @@ function kb(bytes) {
 
 await generateHero()
 await generateSectionPhotos()
+await generateBackdrops()
 await generateAboutPhotos()
 await generateSponsorsPhotos()
 await generateGalleryPhotos()

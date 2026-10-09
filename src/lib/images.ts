@@ -140,6 +140,102 @@ export const SECTION_PHOTOS = {
   ),
 } as const
 
+/* -------------------------------------------------------------------------- */
+/* Landing-page section backdrops                                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Full-width campus photographs behind whole landing-page sections (see
+ * src/components/SectionBackdrop.tsx). All three are from Binghamton
+ * University's own Flickr (flickr.com/photos/binghamtonu), by the University
+ * Photographer, Jonathan Cohen — the account Communications and Marketing
+ * offers to on-campus groups. The 4K copies live in `hackbuimage/` under their
+ * Flickr ids; `npm run images` cuts the ladder below.
+ *
+ * `position` is the `object-position` crop: the section is wider than 3:2 on
+ * a laptop and much taller on a phone, so each one keeps its landmark in
+ * frame at both ends.
+ *
+ * **Keep `BACKDROP_WIDTHS` in step with scripts/generate-images.mjs.**
+ */
+const BACKDROP_WIDTHS = [960, 1600, 2400] as const
+
+export type BackdropPhoto = {
+  jpg: string
+  avif: string
+  webp: string
+  width: number
+  height: number
+  position: string
+  /**
+   * Optional focal subject for wide screens. From `lg` up the photo is zoomed
+   * and shifted so the point `x` (a 0..1 fraction of the photo's width) lands
+   * in the empty right side of the section, with `y` the vertical
+   * `object-position` of the zoomed crop. Only for a section whose text keeps
+   * to the left half from `lg` up — see `.backdrop-focus` in src/index.css.
+   */
+  focus?: { x: number; y: string }
+  /**
+   * Optional horizontal focal band, as 0..1 fractions of the photo's height.
+   * A photo with a band is shown through a <BackdropWindow> placed in the
+   * section's flow, which centres the band in a gap kept clear of content.
+   */
+  band?: { top: number; bottom: number }
+}
+
+function backdropPhoto(
+  base: string,
+  width: number,
+  height: number,
+  position: string,
+  focus?: BackdropPhoto['focus'],
+  band?: BackdropPhoto['band'],
+): BackdropPhoto {
+  const srcset = (extension: 'avif' | 'webp') =>
+    BACKDROP_WIDTHS.map(
+      (w) => `/artwork/photos/${base}-${w}.${extension} ${w}w`,
+    ).join(', ')
+  return {
+    jpg: `/artwork/photos/${base}.jpg`,
+    avif: srcset('avif'),
+    webp: srcset('webp'),
+    width,
+    height,
+    position,
+    ...(focus ? { focus } : {}),
+    ...(band ? { band } : {}),
+  }
+}
+
+export const BACKDROP_PHOTOS = {
+  /**
+   * The Bartle Library Tower behind snow-laden trees, 23 January 2023. The
+   * tower spans 37–62% of the frame's width (centre 0.49), its antenna starts
+   * at 12% of the height and its roof at 27%; `focus` stands it in the right
+   * half of the event overview on desktop, clear of the copy.
+   */
+  libraryTower: backdropPhoto('backdrop-library-tower', 4096, 2732, '40% 45%', {
+    x: 0.49,
+    y: '10%',
+  }),
+  /**
+   * Susquehanna Community under the snowy hillside, from Science II, 12
+   * December 2022. The line of brick residence halls runs across 0–94% of the
+   * width, roofs at 58.5% of the height and the front buildings' feet at 71%:
+   * that is the `band` the sponsors section keeps clear.
+   */
+  susquehanna: backdropPhoto(
+    'backdrop-susquehanna',
+    4096,
+    2732,
+    '50% 60%',
+    undefined,
+    { top: 0.585, bottom: 0.71 },
+  ),
+  /** The Union — the hackathon's venue — in the first storm of 2024, 7 January 2024. */
+  union: backdropPhoto('backdrop-union', 4095, 2732, '70% 55%'),
+} as const
+
 /** Cartoon Baxter the Bearcat — welcome pose for the hero. */
 export const BAXTER_PNG = '/artwork/mascot/Baxter.png'
 export const BAXTER_WIDTH = 1024

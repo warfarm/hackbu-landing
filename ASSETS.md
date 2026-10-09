@@ -3,8 +3,9 @@
 The site's images come from two read-only source directories, and everything the browser
 downloads is a derivative in `public/artwork/`:
 
-- **`hackbuimage/`** — the four campus photographs, as delivered. The hero and the three
-  section photographs are cut from these by `npm run images`.
+- **`hackbuimage/`** — the campus photographs, as delivered. The hero, the three
+  section photographs and the three section backdrops are cut from these by
+  `npm run images`.
 - **`artwork/`** — the retired cel-shaded campus illustration (with its 4x Real-ESRGAN
   master) and the retired cloud cutouts. Kept as reference; nothing in it is copied to
   `public/` any more.
@@ -69,6 +70,43 @@ All three are `loading="lazy"` — every one is below the fold — and each `<pi
 switches on format only, with no `srcset`: they render at a fraction of their width inside
 the 64rem content column. The About band shows the plaza photograph at its own 8:3 from
 `sm` up and as a 16:9 crop on phones.
+
+## The section backdrops
+
+Three photographs sit behind whole landing-page sections, full width, under a 50% cloud
+wash, with the section's text on frosted panels (`src/components/SectionBackdrop.tsx`,
+`BACKDROP_PHOTOS` in `src/lib/images.ts`, `.backdrop-feather` in `src/index.css`). All
+three are from Binghamton University's official Flickr
+([flickr.com/photos/binghamtonu](https://www.flickr.com/photos/binghamtonu/)), by the
+University Photographer, Jonathan Cohen. The university's photography policy lets
+on-campus groups use them at no charge. They were downloaded at Flickr's 4K size on
+2026-10-08 and are named by their Flickr ids.
+
+| Section | Source | Flickr photo | Shipped as |
+| --- | --- | --- | --- |
+| Event overview | `hackbuimage/52667487153_4b90fbe904_4k.jpg` — Library Tower behind snowy trees | [52667487153](https://www.flickr.com/photos/binghamtonu/52667487153/) | `photos/backdrop-library-tower-{960,1600,2400}.{avif,webp}` + `.jpg` |
+| Sponsors | `hackbuimage/52561146696_08ee403342_4k.jpg` — Susquehanna Community and the hillside | [52561146696](https://www.flickr.com/photos/binghamtonu/52561146696/) | `photos/backdrop-susquehanna-…` |
+| Questions | `hackbuimage/53451481308_1328388503_4k.jpg` — The Union (the venue) in snow | [53451481308](https://www.flickr.com/photos/binghamtonu/53451481308/) | `photos/backdrop-union-…` |
+
+Two of them are composed around a focal subject rather than simply covering the
+section. The Library Tower has a `focus` point: from `lg` up it is zoomed and shifted so
+the tower stands in the empty right half beside the event overview's copy
+(`.backdrop-focus`). The Susquehanna photograph has a `band` — the line of residence halls,
+58.5–71% of its height — and is shown through a `<BackdropWindow>`: a spacer between the
+sponsors section's top row and its "Coming soon" panel that centres the band in itself at
+every width, so the buildings are always in a gap kept clear of content
+(`.backdrop-window`).
+
+The ladder stops at 2400 and uses lighter compression than the other photos (AVIF q50 /
+WebP q70): the wash hides the detail a sharper rung would buy. The JPEG fallback is the
+1600 rung. Text contrast is the constraint that sets the wash and the panel: with a 50%
+wash and an 85% panel, `pine/90` measures at least 4.67:1 against every pixel of all three
+photos, but brick only ~4.05:1, so links on these panels take the frost treatment
+(underline on hover). The walkway photograph (`campus-path`) is no longer on the landing
+page; the backdrop replaced it in the event overview.
+
+`hackbuimage/52561481869_3421ef9b87_4k.jpg` (the Union clock tower and the Peace Quad
+lights at night) was downloaded with them but is not used yet.
 
 ## The retired illustration
 
