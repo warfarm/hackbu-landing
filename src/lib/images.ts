@@ -632,6 +632,7 @@ export const CLOCK_TOWER = {
  *   jessica-ha.jpg
  *   adam-babayev.jpg
  *   zuri-chan.jpg
+ *   joshuanaveen-navaneetharaja.jpg
  *
  * Group photo (already shipped):
  *   team.jpg
@@ -691,7 +692,7 @@ export const ORGANIZER_PHOTOS = {
   ),
   'carinna-lee': organizerPhoto(
     'carinna-lee',
-    'Portrait of Carinna Lee, HackBU Vice President of Outreach, smiling in a gray denim jacket and hoop earrings.',
+    'Portrait of Carinna Lee, HackBU Co-Vice President of Outreach, smiling in a gray denim jacket and hoop earrings.',
     true,
     1024,
     1024,
@@ -740,7 +741,7 @@ export const ORGANIZER_PHOTOS = {
   ),
   'rijaa-zaidi': organizerPhoto(
     'rijaa-zaidi',
-    'Portrait of Rijaa Zaidi, HackBU organizer, smiling in a navy headscarf and white collared shirt with a light blue scarf.',
+    'Portrait of Rijaa Zaidi, HackBU Co-Vice President of Outreach, smiling in a navy headscarf and white collared shirt with a light blue scarf.',
     true,
     768,
     1024,
@@ -786,6 +787,13 @@ export const ORGANIZER_PHOTOS = {
     true,
     1024,
     576,
+  ),
+  'joshuanaveen-navaneetharaja': organizerPhoto(
+    'joshuanaveen-navaneetharaja',
+    'Portrait of Joshuanaveen Navaneetharaja, HackBU organizer, smiling in a gray plaid shirt jacket against a green wall panel.',
+    true,
+    640,
+    800,
   ),
 } as const
 
