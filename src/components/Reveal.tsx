@@ -58,8 +58,16 @@ const REST_TRANSITION = { duration: 0 } as const
 const EASE = cubicBezier(0.22, 0.61, 0.36, 1)
 const DURATION = 0.55
 
-/** Fires a little before the element is fully on screen. */
-const VIEWPORT: MotionProps['viewport'] = { once: true, amount: 0.2 }
+/**
+ * Fires once the element's top edge is a fifth of the way up the window. Not a
+ * share of the element (`amount`): a group taller than five windows — the
+ * one-column organizer grid on a phone — can never show 20% of itself at once,
+ * so it never revealed.
+ */
+const VIEWPORT: MotionProps['viewport'] = {
+  once: true,
+  margin: '0px 0px -20% 0px',
+}
 
 const ITEM_TRANSITION = { duration: DURATION, ease: EASE }
 
