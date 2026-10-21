@@ -71,6 +71,8 @@ export function usePrefersReducedMotion(): boolean {
 
   useIsomorphicLayoutEffect(() => {
     setMounted(true)
+    // Cancels the reveal fallback timer inlined in each page's <head>.
+    document.documentElement.setAttribute('data-reveals-ready', '')
   }, [])
 
   return mounted && prefersReducedMotion

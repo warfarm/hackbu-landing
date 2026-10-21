@@ -114,7 +114,7 @@ export function SnapSlide({
 
   return (
     <div ref={stopRef} className={align === 'end' ? 'snap-end' : 'snap-start'}>
-      <m.div {...motionProps}>{children}</m.div>
+      <m.div data-reveal {...motionProps}>{children}</m.div>
     </div>
   )
 }

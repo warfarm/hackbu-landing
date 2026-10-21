@@ -102,7 +102,7 @@ export function Reveal({ children, className = '', delay = 0 }: RevealProps) {
       }
 
   return (
-    <m.div className={className} {...motionProps}>
+    <m.div data-reveal className={className} {...motionProps}>
       {children}
     </m.div>
   )
@@ -134,7 +134,7 @@ export function RevealGroup({
 
   if (as === 'ul') {
     return (
-      <m.ul className={className} {...motionProps}>
+      <m.ul data-reveal className={className} {...motionProps}>
         {children}
       </m.ul>
     )
@@ -142,14 +142,14 @@ export function RevealGroup({
 
   if (as === 'dl') {
     return (
-      <m.dl className={className} {...motionProps}>
+      <m.dl data-reveal className={className} {...motionProps}>
         {children}
       </m.dl>
     )
   }
 
   return (
-    <m.div className={className} {...motionProps}>
+    <m.div data-reveal className={className} {...motionProps}>
       {children}
     </m.div>
   )
@@ -176,14 +176,14 @@ export function RevealItem({
 
   if (as === 'li') {
     return (
-      <m.li className={className} {...motionProps}>
+      <m.li data-reveal className={className} {...motionProps}>
         {children}
       </m.li>
     )
   }
 
   return (
-    <m.div className={className} {...motionProps}>
+    <m.div data-reveal className={className} {...motionProps}>
       {children}
     </m.div>
   )

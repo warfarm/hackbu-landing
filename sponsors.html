@@ -25,6 +25,16 @@
     <!-- Same page ground as the landing page: `cloud` (#f7f5ee) — see index.html. -->
     <meta name="theme-color" content="#f7f5ee" />
 
+    <!--
+      Prerendered reveals start at opacity 0 and only the bundle fades them in.
+      With JavaScript off, or if the bundle hasn't started within 3s (blocked,
+      failed, stale cache), show them unanimated rather than leave blank
+      sections. `data-reveals-ready` is set in src/lib/motion.ts.
+    -->
+    <style>html.reveal-fallback [data-reveal]{opacity:1!important;transform:none!important}</style>
+    <noscript><style>[data-reveal]{opacity:1!important;transform:none!important}</style></noscript>
+    <script>setTimeout(function(){var d=document.documentElement;if(!d.hasAttribute('data-reveals-ready'))d.classList.add('reveal-fallback')},3000)</script>
+
     <title>Sponsors · HackBU</title>
   </head>
   <body>
