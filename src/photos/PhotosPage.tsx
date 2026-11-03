@@ -5,8 +5,41 @@ import { SnowdriftDivider } from '../components/SnowdriftDivider'
 import { Eyebrow, Section } from '../components/Layout'
 import { Reveal } from '../components/Reveal'
 import { PHOTOS_PATH } from '../lib/links'
-import { GALLERY_PHOTOS } from '../lib/images'
+import { GALLERY_2019, GALLERY_2023, type GalleryPhoto } from '../lib/images'
 import { GalleryGrid } from './GalleryGrid'
+
+const YEAR_TITLE =
+  'font-display text-display-xl text-pine mt-5 font-semibold text-balance'
+
+function YearSection({
+  id,
+  year,
+  photos,
+  heading: Heading,
+}: {
+  id: string
+  year: string
+  photos: readonly GalleryPhoto[]
+  heading: 'h1' | 'h2'
+}) {
+  const titleId = `${id}-title`
+  return (
+    <Section id={id} labelledBy={titleId} className="bg-cloud">
+      <Reveal>
+        <div className="max-w-3xl">
+          <Eyebrow>Photos</Eyebrow>
+          <Heading id={titleId} className={YEAR_TITLE}>
+            {year}
+          </Heading>
+        </div>
+      </Reveal>
+
+      <div className="mt-12">
+        <GalleryGrid photos={photos} />
+      </div>
+    </Section>
+  )
+}
 
 export function PhotosPage() {
   return (
@@ -22,27 +55,21 @@ export function PhotosPage() {
         <SiteHeader homeHref="/" currentHref={PHOTOS_PATH} />
 
         <main id="main" className="pt-16 sm:pt-20">
-          <Section id="photos" labelledBy="photos-title" className="bg-cloud">
-            <Reveal>
-              <div className="max-w-3xl">
-                <Eyebrow>HackBU 2023</Eyebrow>
-                <h1
-                  id="photos-title"
-                  className="font-display text-display-xl text-pine mt-5 font-semibold text-balance"
-                >
-                  Photos
-                </h1>
-                <p className="text-lede text-pine mt-6 max-w-2xl">
-                  February 4–5, 2023. Workshops, hacking, and the closing
-                  photo from the weekend.
-                </p>
-              </div>
-            </Reveal>
+          <YearSection
+            id="photos-2023"
+            year="2023"
+            photos={GALLERY_2023}
+            heading="h1"
+          />
 
-            <div className="mt-12">
-              <GalleryGrid photos={GALLERY_PHOTOS} />
-            </div>
-          </Section>
+          <SnowdriftDivider variant="drift-a" />
+
+          <YearSection
+            id="photos-2019"
+            year="2019"
+            photos={GALLERY_2019}
+            heading="h2"
+          />
         </main>
 
         <SnowdriftDivider variant="cloud-to-frost" />

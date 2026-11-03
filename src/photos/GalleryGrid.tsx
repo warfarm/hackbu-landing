@@ -129,30 +129,22 @@ export function GalleryGrid({ photos }: { photos: readonly GalleryPhoto[] }) {
       <dialog
         ref={dialogRef}
         closedby="any"
-        aria-labelledby="gallery-lightbox-caption"
+        aria-label={active?.alt ?? 'Photo'}
         className="relative m-auto w-fit max-w-[calc(100%-2rem)] max-h-[calc(100dvh-2rem)] overflow-hidden overscroll-none rounded-2xl border border-frost bg-cloud p-0 text-pine backdrop:bg-pine/70"
         onClose={() => setActive(null)}
       >
         {active ? (
-          <figure className="w-fit max-w-full">
-            <picture>
-              <source type="image/avif" srcSet={active.avif} />
-              <source type="image/webp" srcSet={active.webp} />
-              <img
-                src={active.jpg}
-                alt=""
-                width={active.width}
-                height={active.height}
-                className="max-h-[calc(100dvh-12rem)] w-auto max-w-[min(72rem,calc(100vw-2rem))] bg-frost object-contain"
-              />
-            </picture>
-            <figcaption
-              id="gallery-lightbox-caption"
-              className="text-body text-pine w-0 min-w-full px-5 py-4 sm:px-6"
-            >
-              {active.alt}
-            </figcaption>
-          </figure>
+          <picture>
+            <source type="image/avif" srcSet={active.avif} />
+            <source type="image/webp" srcSet={active.webp} />
+            <img
+              src={active.jpg}
+              alt=""
+              width={active.width}
+              height={active.height}
+              className="max-h-[calc(100dvh-4rem)] w-auto max-w-[min(72rem,calc(100vw-2rem))] bg-frost object-contain"
+            />
+          </picture>
         ) : null}
         {active && photos.length > 1 ? (
           <>
