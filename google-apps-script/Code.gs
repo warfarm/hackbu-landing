@@ -9,6 +9,8 @@
  *   requestCode         emails a 6-digit sign-in code to a registered address.
  *   verifyCode          exchanges that code for a session token.
  *   getApplication      returns the signed-in applicant's answers and status.
+ *   getFile             returns one of that applicant's uploads (the resume)
+ *                       so the portal can open the PDF itself.
  *   rsvp                records Coming / Not coming for an accepted applicant.
  *
  *   onAcceptEdit        installable edit trigger (created by `setup`): when an
@@ -149,6 +151,8 @@ function doPost(e) {
         return json_(handleVerifyCode_(body))
       case 'getApplication':
         return json_(handleGetApplication_(body))
+      case 'getFile':
+        return json_(handleGetFile_(body))
       case 'rsvp':
         return json_(handleRsvp_(body))
       default:
@@ -414,13 +418,15 @@ function handleGetApplication_(body) {
     return i < 0 ? '' : row[i]
   }
 
-  // Resumes (and any other Drive links) are sheet HYPERLINK formulas. getValues
-  // only returns the filename, so the portal needs the formula's URL too.
+  // Resumes are sheet HYPERLINK formulas. getValues only returns the filename.
+  // A Drive link is marked `file` so the portal fetches the bytes with getFile
+  // and opens the PDF itself. Other links (if any) still go out as href.
   const answers = headers
     .map((label, i) => {
       const answer = { label: label, value: formatCell_(row[i]) }
       const href = hyperlinkFromCell_(formulas[i], rich[i])
-      if (href) answer.href = href
+      if (driveFileId_(href)) answer.file = true
+      else if (href) answer.href = href
       return answer
     })
     .filter((a) => a.label && INTERNAL_COLUMNS.indexOf(a.label) < 0)
@@ -434,6 +440,57 @@ function handleGetApplication_(body) {
       rsvp: String(cell(COL.RSVP) || ''),
       answers: answers,
     },
+  }
+}
+
+/**
+ * The signed-in applicant's own upload, as base64. The portal opens it in the
+ * browser instead of sending them to Drive. The file id comes from their row,
+ * and the stored name must start with their email, so a token can't be used
+ * to read anyone else's resume.
+ */
+function handleGetFile_(body) {
+  const email = sessionEmail_(body.token)
+  if (!email) return { ok: false, error: 'unauthorized' }
+
+  const label = String(body.label || '').slice(0, 200)
+  if (!label || INTERNAL_COLUMNS.indexOf(label) >= 0) return { ok: false, error: 'not_found' }
+
+  const sheet = getSheet_()
+  const rowIndex = findRowByEmail_(sheet, email)
+  if (rowIndex < 0) return { ok: false, error: 'not_found' }
+
+  const headers = headers_(sheet)
+  const col = headers.indexOf(label)
+  if (col < 0) return { ok: false, error: 'not_found' }
+
+  const cell = sheet.getRange(rowIndex, col + 1)
+  const fileId = driveFileId_(hyperlinkFromCell_(cell.getFormula(), cell.getRichTextValue()))
+  if (!fileId) return { ok: false, error: 'not_found' }
+
+  let file
+  try {
+    file = DriveApp.getFileById(fileId)
+  } catch (err) {
+    return { ok: false, error: 'not_found' }
+  }
+  if (file.isTrashed()) return { ok: false, error: 'not_found' }
+
+  const storedName = file.getName()
+  if (storedName.toLowerCase().indexOf(email.toLowerCase() + ' - ') !== 0) {
+    return { ok: false, error: 'not_found' }
+  }
+
+  const blob = file.getBlob()
+  const bytes = blob.getBytes()
+  if (!bytes.length || bytes.length > UPLOAD_MAX_BYTES) return { ok: false, error: 'not_found' }
+
+  const dash = storedName.indexOf(' - ')
+  return {
+    ok: true,
+    name: dash < 0 ? storedName : storedName.slice(dash + 3),
+    mimeType: blob.getContentType() || 'application/octet-stream',
+    data: Utilities.base64Encode(bytes),
   }
 }
 
@@ -841,6 +898,15 @@ function formatCell_(value) {
     return Utilities.formatDate(value, Session.getScriptTimeZone(), 'MMM d, yyyy h:mm a')
   }
   return String(value == null ? '' : value)
+}
+
+/** A Drive file id from a file URL, or ''. */
+function driveFileId_(url) {
+  const text = String(url || '')
+  const byPath = text.match(/\/d\/([a-zA-Z0-9_-]+)/)
+  if (byPath) return byPath[1]
+  const byQuery = text.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+  return byQuery ? byQuery[1] : ''
 }
 
 /** The URL from a HYPERLINK formula or a rich-text link, or ''. */

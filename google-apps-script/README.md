@@ -67,9 +67,11 @@ yet.
 
 Every applicant must upload a resume (PDF or Word, up to 5 MB). It's saved to a
 **HackBU Resumes** folder in the script owner's Google Drive, created by
-`setup`. The **Resume** cell links to the file. The files are private: to let
-other organizers open them, share that folder with them in Drive (sharing the
-sheet alone isn't enough).
+`setup`. The **Resume** cell links to the file for organizers. On
+`/application`, the applicant opens that same file in the browser — a PDF
+opens in the PDF viewer, a Word document downloads — without visiting Drive.
+The files stay private: to let other organizers open them from the sheet,
+share that folder with them in Drive (sharing the sheet alone isn't enough).
 
 ## RSVPs
 

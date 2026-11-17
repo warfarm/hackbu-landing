@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Eyebrow } from '../components/Layout'
 import { ExternalLink, LINK_ON_FROST, MailLink } from '../components/ExternalLink'
 import { CONTACT_EMAIL, REGISTER_PATH } from '../lib/links'
-import { callScript, type Application } from '../register/api'
+import { callScript, type Application, type UploadedFile } from '../register/api'
 import { BUTTON, BUTTON_SECONDARY, ERROR_BOX, INPUT } from '../register/styles'
 import { CodeInput } from './CodeInput'
 
@@ -19,6 +19,7 @@ const ERRORS: Record<string, string> = {
   code_expired: 'That code has expired. Request a new one.',
   unauthorized: 'Your session expired. Sign in again.',
   not_accepted: 'You can RSVP once your application is accepted.',
+  file_missing: 'We couldn’t open that file. Email us and we’ll send it to you.',
   not_configured: 'The applicant portal isn’t connected yet. Please check back soon.',
   network: 'We couldn’t reach the server. Check your connection and try again.',
   email_quota: `We can’t send a sign-in code right now — today’s email limit was reached. Your registration is saved. Try again tomorrow, or email ${CONTACT_EMAIL}.`,
@@ -40,6 +41,14 @@ const STATUS_COPY: Record<Application['status'], { title: string; body: string }
   },
 }
 
+/** Bytes from the script, as a blob URL the browser can show or download. */
+function fileUrl(file: UploadedFile): string {
+  const binary = atob(file.data.replace(/\s/g, ''))
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return URL.createObjectURL(new Blob([bytes], { type: file.mimeType || 'application/octet-stream' }))
+}
+
 type View =
   | { step: 'loading' }
   | { step: 'email' }
@@ -58,6 +67,7 @@ export function ApplicationPortal() {
   const [busy, setBusy] = useState(false)
   const [code, setCode] = useState('')
   const [codeRequests, setCodeRequests] = useState(0)
+  const [openingFile, setOpeningFile] = useState('')
   const errorRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -137,6 +147,57 @@ export function ApplicationPortal() {
         ? { ...current, application: { ...current.application, rsvp: result.rsvp } }
         : current,
     )
+  }
+
+  /**
+   * Opens the applicant's resume in a new tab as the file itself. The blank
+   * tab is opened during the click so the browser doesn't treat the later
+   * navigation as a popup. PDFs use the browser's viewer; Word files download.
+   */
+  function openFile(label: string) {
+    if (view.step !== 'signedIn' || openingFile) return
+    const token = view.token
+    let preview: Window | null = null
+    try {
+      preview = window.open('', '_blank')
+      if (preview) {
+        preview.document.title = 'Opening resume'
+        preview.document.body.textContent = 'Opening your resume…'
+      }
+    } catch {
+      preview?.close()
+      preview = null
+    }
+    setOpeningFile(label)
+    setError('')
+    void (async () => {
+      const result = await callScript<UploadedFile>({ action: 'getFile', token, label })
+      setOpeningFile('')
+      if (!result.ok) {
+        preview?.close()
+        if (result.error === 'unauthorized') {
+          localStorage.removeItem(SESSION_KEY)
+          setView({ step: 'email' })
+        }
+        return fail(result.error === 'not_found' ? 'file_missing' : result.error)
+      }
+      let url = ''
+      try {
+        url = fileUrl(result)
+      } catch {
+        preview?.close()
+        return fail('file_missing')
+      }
+      if (preview) {
+        preview.location.href = url
+        return
+      }
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = result.name || 'resume'
+      anchor.click()
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    })()
   }
 
   function signOut() {
@@ -332,7 +393,16 @@ export function ApplicationPortal() {
             <div key={answer.label}>
               <dt className="text-caption text-pine/90">{answer.label}</dt>
               <dd className="text-body text-pine mt-1 break-words whitespace-pre-wrap">
-                {answer.href ? (
+                {answer.file ? (
+                  <button
+                    type="button"
+                    className={`${LINK} cursor-pointer bg-transparent p-0 text-left underline underline-offset-4 disabled:opacity-60`}
+                    disabled={openingFile === answer.label}
+                    onClick={() => openFile(answer.label)}
+                  >
+                    {openingFile === answer.label ? 'Opening…' : answer.value || 'Open file'}
+                  </button>
+                ) : answer.href ? (
                   <ExternalLink href={answer.href} className={`${LINK} underline underline-offset-4`}>
                     {answer.value || answer.href}
                   </ExternalLink>
