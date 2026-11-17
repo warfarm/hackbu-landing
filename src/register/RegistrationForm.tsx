@@ -104,7 +104,8 @@ export function RegistrationForm() {
     const saved = readDraftEmail()
     if (!saved) return
     skipScroll.current = true
-    setEmail(saved)
+    const id = window.setTimeout(() => setEmail(saved), 0)
+    return () => window.clearTimeout(id)
   }, [])
 
   useEffect(() => {
