@@ -7,6 +7,7 @@ import { SnapSlide } from './components/SnapSlide'
 import { EventOverviewSection } from './components/sections/EventOverviewSection'
 import { SponsorsPreviewSection } from './components/sections/SponsorsPreviewSection'
 // import { PrizeTracksSection } from './components/sections/PrizeTracksSection'
+import { RegisterSection } from './components/sections/RegisterSection'
 import { QuestionsSection } from './components/sections/QuestionsSection'
 import { SiteFooter } from './components/SiteFooter'
 
@@ -24,19 +25,22 @@ import { SiteFooter } from './components/SiteFooter'
  *
  *   fixed header
  *   Hero                    the banner: campus photograph, <h1>, dates,
- *                           venue and the Discord link
+ *                           venue and the Register link
  *   EventOverviewSection    what HackBU 2027 is — when, where, who, teams —
  *                           and the link to the schedule on /hackathons
  *   SponsorsPreviewSection  2027 sponsors: "coming soon", and /sponsors
  *   PrizeTracksSection      last year's five prize tracks on a spinning ring;
  *                           hover, tap or focus a track to read it
+ *   RegisterSection         the conversion point: /register, and /application
+ *                           for people who already applied
  *   QuestionsSection        the hackathon FAQ, with the map of the Union
  *   footer on frost
  *
  * The order is the reader's: first what the event is, then who is behind it
- * and what can be won, then the leftover doubts — with the questions last
- * because "where exactly is it?" is the one people still have after deciding
- * to come. The banner carries the Discord link, so nobody has to scroll to act.
+ * and what can be won, then the ask, then the leftover doubts — with the
+ * questions last because "where exactly is it?" is the one people still have
+ * after deciding to come. The banner carries a Register link too, so nobody
+ * has to scroll to act.
  *
  * Content sections all sit on cloud, separated by the `drift-*` snowdrift
  * dividers (a frost bank with cloud drifts either side). SnowdriftDivider's
@@ -114,7 +118,7 @@ export default function App() {
            * and bottom, which under the plaza reads as a bank of settled snow
            * carrying the eye into the page — the thing the component was built to
            * do. `drift-c` specifically, so the rotation below can run a → b → c
-           * and its next use is as far down the page
+           * and its next use (prizes -> registration) is as far down the page
            * as three shapes allow.
            */}
           <SnowdriftDivider variant="drift-c" />
@@ -131,6 +135,11 @@ export default function App() {
           <SnowdriftDivider variant="drift-b" />
           <PrizeTracksSection />
           */}
+
+          <SnowdriftDivider variant="drift-c" />
+          <SnapSlide>
+            <RegisterSection />
+          </SnapSlide>
 
           <SnowdriftDivider variant="drift-a" />
           <SnapSlide>

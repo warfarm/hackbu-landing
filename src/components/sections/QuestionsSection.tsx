@@ -5,9 +5,11 @@ import { Reveal, RevealGroup, RevealItem } from '../Reveal'
 import { BACKDROP_PANEL } from '../SectionBackdrop'
 import { BACKDROP_PHOTOS } from '../../lib/images'
 import {
+  APPLICATION_PATH,
   CONTACT_EMAIL,
   DISCORD_URL,
   HACKATHON_DATES,
+  REGISTER_PATH,
   VENUE,
   VENUE_DIRECTIONS_URL,
   VENUE_MAP_EMBED_URL,
@@ -29,9 +31,10 @@ import {
  * item is open so it becomes a `−` in the same motion. Answers are
  * `ReactNode`, not strings, because several now carry links.
  *
- * **Copy.** The club-era FAQ is re-aimed at the hackathon. Registration is not
- * open yet, so its answer points at the Discord, where it will be announced.
- * "Who can attend?" keeps only its hackathon half. Nothing is claimed that the site
+ * **Copy.** The club-era FAQ is re-aimed at the hackathon. Registration is no
+ * longer "opens in December": it is open, at /register, and the answer says
+ * what the form asks for and what happens after (src/register/). "Who can
+ * attend?" keeps only its hackathon half. Nothing is claimed that the site
  * does not already say somewhere — no cost, meals, travel or age policy,
  * because none of those is written down yet.
  *
@@ -126,18 +129,24 @@ const QUESTIONS: readonly { question: string; answer: ReactNode }[] = [
     question: 'How do I register?',
     answer: (
       <>
-        Registration isn’t open yet. We’ll announce it in the{' '}
-        <ExternalLink href={DISCORD_URL} className={LINK}>
-          HackBU Discord
+        Registration is open now:{' '}
+        <ExternalLink href={REGISTER_PATH} className={LINK}>
+          fill in the registration form
+        </ExternalLink>
+        . It takes a few minutes and asks for your resume. You’ll get a
+        confirmation email straight away, and another once your application
+        has been reviewed. To see where yours stands, sign in to{' '}
+        <ExternalLink href={APPLICATION_PATH} className={LINK}>
+          My Application
         </ExternalLink>{' '}
-        as soon as it is.
+        with the email you registered with.
       </>
     ),
   },
   {
     question: 'I’m a first-time hacker. What should I do?',
     answer:
-      'Come anyway — no experience is required. A lot of our members started with none. Before the hackathon we run sessions that help you get started, and organizers are around the whole weekend to help when something breaks.',
+      'Register anyway — no experience is required. A lot of our members started with none. Before the hackathon we run sessions that help you get started, and organizers are around the whole weekend to help when something breaks.',
   },
   {
     question: 'How does team formation work?',
