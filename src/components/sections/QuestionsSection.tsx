@@ -201,9 +201,9 @@ export function QuestionsSection() {
         <div className={`${BACKDROP_PANEL} p-6 sm:p-10`}>
           <Reveal>
             <SectionHeader
-              eyebrow="Hackathon FAQ"
+              eyebrow="Questions"
               titleId="questions-title"
-              title="Questions newcomers actually have."
+              title="Hackathon FAQ"
             />
           </Reveal>
 
