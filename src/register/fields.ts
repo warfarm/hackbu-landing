@@ -73,6 +73,7 @@ export const FIELD_GROUPS: readonly FieldGroup[] = [
   {
     title: 'Logistics',
     fields: [
+      { key: 'overnightAccommodations', label: 'Do you need overnight accommodations?', type: 'select', required: true, options: ['Yes', 'No'], wide: true },
       { key: 'dietary', label: 'Dietary restrictions', type: 'text', wide: true, placeholder: 'Vegetarian, halal, nut allergy…', help: 'Optional.' },
       { key: 'accessibility', label: 'Anything we can do to make the event accessible for you?', type: 'textarea', wide: true, help: 'Optional.' },
     ],
