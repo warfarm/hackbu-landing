@@ -405,14 +405,24 @@ function handleGetApplication_(body) {
   if (rowIndex < 0) return { ok: false, error: 'not_found' }
 
   const headers = headers_(sheet)
-  const row = sheet.getRange(rowIndex, 1, 1, headers.length).getValues()[0]
+  const range = sheet.getRange(rowIndex, 1, 1, headers.length)
+  const row = range.getValues()[0]
+  const formulas = range.getFormulas()[0]
+  const rich = range.getRichTextValues()[0]
   const cell = (header) => {
     const i = headers.indexOf(header)
     return i < 0 ? '' : row[i]
   }
 
+  // Resumes (and any other Drive links) are sheet HYPERLINK formulas. getValues
+  // only returns the filename, so the portal needs the formula's URL too.
   const answers = headers
-    .map((label, i) => ({ label: label, value: formatCell_(row[i]) }))
+    .map((label, i) => {
+      const answer = { label: label, value: formatCell_(row[i]) }
+      const href = hyperlinkFromCell_(formulas[i], rich[i])
+      if (href) answer.href = href
+      return answer
+    })
     .filter((a) => a.label && INTERNAL_COLUMNS.indexOf(a.label) < 0)
 
   return {
@@ -831,6 +841,25 @@ function formatCell_(value) {
     return Utilities.formatDate(value, Session.getScriptTimeZone(), 'MMM d, yyyy h:mm a')
   }
   return String(value == null ? '' : value)
+}
+
+/** The URL from a HYPERLINK formula or a rich-text link, or ''. */
+function hyperlinkFromCell_(formula, rich) {
+  const match = String(formula || '').match(/^=HYPERLINK\(\s*"([^"]+)"/i)
+  if (match) return match[1]
+  if (!rich) return ''
+  try {
+    const whole = rich.getLinkUrl()
+    if (whole) return whole
+    const runs = rich.getRuns()
+    for (let i = 0; i < runs.length; i++) {
+      const url = runs[i].getLinkUrl()
+      if (url) return url
+    }
+  } catch (err) {
+    // Older Sheets builds may not expose link URLs on rich text.
+  }
+  return ''
 }
 
 /** Stops answers like "+1 607…" or "=HYPERLINK(…)" being read as formulas. */

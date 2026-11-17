@@ -332,7 +332,13 @@ export function ApplicationPortal() {
             <div key={answer.label}>
               <dt className="text-caption text-pine/90">{answer.label}</dt>
               <dd className="text-body text-pine mt-1 break-words whitespace-pre-wrap">
-                {answer.value || '—'}
+                {answer.href ? (
+                  <ExternalLink href={answer.href} className={`${LINK} underline underline-offset-4`}>
+                    {answer.value || answer.href}
+                  </ExternalLink>
+                ) : (
+                  answer.value || '—'
+                )}
               </dd>
             </div>
           ))}

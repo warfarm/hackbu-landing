@@ -84,5 +84,5 @@ export type Application = {
   submittedAt: string
   status: 'pending' | 'accepted' | 'rejected'
   rsvp: '' | 'Coming' | 'Not coming'
-  answers: { label: string; value: string }[]
+  answers: { label: string; value: string; href?: string }[]
 }
