@@ -5,7 +5,7 @@ import { SnowdriftDivider } from '../components/SnowdriftDivider'
 import { Eyebrow, Section } from '../components/Layout'
 import { Reveal } from '../components/Reveal'
 import { PHOTOS_PATH } from '../lib/links'
-import { GALLERY_2019, GALLERY_2023, type GalleryPhoto } from '../lib/images'
+import { GALLERY_2019, GALLERY_2023, GALLERY_2026, type GalleryPhoto } from '../lib/images'
 import { GalleryGrid } from './GalleryGrid'
 
 const YEAR_TITLE =
@@ -56,13 +56,22 @@ export function PhotosPage() {
 
         <main id="main" className="pt-16 sm:pt-20">
           <YearSection
-            id="photos-2023"
-            year="2023"
-            photos={GALLERY_2023}
+            id="photos-2026"
+            year="HackBU 2026 NYCAIRR Hackathon"
+            photos={GALLERY_2026}
             heading="h1"
           />
 
           <SnowdriftDivider variant="drift-a" />
+
+          <YearSection
+            id="photos-2023"
+            year="2023"
+            photos={GALLERY_2023}
+            heading="h2"
+          />
+
+          <SnowdriftDivider variant="drift-b" />
 
           <YearSection
             id="photos-2019"

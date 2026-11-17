@@ -363,6 +363,136 @@ function galleryPhoto(file: string, width: number, height: number, alt: string) 
 
 export type GalleryPhoto = ReturnType<typeof galleryPhoto>
 
+/** HackBU 2026 NYCAIRR Hackathon. New JPEGs in `public/artwork/gallery/`. */
+export const GALLERY_2026: readonly GalleryPhoto[] = [
+  galleryPhoto(
+    'BUHackathon-7',
+    1600,
+    1066,
+    'Students seated in a lecture hall at the HackBU 2026 NYCAIRR Hackathon, with Happy Hacking on the screens.',
+  ),
+  galleryPhoto(
+    'BUHackathon-9',
+    1600,
+    1066,
+    'A speaker addressing the lecture hall while students applaud, with Happy Hacking on the screens.',
+  ),
+  galleryPhoto(
+    'BUHackathon-8',
+    1600,
+    1066,
+    'Two organizers in HackBU shirts speaking from the front of the lecture hall.',
+  ),
+  galleryPhoto(
+    'BUHackathon-12',
+    1600,
+    1066,
+    'A speaker at the front of the lecture hall beside two organizers in HackBU shirts.',
+  ),
+  galleryPhoto(
+    'BUHackathon-13',
+    1600,
+    1066,
+    'Students listening from the lecture hall seats during the HackBU 2026 NYCAIRR Hackathon.',
+  ),
+  galleryPhoto(
+    'BUHackathon',
+    1600,
+    1066,
+    'A student drawing a trade-off matrix on a whiteboard in the Zurack Family High-Technology Collaboration Center.',
+  ),
+  galleryPhoto(
+    'IMG_4020',
+    1600,
+    1200,
+    'A team gathered around a laptop in the collaboration center during the hackathon.',
+  ),
+  galleryPhoto(
+    'IMG_4026',
+    1600,
+    1200,
+    'Students crowded around a laptop on a standing table during the hackathon.',
+  ),
+  galleryPhoto(
+    'IMG_4030',
+    1600,
+    1200,
+    'A team reviewing a laptop together, with a whiteboard behind them that reads Tired.',
+  ),
+  galleryPhoto(
+    'IMG_4033',
+    1600,
+    1200,
+    'Students working beside a whiteboard mapped out for a StormReadiness app.',
+  ),
+  galleryPhoto(
+    'IMG_4037',
+    1600,
+    1200,
+    'Three students leaning over a laptop at a standing table in the collaboration center.',
+  ),
+  galleryPhoto(
+    'IMG_4038',
+    1600,
+    1200,
+    'A student demonstrating a laptop setup with small hardware on the table while teammates watch.',
+  ),
+  galleryPhoto(
+    'IMG_4041',
+    1600,
+    1200,
+    'A team writing on a whiteboard about bird collisions during New York migration season.',
+  ),
+  galleryPhoto(
+    'IMG_4046',
+    1600,
+    1200,
+    'A student presenting a whiteboard labeled Lantern to a small group by the windows.',
+  ),
+  galleryPhoto(
+    'IMG_4317',
+    1200,
+    1600,
+    'Two students posing in front of a screen that reads Winner: TopoGuard.',
+  ),
+  galleryPhoto(
+    'IMG_4319',
+    1200,
+    1600,
+    'A student posing in front of a screen that reads Runner Up: CommandOS.',
+  ),
+  galleryPhoto(
+    'IMG_4320',
+    1200,
+    1600,
+    'Two students posing in front of a screen that reads Winner: SensorGap.',
+  ),
+  galleryPhoto(
+    'IMG_4322',
+    1200,
+    1600,
+    'Two students posing in front of a screen that reads Runner Up: Litterbug, one holding a small drone.',
+  ),
+  galleryPhoto(
+    'IMG_4324',
+    1200,
+    1600,
+    'Three students posing in front of a screen for Kairos and Storm Readiness App.',
+  ),
+  galleryPhoto(
+    'IMG_4330',
+    1200,
+    1600,
+    'Three students posing in front of a screen that reads Winner: Checking for AI biases in Resume Scanning.',
+  ),
+  galleryPhoto(
+    'IMG_4332',
+    1200,
+    1600,
+    'A student posing in front of a screen that reads Runner Up: LuckAudit.',
+  ),
+]
+
 /** HackBU 2019. Filenames starting with DSC in `public/artwork/gallery/`. */
 export const GALLERY_2019: readonly GalleryPhoto[] = [
   galleryPhoto(

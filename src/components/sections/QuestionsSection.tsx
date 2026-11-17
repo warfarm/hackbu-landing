@@ -118,6 +118,11 @@ const QUESTIONS: readonly { question: string; answer: ReactNode }[] = [
       'College students. HackBU brings students together from Binghamton and across the Northeast to build, network and compete for prizes, and you don’t need any experience to apply.',
   },
   {
+    question: 'Do you offer charter buses?',
+    answer:
+      'HackBU is not providing charter buses this year. If you are traveling from another school, please arrange your own transportation to Binghamton.',
+  },
+  {
     question: 'How do I register?',
     answer: (
       <>
