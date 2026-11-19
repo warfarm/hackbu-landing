@@ -10,7 +10,7 @@ const LINK_CLASSES =
 
 export function SponsorsContactSection() {
   return (
-    <Section id="contact" labelledBy="sponsors-contact-title" className="bg-cloud">
+    <Section id="contact" labelledBy="sponsors-contact-title">
       <Reveal>
         <SectionHeader
           eyebrow="Contact us"
@@ -23,7 +23,7 @@ export function SponsorsContactSection() {
       <div className="mt-12">
         <RevealGroup className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <RevealItem>
-            <div className="border-frost bg-frost/30 h-full rounded-2xl border p-6 sm:p-8 flex flex-col justify-between">
+            <div className="hud-panel h-full rounded-2xl border p-6 sm:p-8 flex flex-col justify-between">
               <div>
                 <Eyebrow>Email our team</Eyebrow>
                 <div className="mt-4">
@@ -32,7 +32,7 @@ export function SponsorsContactSection() {
                     className={`${LINK_CLASSES} text-display-sm inline-block break-all`}
                   />
                 </div>
-                <p className="text-caption text-pine/80 mt-4">
+                <p className="text-caption text-ink mt-4">
                   Direct line to our student organizing and outreach leads. We
                   typically respond within 24 to 48 hours.
                 </p>
@@ -46,13 +46,13 @@ export function SponsorsContactSection() {
           </RevealItem>
 
           <RevealItem>
-            <div className="border-frost bg-frost/30 h-full rounded-2xl border p-6 sm:p-8 flex flex-col justify-between">
+            <div className="hud-panel h-full rounded-2xl border p-6 sm:p-8 flex flex-col justify-between">
               <div>
                 <Eyebrow>Sponsorship packet</Eyebrow>
-                <p className="font-display text-display-sm text-pine mt-4 font-semibold">
+                <p className="font-display text-display-sm text-ink mt-4 font-semibold">
                   Request the packet
                 </p>
-                <p className="text-body text-pine/90 mt-3 text-sm">
+                <p className="text-body text-ink mt-3 text-sm">
                   Our comprehensive packet includes student demographics, past
                   hackathon statistics, venue details, and payment logistics.
                 </p>
@@ -69,7 +69,7 @@ export function SponsorsContactSection() {
           </RevealItem>
 
           <RevealItem>
-            <div className="border-frost bg-frost/30 h-full rounded-2xl border p-6 sm:p-8 flex flex-col justify-between">
+            <div className="hud-panel h-full rounded-2xl border p-6 sm:p-8 flex flex-col justify-between">
               <div>
                 <Eyebrow>Meet the team</Eyebrow>
                 <div className="mt-4">
@@ -80,7 +80,7 @@ export function SponsorsContactSection() {
                     View organizers
                   </ExternalLink>
                 </div>
-                <p className="text-body text-pine/90 mt-3 text-sm">
+                <p className="text-body text-ink mt-3 text-sm">
                   HackBU is run by a passionate group of Binghamton University
                   students who lead our weekly workshops and organize our annual
                   hackathon.
@@ -89,7 +89,7 @@ export function SponsorsContactSection() {
               <div className="mt-6">
                 <ExternalLink
                   href={DISCORD_URL}
-                  className="text-caption text-pine hover:text-brick font-medium underline underline-offset-4"
+                  className="text-caption text-ink hover:underline hover:underline-offset-4 font-medium underline underline-offset-4"
                 >
                   Join our Discord server
                 </ExternalLink>

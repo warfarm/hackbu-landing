@@ -1,9 +1,8 @@
 /**
  * Build-time image derivative generator — `npm run images`.
  *
- * Reads the source images — the delivered photographs in `hackbuimage/`, and
- * the JPEG/PNG copies under `public/artwork/` — and writes AVIF + WebP
- * derivatives into `public/artwork/`. The sources are never touched; a JPEG or
+ * Reads the source images — the JPEG/PNG copies under `public/artwork/` — and
+ * writes AVIF + WebP derivatives into `public/artwork/`. The sources are never touched; a JPEG or
  * PNG stays in place as the final <picture> fallback.
  *
  * This runs by hand, not on every build: the outputs are committed, so a
@@ -12,22 +11,13 @@
  * and never reaches the browser bundle.
  *
  * ---------------------------------------------------------------------------
- * Widths
+ * Photographs
  * ---------------------------------------------------------------------------
- * The hero is `hackbuimage/hero.jpg`, a 2048 x 1151 photograph, and the hero
- * magnifies it only 1.2x at its start frame — so the ladder is cut at and
- * below the source width and never enlarged: 640, 960, 1280, 1600 and the
- * 2048 source itself. (Its predecessor, a cel-shaded illustration opened at 3.8x,
- * needed a 4x Real-ESRGAN master to stay sharp; a photograph does not survive
- * that kind of enlargement and is not asked to. The illustration and its
- * master stay in the read-only `artwork/campus/` as reference and are no
- * longer copied to `public/`. The cloud cutouts that drifted over it went the
- * same way, into `artwork/clouds/`.)
- *
- * The three section photographs — also from `hackbuimage/` — are rendered at
- * a fraction of their width inside the content column, so they get one
- * derivative each at the intrinsic size: a re-encoded JPEG as the `<img src>`
- * fallback plus AVIF and WebP, switching on format only.
+ * Every photograph is rendered at a fraction of its width, so each gets one
+ * derivative per format at its intrinsic size. (The campus photographs — the
+ * hero ladder, the three section photos and the clock-tower cutout — were
+ * removed with the snow-scene redesign, sources included: the hero and the
+ * section décor are drawn by three.js now, see src/three/.)
  *
  * ---------------------------------------------------------------------------
  * Quality
@@ -38,11 +28,7 @@
  *     AVIF q60 237 KB 34.25 dB   q65 267 KB 35.15 dB   q70 324 KB 36.63 dB
  *     WebP q80 318 KB 33.49 dB   q85 385 KB 34.59 dB   q90 499 KB 36.23 dB
  *
- * AVIF q68 / WebP q82 sit just below the knee of both curves. The hero
- * photograph is the LCP element and is drawn wider than its 1600px on most
- * screens, where compression artifacts are magnified along with everything
- * else, so this leans toward quality — the 2048 AVIF is ~550 KB, a little
- * over a third of the 1.5 MB first-load image budget.
+ * AVIF q68 / WebP q82 sit just below the knee of both curves.
  *
  * ---------------------------------------------------------------------------
  * Brand marks
@@ -73,7 +59,7 @@
  *    because the source is a 2.15 MB PNG of a 14-colour image.
  */
 
-import { mkdir, readdir, stat, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, writeFile } from 'node:fs/promises'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
@@ -84,34 +70,8 @@ const ARTWORK = join(ROOT, 'public', 'artwork')
 const BRAND_SOURCE = join(ROOT, 'brand-source')
 const BRAND_OUT = join(ROOT, 'public', 'brand')
 
-/** The delivered photographs. Read-only, exactly like `artwork/` and `brand-source/`. */
-const PHOTO_SOURCE = join(ROOT, 'hackbuimage')
-const PHOTOS_OUT = join(ARTWORK, 'photos')
-
-/**
- * Hero srcset ladder. **Keep in sync with `HERO_WIDTHS` in
- * `src/lib/images.ts` and with the preload `imagesrcset` in `index.html`.**
- * The script prints both strings at the end of a run so a drift is visible.
- * The top rung is the source's own width; nothing is enlarged.
- */
-const HERO_SOURCE = join(PHOTO_SOURCE, 'hero.jpg')
-const HERO_WIDTHS = [640, 960, 1280, 1600, 2048]
-
-/**
- * The section photographs: delivered file in `hackbuimage/` -> base name in
- * `public/artwork/photos/`. **Keep in step with `SECTION_PHOTOS` in
- * `src/lib/images.ts`.**
- */
-const SECTION_PHOTOS = [
-  ['winter-header.jpg', 'plaza-winter'],
-  ['1-KS1-WEB-2-1024x683.jpg', 'snow-walk'],
-  ['47065170581_63875cf429_b.jpg', 'campus-path'],
-]
-
 const AVIF = { quality: 68, effort: 6 }
 const WEBP = { quality: 82, effort: 6 }
-/** The `<img src>` fallbacks are re-encoded from the delivered files (one is a PNG). */
-const JPEG = { quality: 88, mozjpeg: true }
 
 /**
  * The mask ladder. `widths` is `[1x, 2x]`, sized against the *largest* place
@@ -120,8 +80,7 @@ const JPEG = { quality: 88, mozjpeg: true }
  * rungs sit above those with headroom, so the mark is never upscaled.
  *
  * **Keep `base` and the emitted ink dimensions in sync with `BEARCAT_MARK` /
- * `WORDMARK_MARK` in `src/lib/images.ts`.** The run prints both, for the same
- * reason it prints the campus srcsets.
+ * `WORDMARK_MARK` in `src/lib/images.ts`.** The run prints both so a drift is visible.
  */
 const BRAND_MASKS = [
   // The largest rung of each feeds `.brand-mark-lg` (the About us lockup).
@@ -137,28 +96,6 @@ async function emit(pipeline, outPath) {
   await writeFile(outPath, buffer)
   written.push({ path: outPath, bytes: buffer.length })
   return buffer.length
-}
-
-async function generateHero() {
-  const { width: sourceWidth } = await sharp(HERO_SOURCE).metadata()
-  for (const width of HERO_WIDTHS) {
-    if (width > sourceWidth) {
-      throw new Error(`Hero width ${width} exceeds the ${sourceWidth}px source.`)
-    }
-    const resized = () => sharp(HERO_SOURCE).resize({ width, withoutEnlargement: true })
-    await emit(resized().avif(AVIF), join(PHOTOS_OUT, `hero-campus-${width}.avif`))
-    await emit(resized().webp(WEBP), join(PHOTOS_OUT, `hero-campus-${width}.webp`))
-  }
-  await emit(sharp(HERO_SOURCE).jpeg(JPEG), join(PHOTOS_OUT, 'hero-campus.jpg'))
-}
-
-async function generateSectionPhotos() {
-  for (const [source, base] of SECTION_PHOTOS) {
-    const src = join(PHOTO_SOURCE, source)
-    await emit(sharp(src).jpeg(JPEG), join(PHOTOS_OUT, `${base}.jpg`))
-    await emit(sharp(src).avif(AVIF), join(PHOTOS_OUT, `${base}.avif`))
-    await emit(sharp(src).webp(WEBP), join(PHOTOS_OUT, `${base}.webp`))
-  }
 }
 
 async function generateAboutPhotos() {
@@ -197,35 +134,6 @@ async function generateOrganizerPhotos() {
   for (const file of files.sort()) {
     const src = join(dir, file)
     const base = file.replace(/\.jpg$/, '')
-    await emit(sharp(src).avif(AVIF), join(dir, `${base}.avif`))
-    await emit(sharp(src).webp(WEBP), join(dir, `${base}.webp`))
-  }
-}
-
-async function generateLandmarkPhotos() {
-  const dir = join(ARTWORK, 'landmarks')
-  let files
-  try {
-    // Prefer PNG cutouts (alpha); also refresh JPG companions if present.
-    files = (await readdir(dir)).filter(
-      (name) => name.endsWith('.png') || name.endsWith('.jpg'),
-    )
-  } catch (error) {
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
-      return
-    }
-    throw error
-  }
-  const bases = new Set(files.map((f) => f.replace(/\.(png|jpg)$/, '')))
-  for (const base of [...bases].sort()) {
-    const png = join(dir, `${base}.png`)
-    const jpg = join(dir, `${base}.jpg`)
-    let src = png
-    try {
-      await stat(png)
-    } catch {
-      src = jpg
-    }
     await emit(sharp(src).avif(AVIF), join(dir, `${base}.avif`))
     await emit(sharp(src).webp(WEBP), join(dir, `${base}.webp`))
   }
@@ -307,12 +215,9 @@ function kb(bytes) {
   return `${(bytes / 1024).toFixed(1)} KB`
 }
 
-await generateHero()
-await generateSectionPhotos()
 await generateAboutPhotos()
 await generateSponsorsPhotos()
 await generateOrganizerPhotos()
-await generateLandmarkPhotos()
 const brandInk = await generateBrandMasks()
 await generateAppIcons()
 
@@ -323,12 +228,6 @@ for (const { path, bytes } of written) {
 }
 console.log(`\n${written.length} derivatives, ${kb(total)} on disk.`)
 
-// The two strings that have to match the hand-written copies in the app.
-const srcset = (ext) =>
-  HERO_WIDTHS.map((w) => `/artwork/photos/hero-campus-${w}.${ext} ${w}w`).join(', ')
-console.log(`\nHero AVIF srcset:\n  ${srcset('avif')}`)
-console.log(`Hero WebP srcset:\n  ${srcset('webp')}`)
-
 // The mark geometry the app has to agree with. `aspect-ratio` in
 // src/components/Wordmark.tsx is built from exactly these numbers.
 for (const [base, { width, height }] of Object.entries(brandInk)) {
@@ -337,14 +236,3 @@ for (const [base, { width, height }] of Object.entries(brandInk)) {
   )
 }
 
-// The realistic first load: the widest hero tier, in one format.
-const heroStat = await stat(HERO_SOURCE)
-for (const ext of ['avif', 'webp']) {
-  const heroTop = written.find((w) =>
-    w.path.endsWith(`hero-campus-${HERO_WIDTHS.at(-1)}.${ext}`),
-  )
-  console.log(
-    `\nFirst load, ${ext.toUpperCase()} path (widest hero tier): ${kb(heroTop.bytes)}` +
-      (ext === 'avif' ? `  [source PNG is ${kb(heroStat.size)}]` : ''),
-  )
-}

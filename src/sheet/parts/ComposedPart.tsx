@@ -20,8 +20,8 @@ import { PrizeTracksSection } from '../../components/sections/PrizeTracksSection
 function NoProps({ children }: { children: ReactNode }) {
   return (
     <Block title="Props">
-      <p className="text-body text-pine">
-        None. <span className="text-pine/90">{children}</span>
+      <p className="text-body text-ink">
+        None. <span className="text-ink">{children}</span>
       </p>
     </Block>
   )
@@ -33,27 +33,27 @@ export function ComposedPart() {
       id="composed"
       number="3"
       title="Composed, as used"
-      intro="The header, content sections and the footer — imported from src/components/ and rendered here unmodified. The landing page now runs: header, hero, drift-c, EventOverview, drift-a, SponsorsPreview, drift-b, PrizeTracks, drift-c, Register, drift-a, Questions, cloud-to-frost, footer. About, Get involved and Contact are no longer on the landing page and are kept here for reference."
+      intro="The header, content sections and the footer — imported from src/components/ and rendered here unmodified. The landing page now runs: header, hero, drift-a, SponsorsPreview, drift-b, PrizeTracks, drift-c, Register, drift-a, Questions, cloud-to-frost, footer. About, Get involved and Contact are no longer on the landing page and are kept here for reference."
     >
       <Entry
         name="SiteHeader"
         path="src/components/SiteHeader.tsx"
-        use="The fixed page bar: the lockup, five destinations and the Discord CTA, collapsing behind a toggle below 768px."
+        use="The fixed page bar: the lockup, three text destinations, Discord as an outlined link and Register as the one filled button. Below 1024px the links and Discord collapse behind a toggle; Register stays in the bar."
       >
         <NoProps>
-          It reads NAV_LINKS and DISCORD_URL from src/lib/links.ts and owns one
+          It reads NAV_LINKS, DISCORD_URL and REGISTER_PATH from src/lib/links.ts and owns one
           piece of state — whether the compact menu is open.
         </NoProps>
 
         <Block title="As rendered">
           <Stage
             label="SiteHeader — live"
-            note="Below 768px the links collapse; the toggle here is real, so open and close it. Escape closes the panel and returns focus to the button."
-            className="sheet-fixed-frame bg-cloud relative h-[26rem] overflow-hidden"
+            note="Below 1024px the links and Discord collapse and Register stays in the bar; the toggle here is real, so open and close it. Escape closes the panel and returns focus to the button."
+            className="sheet-fixed-frame bg-frost relative h-[26rem] overflow-hidden"
           >
             <SiteHeader />
             <div className="px-6 pt-24 sm:px-8 sm:pt-28">
-              <p className="text-caption text-pine/90 max-w-md">
+              <p className="text-caption text-ink max-w-md">
                 The header is <b>position: fixed</b>. This frame carries a
                 transform, which makes it the containing block for fixed
                 descendants — so the bar pins to the top of the frame instead of
@@ -71,8 +71,8 @@ export function ComposedPart() {
             everything that has to clear it — the scroll anchors’{' '}
             <b>scroll-mt-24</b>, the <b>scroll-padding-top</b> in{' '}
             <b>src/index.css</b> — is written against those two numbers. Both the
-            bar and the compact panel are opaque cloud, so every link inside
-            takes <b>LINK_ON_CLOUD</b> and hovers to brick.
+            bar and the compact panel are translucent frost, and every link
+            inside takes <b>LINK_ON_CLOUD</b>’s underline hover.
           </Rule>
           <Caption>
             The compact panel stays mounted and is hidden with the{' '}
@@ -88,22 +88,21 @@ export function ComposedPart() {
       <Entry
         name="AboutSection"
         path="src/components/sections/AboutSection.tsx"
-        use="The page’s masthead. It sits directly under the hero: mission statement with Baxter, the campus aerial, and the Discord and mailing-list CTAs."
+        use="The club’s mission statement with the Discord and mailing-list CTAs, beside a block of ice. It is no longer on a public page."
       >
         <NoProps>Copy is written into the component.</NoProps>
         <Block title="As rendered">
           <Stage
-            label="AboutSection — on cloud"
-            note="On this sheet it means a second <h1> on the page. That is a property of the sheet, not of the section."
+            label="AboutSection"
           >
             <AboutSection />
           </Stage>
         </Block>
         <Block title="Notes">
           <Rule>
-            The hero above it carries the page’s <b>&lt;h1&gt;</b> across the
-            top of the photograph, under a pine gradient wash and a text-shadow
-            confined to the top band of the frame — so this section’s heading
+            The hero above it carries the page’s <b>&lt;h1&gt;</b> — the
+            “HackBU 2027” lockup, on a frost scrim across the bottom of the 3D
+            scene — so this section’s heading
             is an <b>&lt;h2&gt;</b> and the outline runs h1 → h2 with no skipped
             level. (When the hero was an illustration, cloud text over its
             painted sky measured <b>1.43:1</b> and the copy lived down here
@@ -131,10 +130,8 @@ export function ComposedPart() {
         <Block title="Notes">
           <Rule>
             The card is frost, so the mailing-list link inside it uses{' '}
-            <b>LINK_ON_FROST</b> and underlines on hover — brick on frost is
-            4.03:1 and fails AA. The section band around the card is cloud,
-            which is why the rule is “pick by the surface the link is painted
-            on, not by the component it lives in”.
+            <b>LINK_ON_FROST</b> and underlines on hover. A colour-change hover
+            would fail contrast on the ice ground.
           </Rule>
           <Caption>
             The button here is the one call site that stretches the{' '}
@@ -155,7 +152,7 @@ export function ComposedPart() {
         </NoProps>
         <Block title="As rendered">
           <Stage
-            label="QuestionsSection — on cloud"
+            label="QuestionsSection"
             note="RevealGroup of disclosure rows; each question is a button that toggles its answer."
           >
             <QuestionsSection />
@@ -174,7 +171,7 @@ export function ComposedPart() {
       <Entry
         name="PrizeTracksSection"
         path="src/components/sections/PrizeTracksSection.tsx"
-        use="The prize tracks, on a ring of wide cards that turns continuously. Hover, tap or tab to a track and the ring turns it to the front, where the card types its description in — every line at once, each a beat behind the one above. It sits between the sponsors and registration sections on the landing page."
+        use="The prize tracks, as a wall of ice blocks laid in an igloo's courses — two on top, three below. Choosing a block lifts it out of the wall and shows the track in full in the panel beside it. It sits between the sponsors and registration sections on the landing page."
       >
         <NoProps>
           The five tracks, their descriptions and the judging criteria are
@@ -183,28 +180,27 @@ export function ComposedPart() {
         </NoProps>
         <Block title="As rendered">
           <Stage
-            label="PrizeTracksSection — on cloud"
-            note="Live: hover a card (or tab to one) to turn it to the front and read it; move away and the ring carries on from the same angle. Under prefers-reduced-motion the five cards stand flat in a wrapping row instead."
+            label="PrizeTracksSection"
+            note="Live: click a block, or tab to the wall and use the arrow keys. With WebGL the chosen block slides out of the 3D wall and glows (at once, under reduced motion); in the CSS fallback it rises and gets an ink rim (the rim alone under reduced motion)."
           >
             <PrizeTracksSection />
           </Stage>
         </Block>
         <Block title="Notes">
           <Rule>
-            Nothing re-renders to turn the ring: one <b>requestAnimationFrame</b>{' '}
-            loop writes its <b>transform</b> directly and stops whenever
-            anything holds it — a hovered, focused or tapped card, the pause
-            button, the section being off-screen, the tab being hidden. Cards
-            turned more than about 75° away take <b>pointer-events: none</b>, so
-            nothing on the far side can be hovered through the gaps.
+            The wall is a WAI-ARIA <b>tablist</b> and the panel its{' '}
+            <b>tabpanel</b>: Tab reaches the chosen block, the arrow keys, Home
+            and End move between blocks and show each as they land. The first
+            track is chosen from the start, so the prerendered HTML already
+            holds a full panel.
           </Rule>
           <Caption>
-            Each card is a <b>&lt;button&gt;</b> whose <b>aria-describedby</b>{' '}
-            points at a visually hidden copy of the full description, so a
-            screen reader never meets the half-typed text; the typed copy in
-            the card is <b>aria-hidden</b>. The 3D geometry and the reduced-motion
-            layout are the <b>.prize-*</b> block at the end of{' '}
-            <b>src/index.css</b>.
+            Where WebGL runs the blocks are 3D ice (<b>src/three/iceWall.ts</b>),
+            drawn behind the buttons with each track etched into its face;
+            otherwise they are CSS — gradients of <b>cloud</b>, <b>frost</b>{' '}
+            and <b>horizon</b>, a bevel of inset shadows, chamfered corners
+            where the browser supports <b>corner-shape</b> — in the{' '}
+            <b>.ice-*</b> block of <b>src/index.css</b>.
           </Caption>
         </Block>
       </Entry>
@@ -227,8 +223,7 @@ export function ComposedPart() {
         </Block>
         <Block title="Notes">
           <Caption>
-            On cloud, so both links take <b>LINK_ON_CLOUD</b> and hover to
-            brick.
+            Both links take <b>LINK_ON_CLOUD</b> and underline on hover.
           </Caption>
         </Block>
       </Entry>
@@ -255,8 +250,7 @@ export function ComposedPart() {
             Every link here is <b>LINK_ON_FROST</b>, and each column title is an{' '}
             <b>Eyebrow as="h2"</b> — in the footer an eyebrow really is the
             heading of the list beneath it, which is the whole reason the{' '}
-            <b>as</b> prop exists. The bottom rule is <b>stone/60</b>, the only
-            place besides the get-involved card that stone appears.
+            <b>as</b> prop exists.
           </Rule>
         </Block>
       </Entry>

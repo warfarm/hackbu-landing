@@ -79,7 +79,7 @@ export function PhotoCarousel({
             aria-roledescription="slide"
             aria-label={`${index + 1} of ${photos.length}`}
             // Every other panel drops lower, so the strip steps up and down.
-            className={`border-frost aspect-[4/5] w-[78%] shrink-0 snap-start overflow-hidden rounded-2xl border-2 md:w-[calc(50%-0.25rem)] ${index % 2 === 1 ? 'mt-8 md:mt-16' : ''}`}
+            className={`border-ink/20 aspect-[4/5] w-[78%] shrink-0 snap-start overflow-hidden rounded-2xl border-2 md:w-[calc(50%-0.25rem)] ${index % 2 === 1 ? 'mt-8 md:mt-16' : ''}`}
           >
             <picture>
               <source type="image/avif" srcSet={photo.avif} />
@@ -133,7 +133,7 @@ function CarouselButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="border-frost text-pine hover:bg-frost focus-visible:outline-pine grid size-11 place-items-center rounded-full border-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
+      className="border-ink/20 text-ink hover:bg-horizon/30 focus-visible:outline-ink grid size-11 place-items-center rounded-none border-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
     >
       <svg
         viewBox="0 0 20 20"

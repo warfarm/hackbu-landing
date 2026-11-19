@@ -1,12 +1,6 @@
 import { Block, Caption, Entry, Rows, Rule, SheetSection } from '../kit'
 import { LINK_ON_CLOUD } from '../../components/ExternalLink'
-import {
-  HERO_ALT,
-  HERO_HEIGHT,
-  HERO_JPG,
-  HERO_SRCSET,
-  HERO_WIDTH,
-} from '../../lib/images'
+import { SnowCanvas } from '../../three/SnowCanvas'
 
 /**
  * Part 4 — the hero, documented rather than embedded.
@@ -15,7 +9,7 @@ import {
  * into this page it would hijack almost two viewports of the sheet's own
  * scrolling to play an animation that is about the top of the landing page,
  * and the sticky stage would be pinned against the sheet's scroll position
- * rather than its own. So what is here instead is the photograph it is made
+ * rather than its own. So what is here instead is the snow scene it is made
  * of, at rest, plus the numbers that drive it.
  *
  * The numbers below are mirrored from src/components/Hero.tsx, which keeps
@@ -30,14 +24,14 @@ type Param = { name: string; value: string; note: string }
 
 const PAN_PARAMS: readonly Param[] = [
   {
-    name: 'PAN_START_SCALE',
-    value: '1.2',
-    note: 'Scale of the photograph at scroll 0, easing to 1 as the pan runs. 1.2 is the most a 1200px source can be magnified before it reads soft on a retina laptop; the photo has no sky-only band, so the old "no buildings at scroll 0" constraint is gone with the illustration.',
+    name: 'camera',
+    value: 'start → end',
+    note: 'In src/three/snowScene.ts (the frame function). The camera starts close over the logo and pulls back and lower as the eased scroll progress runs; its distance is fitted so the logo spans the band between the header and the lockup, and the pitch is solved each frame.',
   },
   {
     name: 'PAN_SCROLL_FRACTION',
     value: '0.75',
-    note: 'The pan completes three-quarters of the way through the pinned scroll (60dvh of it). The last 0.25 (20dvh) is a hold on the finished frame before the stage unpins.',
+    note: 'The camera move completes three-quarters of the way through the pinned scroll (60dvh of it). The last 0.25 (20dvh) is a hold on the finished frame before the stage unpins.',
   },
   {
     name: 'TRACK_HEIGHT',
@@ -49,11 +43,6 @@ const PAN_PARAMS: readonly Param[] = [
     value: 'cubicBezier(0.4, 0, 0.35, 1)',
     note: 'Eases in and out only gently — the user’s own scrolling supplies the timing, and anything steeper reads as the image lagging behind the finger. Exported from src/lib/motion.ts.',
   },
-  {
-    name: 'object-position / transform-origin',
-    value: 'object-[50%_0%] · origin-top',
-    note: 'Pins the photo’s top edge to the top of the stage before any transform, so scale alone drives the pan and there is no translate. 50% horizontally is the Library Tower, which stands at the centre of the frame — so one value serves every screen.',
-  },
 ]
 
 /* -------------------------------------------------------------------------- */
@@ -64,21 +53,20 @@ export function HeroPart() {
       id="hero"
       number="4"
       title="The hero"
-      intro="The one component on this sheet that is not rendered live. It is a 180dvh scroll track with a sticky stage inside it: embedded here it would take almost two viewports of the sheet’s scrolling and pin itself against the wrong scroll position. What follows is its photograph at rest and the numbers that drive it."
+      intro="The one component on this sheet that is not rendered live. It is a 180dvh scroll track with a sticky stage inside it: embedded here it would take almost two viewports of the sheet’s scrolling and pin itself against the wrong scroll position. What follows is its snow scene at rest and the numbers that drive it."
     >
       <Entry
         name="Hero"
         path="src/components/Hero.tsx"
-        use="The top of the landing page, and nothing else: a real aerial photograph of the whole campus under snow, with the page’s <h1> across the top of the frame."
+        use="The top of the landing page, and nothing else: the HackBU logo buried in snow, which the pointer brushes away, with the “HackBU 2027” lockup — the page’s <h1>, dates, venue, countdown and Register — on a frost scrim across the bottom."
       >
         <Block title="See it live">
-          <p className="text-body text-pine">
-            {/* On cloud, so the cloud treatment: brick hover. */}
-            <a href="/" className={`${LINK_ON_CLOUD} underline underline-offset-4`}>
+          <p className="text-body text-ink">
+                        <a href="/" className={`${LINK_ON_CLOUD} underline underline-offset-4`}>
               Open the landing page
             </a>{' '}
-            and scroll: the photograph opens at a slight zoom with its top
-            edge pinned and settles to its full frame over the first 60dvh.
+            move the pointer over the snow to uncover the logo, then scroll: the
+            camera pulls back over the first 60dvh.
           </p>
         </Block>
 
@@ -93,55 +81,44 @@ export function HeroPart() {
               {
                 name: '<div data-hero-stage>',
                 value: 'sticky top-0, h-dvh',
-                note: 'Exactly one viewport tall, and the element that clips the scaled artwork.',
+                note: 'Exactly one viewport tall. Its CSS gradient of haze, horizon and frost gives the banner its colour before any script runs, and keeps it without WebGL.',
               },
               {
-                name: '<div data-hero-artwork>',
-                value: 'the photograph',
-                note: 'A <picture> — AVIF, then WebP, then the JPEG as the <img src>. It opens at 1.2x and eases back to 1.',
+                name: '<SnowCanvas variant="hero">',
+                value: 'the scene',
+                note: 'The WebGL scene: terrain, sky, the logo slab and the snow over it, mist, and survey marks, lit by a low sun and the sky, with bloom and a film finish. It is told where the header ends and the lockup begins, and frames the logo between them. three.js loads on demand, in the browser only.',
               },
             ]}
           />
         </Block>
 
-        <Block title="The hero photograph, at rest">
-          <div className="border-frost overflow-hidden rounded-xl border">
-            <picture>
-              <source type="image/avif" srcSet={HERO_SRCSET.avif} sizes="(min-width: 64rem) 60rem, 92vw" />
-              <source type="image/webp" srcSet={HERO_SRCSET.webp} sizes="(min-width: 64rem) 60rem, 92vw" />
-              <img
-                src={HERO_JPG}
-                alt={HERO_ALT}
-                width={HERO_WIDTH}
-                height={HERO_HEIGHT}
-                decoding="async"
-                loading="lazy"
-                className="block h-auto w-full"
-              />
-            </picture>
+        <Block title="The hero scene, at rest">
+          <div className="border-ink/20 from-haze/60 via-horizon/40 to-frost overflow-hidden border bg-gradient-to-b">
+            <SnowCanvas variant="hero" atRest className="aspect-[16/9] w-full" />
           </div>
           <Caption>
-            public/artwork/photos/hero-campus.jpg — {HERO_WIDTH}×{HERO_HEIGHT},
-            with AVIF and WebP derivatives from 640 up to the source’s own
-            1200. This is the frame the pan ends on; it opens at 1.2 times
-            this size with the top edge pinned, so the foreground plaza is
-            what the settle brings in.
+            src/three/snowScene.ts, the <b>hero</b> variant, drawn live at the
+            frame the camera move ends on. Everything in it is built in code
+            from the palette tokens, apart from the two logo masks it borrows
+            from public/brand/.
           </Caption>
         </Block>
 
-        <Block title="Pan parameters">
+        <Block title="Camera-move parameters">
           <Rows rows={PAN_PARAMS} />
           <Caption>
-            These are module-private constants in src/components/Hero.tsx, not
-            props — <b>&lt;Hero&gt;</b> takes none. Nothing configures the hero
-            from outside.
+            These are module-private constants — the camera’s in
+            src/three/snowScene.ts, the scroll track’s in
+            src/components/Hero.tsx — not props: <b>&lt;Hero&gt;</b> takes
+            none. Nothing configures the hero from outside.
           </Caption>
         </Block>
 
         <Block title="Reduced motion">
           <Rule>
-            Under <b>prefers-reduced-motion</b> the pan is pinned to its end
-            state — scale 1, the whole photograph — <b>and the track collapses
+            Under <b>prefers-reduced-motion</b> the camera is pinned to its end
+            state and one still frame is drawn, with no falling snow — <b>and
+            the track collapses
             from 180dvh to h-dvh</b>. Freezing the animation alone would strand
             the reader in most of a viewport of dead scroll space: a component
             that buys scroll distance has to give it back.

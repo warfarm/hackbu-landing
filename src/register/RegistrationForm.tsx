@@ -47,7 +47,7 @@ type Status =
   | { state: 'success'; email: string }
   | { state: 'error'; message: string }
 
-const CARD = 'border-frost bg-frost rounded-3xl border p-6 sm:p-10'
+const CARD = 'hud-panel rounded-3xl border p-6 sm:p-10'
 const LINK = `${LINK_ON_FROST} underline underline-offset-4`
 
 /**
@@ -112,14 +112,14 @@ function EmailStep({ onContinue }: { onContinue: (email: string) => void }) {
   return (
     <form onSubmit={handleSubmit} className={CARD}>
       <Eyebrow>Step 1 of 2</Eyebrow>
-      <p className="font-display text-display-md text-pine mt-4 font-semibold">
+      <p className="font-display text-display-md text-ink mt-4 font-semibold">
         Start with your email
       </p>
-      <p className="text-body text-pine mt-3 max-w-xl">
+      <p className="text-body text-ink mt-3 max-w-xl">
         We’ll send your confirmation and decision here, and you’ll use it to sign
         in and check your application.
       </p>
-      <label htmlFor="reg-start-email" className="text-body text-pine mt-8 block font-medium">
+      <label htmlFor="reg-start-email" className="text-body text-ink mt-8 block font-medium">
         Email
         <RequiredMark />
       </label>
@@ -252,13 +252,13 @@ function DetailsStep({
       <div
         ref={statusRef}
         tabIndex={-1}
-        className="border-frost bg-frost rounded-3xl border p-8 focus:outline-none sm:p-12"
+        className="hud-panel rounded-3xl border p-8 focus:outline-none sm:p-12"
       >
         <Eyebrow>You’re registered</Eyebrow>
-        <p className="font-display text-display-md text-pine mt-4 font-semibold">
+        <p className="font-display text-display-md text-ink mt-4 font-semibold">
           Thanks for registering for HackBU!
         </p>
-        <p className="text-body text-pine mt-4 max-w-xl">
+        <p className="text-body text-ink mt-4 max-w-xl">
           We sent a confirmation to <strong className="font-medium">{status.email}</strong>.
           We’ll email you again once your application has been reviewed. If it
           doesn’t show up, check your spam folder or email{' '}
@@ -268,7 +268,7 @@ function DetailsStep({
           />
           .
         </p>
-        <p className="text-body text-pine mt-4">
+        <p className="text-body text-ink mt-4">
           <ExternalLink
             href={APPLICATION_PATH}
             className={`${LINK_ON_FROST} underline underline-offset-4`}
@@ -296,11 +296,11 @@ function DetailsStep({
       <p
         ref={headingRef}
         tabIndex={-1}
-        className="font-display text-display-md text-pine mt-4 font-semibold focus:outline-none"
+        className="font-display text-display-md text-ink mt-4 font-semibold focus:outline-none"
       >
         Tell us about yourself
       </p>
-      <p className="text-body text-pine mt-3">
+      <p className="text-body text-ink mt-3">
         Registering as <strong className="font-medium">{email}</strong>{' '}
         <button
           type="button"
@@ -318,7 +318,7 @@ function DetailsStep({
           if (fields.length === 0) return null
           return (
             <fieldset key={group.title} disabled={submitting}>
-              <legend className="font-display text-display-md text-pine font-semibold">
+              <legend className="font-display text-display-md text-ink font-semibold">
                 {group.title}
               </legend>
               <div className="mt-6 grid gap-6 sm:grid-cols-2">
@@ -346,7 +346,7 @@ function DetailsStep({
         <button type="submit" className={BUTTON} disabled={submitting}>
           {submitting ? 'Submitting…' : 'Submit registration'}
         </button>
-        <p className="text-caption text-pine/90">
+        <p className="text-caption text-ink">
           Fields marked <span aria-hidden="true">*</span>
           <span className="sr-only">with an asterisk</span> are required.
         </p>
@@ -368,10 +368,10 @@ function FieldControl({ field }: { field: Field }) {
           name={field.key}
           type="checkbox"
           required={field.required}
-          className="accent-pine border-pine mt-1 size-5 shrink-0 rounded focus-visible:outline-pine focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="accent-ink border-ink mt-1 size-5 shrink-0 rounded focus-visible:outline-ink focus-visible:outline-2 focus-visible:outline-offset-2"
         />
         <div>
-          <label htmlFor={id} className="text-body text-pine">
+          <label htmlFor={id} className="text-body text-ink">
             {field.label}
             {field.required ? <RequiredMark /> : null}
           </label>
@@ -392,7 +392,7 @@ function FieldControl({ field }: { field: Field }) {
 
   return (
     <div className={span}>
-      <label htmlFor={id} className="text-body text-pine block font-medium">
+      <label htmlFor={id} className="text-body text-ink block font-medium">
         {field.label}
         {field.required ? <RequiredMark /> : null}
       </label>
@@ -423,7 +423,7 @@ function FieldControl({ field }: { field: Field }) {
             accept={field.accept}
             required={field.required}
             aria-describedby={helpId}
-            className={`${INPUT} file:bg-pine file:text-cloud file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:px-4 file:py-2 file:font-medium`}
+            className={`${INPUT} file:bg-ink file:text-frost file:mr-4 file:cursor-pointer file:rounded-none file:border-0 file:px-4 file:py-2 file:font-medium`}
           />
         ) : field.type === 'textarea' ? (
           <textarea
@@ -449,7 +449,7 @@ function FieldControl({ field }: { field: Field }) {
         )}
       </div>
       {helpId ? (
-        <p id={helpId} className="text-caption text-pine/90 mt-2">
+        <p id={helpId} className="text-caption text-ink mt-2">
           {field.help}
         </p>
       ) : null}
@@ -460,7 +460,7 @@ function FieldControl({ field }: { field: Field }) {
 function RequiredMark() {
   return (
     <>
-      <span aria-hidden="true" className="text-brick ml-1">
+      <span aria-hidden="true" className="text-ink ml-1">
         *
       </span>
       <span className="sr-only"> (required)</span>

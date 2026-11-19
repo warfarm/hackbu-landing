@@ -13,7 +13,7 @@ import { Wordmark } from '../../components/Wordmark'
 import { SnowdriftDivider } from '../../components/SnowdriftDivider'
 import { Reveal, RevealGroup, RevealItem } from '../../components/Reveal'
 import { usePrefersReducedMotion } from '../../lib/motion'
-import { CONTACT_EMAIL, DISCORD_URL, ORGANIZERS_ANCHOR } from '../../lib/links'
+import { CONTACT_EMAIL, DISCORD_URL, ORGANIZERS_ANCHOR, REGISTER_PATH } from '../../lib/links'
 
 /**
  * Part 2 — the standalone primitives, in isolation, with every variant.
@@ -113,16 +113,18 @@ function ButtonEntry() {
     <Entry
       name="ButtonLink"
       path="src/components/ButtonLink.tsx"
-      use="The Discord conversion action. If it is not the Discord CTA, it is a text link, not a button."
+      use="The site's buttons that are links: Register (the register tone), the header's outlined Discord link (outline), and the content sections' solid ink buttons (the default). If it is none of those, it is a text link, not a button."
     >
       <Block title="Props">
         <Props
           rows={[
-            { name: 'href', type: 'string', note: 'Passed through to <ExternalLink>, so it always opens in a new tab.' },
+            { name: 'href', type: 'string', note: 'Passed through to <ExternalLink>: same-site paths navigate in place, anything else opens in a new tab.' },
             CHILDREN_ROW,
-            { name: 'size', type: "'sm' | 'md' | 'lg'", fallback: "'md'", note: 'The only axis of variation.' },
+            { name: 'size', type: "'sm' | 'md' | 'lg'", fallback: "'md'", note: 'Padding and text step. sm in the header, md in the compact menu, lg in the sections.' },
+            { name: 'tone', type: "'ink' | 'register' | 'outline'", fallback: "'ink'", note: 'ink: solid ink, the sections’ buttons. register: horizon fill with an ink label and border, for Register only. outline: the same ink border with no fill, for Discord in the header.' },
             CLASSNAME_ROW,
             { name: 'onClick', type: '() => void', fallback: 'undefined', note: 'Used by the compact header menu to close itself.' },
+            { name: 'aria-current', type: "'page'", fallback: 'undefined', note: 'Set by the header on Register when /register is the page being shown.' },
           ]}
         />
       </Block>
@@ -141,33 +143,57 @@ function ButtonEntry() {
             </ButtonLink>
           </div>
           <Caption>
-            sm (px-4 py-2, text-caption) · md (px-6 py-3, text-body) · lg (px-8
-            py-4, text-lede). Header nav uses sm, the compact menu md, the
+            sm (px-3 py-2, 0.75rem) · md (px-5 py-3, text-caption) · lg (px-7
+            py-4, text-body). Header nav uses sm, the compact menu md, the
             intro and get-involved CTAs lg.
           </Caption>
         </Ground>
       </Block>
 
+      <Block title="The three tones">
+        <Ground tone="cloud" label="on cloud">
+          <div className="flex flex-wrap items-center gap-4">
+            <ButtonLink href={REGISTER_PATH} size="sm" tone="register">
+              Register
+            </ButtonLink>
+            <ButtonLink href={DISCORD_URL} size="sm" tone="outline">
+              Discord
+            </ButtonLink>
+            <ButtonLink href={DISCORD_URL} size="sm">
+              Join the Discord
+            </ButtonLink>
+          </div>
+          <Caption>
+            register (horizon, ink label 4.99:1, ink border) · outline (ink
+            border, no fill) · ink, the default. horizon against cloud is only
+            1.49:1, so on cream the ink border is what draws the button&apos;s
+            edge.
+          </Caption>
+        </Ground>
+      </Block>
+
       <Block title="States">
-        <ul className="border-frost text-body text-pine border-t">
-          <li className="border-frost border-b py-3">
+        <ul className="border-ink/20 text-body text-ink border-t">
+          <li className="border-ink/20 border-b py-3">
             <b>Rest</b> —{' '}
-            <span className="text-pine/90">
-              bg-pine, text-cloud, rounded-lg.
+            <span className="text-ink">
+              ink: bg-ink, text-frost. register: bg-horizon, text-ink, a
+              ink border. outline: an ink border and label, no fill. All
+              square, in brackets.
             </span>
           </li>
-          <li className="border-frost border-b py-3">
+          <li className="border-ink/20 border-b py-3">
             <b>Hover</b> —{' '}
-            <span className="text-pine/90">
-              the fill turns brick. Hover one above to see it; it is a colour
-              swap, not a transition — nothing in this project animates on
-              hover.
+            <span className="text-ink">
+              ink turns horizon with an ink label; register and outline both
+              fill ink with a frost label. Hover one above to see it; it is a colour
+              swap, not a transition.
             </span>
           </li>
-          <li className="border-frost border-b py-3">
+          <li className="border-ink/20 border-b py-3">
             <b>Focus</b> —{' '}
-            <span className="text-pine/90">
-              a 2px pine outline at offset 2, on <b>focus-visible</b> only, so a
+            <span className="text-ink">
+              a 2px ink outline at offset 2, on <b>focus-visible</b> only, so a
               mouse click never draws one. Tab into the row above to see it.
             </span>
           </li>
@@ -178,9 +204,8 @@ function ButtonEntry() {
         <Rule>
           The ring is drawn at <b>outline-offset-2</b>, so what it has to stand
           out against is the surface around the button, not the button. Every
-          button on the page sits on cloud or frost, where a pine ring measures
-          6.83:1 and 5.76:1 — one ring colour covers the whole page. The fill
-          is pine (the site green) at rest and brick on hover.
+          button on the page sits on frost, where an ink ring measures 6.28:1 —
+          one ring colour covers the whole page, the hero included.
         </Rule>
       </Block>
     </Entry>
@@ -199,7 +224,7 @@ function LinkEntry() {
       <Block title="Props">
         <Props
           rows={[
-            { name: 'ExternalLink href', type: 'string', note: 'Renders target="_blank" rel="noopener noreferrer" — always, so the hardening cannot be forgotten.' },
+            { name: 'ExternalLink href', type: 'string', note: 'Off-site links get target="_blank" rel="noopener noreferrer"; same-site paths navigate in place.' },
             { name: 'ExternalLink children', type: 'ReactNode', note: 'Link text.' },
             { name: 'ExternalLink …rest', type: 'AnchorHTMLAttributes', note: 'Everything else spreads onto the <a>.' },
             { name: 'MailLink email', type: 'string', note: 'Becomes href="mailto:{email}". No target — a mail client should not open a throwaway tab.' },
@@ -224,7 +249,7 @@ function LinkEntry() {
                 />
               </li>
             </ul>
-            <Caption>Hover recolours to brick — 4.78:1 on cloud, clears AA.</Caption>
+            <Caption>Hover adds a thick underline.</Caption>
           </Ground>
           <Ground tone="frost" label="LINK_ON_FROST">
             <ul className="flex flex-col gap-3">
@@ -240,20 +265,17 @@ function LinkEntry() {
                 />
               </li>
             </ul>
-            <Caption>Hover thickens an underline instead. Never brick.</Caption>
+            <Caption>The same hover; the name records the surface.</Caption>
           </Ground>
         </div>
       </Block>
 
       <Block title="Why there are two">
         <Rule>
-          <b>brick</b> hover on <b>frost</b> measures <b>4.03:1</b> and fails AA,
-          so it cannot be the hover on that surface — and thickening an
-          underline signals the same thing at no contrast cost. Pick by the
-          background the link is painted on, not by the component it lives in:
-          the header and the content sections are cloud; the footer and the
-          get-involved card are frost. Both strings carry the same pine focus
-          ring at offset 4 (6.83:1 on cloud, 5.76:1 on frost), so the ring needs
+          A colour-change hover would fail contrast on the ice ground, and
+          thickening an underline signals the same thing at no contrast cost.
+          The two names remain so a call site still says what it sits on. Both strings carry the same ink focus
+          ring at offset 4 (6.83:1 on cloud, 6.28:1 on frost), so the ring needs
           no per-surface variant. Typography is deliberately not in these
           strings — only the part that has a contrast answer.
         </Rule>
@@ -273,9 +295,9 @@ function LayoutEntry() {
     >
       <Block title="Container">
         <Props rows={[CHILDREN_ROW, CLASSNAME_ROW]} />
-        <div className="border-frost mt-4 rounded-xl border py-4">
+        <div className="border-ink/20 mt-4 rounded-xl border py-4">
           <Container>
-            <div className="border-stone/60 text-caption text-pine rounded-lg border border-dashed p-4">
+            <div className="border-ink/20 text-caption text-ink rounded-lg border border-dashed p-4">
               The content column: <b>max-w-[120rem]</b>, centred, with{' '}
               <b>px-6</b> gutters and <b>sm:px-8</b> from 640px up.
             </div>
@@ -292,11 +314,11 @@ function LayoutEntry() {
             CLASSNAME_ROW,
           ]}
         />
-        <div className="border-frost bg-cloud mt-4 overflow-hidden rounded-xl border">
+        <div className="border-ink/20 bg-frost mt-4 overflow-hidden rounded-xl border">
           <Section
             id="sheet-demo-section"
             labelledBy="sheet-demo-section-title"
-            className="bg-cloud"
+            className="bg-frost"
           >
             <SectionHeader
               eyebrow="Section + SectionHeader"
@@ -322,7 +344,7 @@ function LayoutEntry() {
           <SectionHeader
             eyebrow="Things people ask us"
             titleId="sheet-demo-header-title"
-            title="Questions newcomers actually have."
+            title="FAQ"
           />
         </Ground>
       </Block>
@@ -352,9 +374,9 @@ function LayoutEntry() {
           </Ground>
         </div>
         <Rule>
-          The colour is <b>pine/90</b>, not <b>haze</b>. haze measures 2.72:1 on
-          cloud, so it cannot legibly carry 12px text; every eyebrow and caption
-          that used it was moved.
+          The colour is full <b>ink</b>, not <b>haze</b>, which cannot legibly
+          carry 12px text. The slashes are decoration and stay out of the
+          accessible name.
         </Rule>
       </Block>
     </Entry>
@@ -366,28 +388,28 @@ function LayoutEntry() {
 const DIVIDERS = [
   {
     variant: 'drift-a' as const,
-    where: 'About → Get involved.',
-    what: 'A frost band with cloud drifts top and bottom: cloud above, cloud below.',
+    where: 'Under the hero, and Registration → Questions.',
+    what: 'A diagonal hairline rising to the right, with survey marks.',
   },
   {
     variant: 'drift-b' as const,
-    where: 'Get involved → Questions.',
-    what: 'The same construction, different beziers — no shape repeats in a row.',
+    where: 'Sponsors → Prize tracks.',
+    what: 'The same construction falling to the right.',
   },
   {
     variant: 'drift-c' as const,
-    where: 'Under the hero, and again Questions → Contact.',
-    what: 'Used twice, placed as far apart as the page allows.',
+    where: 'Prize tracks → Registration.',
+    what: 'A steep rise to the right.',
   },
   {
     variant: 'cloud-to-frost' as const,
-    where: 'Contact → the footer; also Organizers intro → leadership.',
-    what: 'A real colour change: a cloud band with one frost drift settling below.',
+    where: 'Questions → the footer; also Organizers intro → leadership.',
+    what: 'A steeper fall, with two marks.',
   },
   {
     variant: 'frost-to-cloud' as const,
     where: 'Organizers leadership → the team roster.',
-    what: 'The reverse colour change: a frost band with one cloud drift settling below.',
+    what: 'A steeper rise, with two marks.',
   },
 ]
 
@@ -404,34 +426,29 @@ function DividerEntry() {
             {
               name: 'variant',
               type: "'drift-a' | 'drift-b' | 'drift-c' | 'cloud-to-frost' | 'frost-to-cloud'",
-              note: 'Picks the band colour and its paths. There is no other prop.',
+              note: 'Picks the slope and where the marks fall. There is no other prop.',
             },
           ]}
         />
-        <Caption>
-          A <b>sky-to-cloud</b> variant existed for when the hero’s bottom edge
-          was open sky. Nothing rendered it after the hero ended on the snowy
-          plaza instead, and it has been removed.
-        </Caption>
       </Block>
 
       <Block title="All five variants">
         <div className="flex flex-col gap-6">
           {DIVIDERS.map((divider) => (
             <div key={divider.variant}>
-              <p className="text-caption text-pine font-medium">{divider.variant}</p>
-              <p className="text-caption text-pine/90 mt-1">
+              <p className="text-caption text-ink font-medium">{divider.variant}</p>
+              <p className="text-caption text-ink mt-1">
                 {divider.where} {divider.what}
               </p>
-              <div className="border-frost mt-3 overflow-hidden rounded-xl border">
+              <div className="border-ink/20 mt-3 overflow-hidden rounded-xl border">
                 <SnowdriftDivider variant={divider.variant} />
               </div>
             </div>
           ))}
         </div>
         <Caption>
-          Each band is <b>h-24</b>, or <b>h-40</b> from 640px up, with a{' '}
-          <b>1440×160</b> viewBox stretched by{' '}
+          Each is <b>h-16</b>, or <b>h-24</b> from 640px up, with a{' '}
+          <b>1440×96</b> viewBox stretched by{' '}
           <b>preserveAspectRatio="none"</b>. It is <b>aria-hidden</b> — the
           shapes carry no meaning.
         </Caption>
@@ -439,13 +456,8 @@ function DividerEntry() {
 
       <Block title="The rule">
         <Rule>
-          A divider’s band is the colour of the section <b>above</b> it and its
-          drifts are the colour of the section <b>below</b>. The three{' '}
-          <b>drift-*</b> variants are cloud-to-cloud, so the frost band shows
-          through between two cloud shapes and reads as a bank of settled snow
-          rather than a rule. <b>cloud-to-frost</b> and <b>frost-to-cloud</b>{' '}
-          are the real colour changes. Nothing here is symmetric and no edge is
-          straight; add a variant rather than reusing one.
+          A divider is one diagonal “ice cut”: an ink hairline over a faint
+          horizon wedge. Rotate the variants so two in a row do not match.
         </Rule>
       </Block>
     </Entry>
@@ -502,7 +514,7 @@ function RevealEntry({ animate }: { animate: boolean }) {
               <RevealItem
                 as="li"
                 key={label}
-                className="border-frost bg-frost text-caption text-pine rounded-xl border p-4 text-center"
+                className="border-ink/20 bg-frost text-caption text-ink rounded-xl border p-4 text-center"
               >
                 {label}
               </RevealItem>
@@ -513,11 +525,11 @@ function RevealEntry({ animate }: { animate: boolean }) {
             <button
               type="button"
               onClick={() => setRun((count) => count + 1)}
-              className={`${TOGGLE_ON_CLOUD} text-caption rounded-full px-4 py-2`}
+              className={`${TOGGLE_ON_CLOUD} text-caption rounded-none px-4 py-2`}
             >
               Replay
             </button>
-            <p className="text-caption text-pine/90">
+            <p className="text-caption text-ink">
               {prefersReducedMotion
                 ? 'Your system asks for reduced motion, so every reveal on this page renders at rest and nothing animates — including this one. That is the component’s own behaviour, not the sheet’s.'
                 : animate
@@ -531,12 +543,12 @@ function RevealEntry({ animate }: { animate: boolean }) {
       <Block title="A standalone Reveal, with a delay">
         <Ground tone="cloud">
           <Reveal key={`a-${run}`}>
-            <p className="text-body text-pine">
+            <p className="text-body text-ink">
               This block reveals on its own, with no delay.
             </p>
           </Reveal>
           <Reveal key={`b-${run}`} delay={0.3}>
-            <p className="text-body text-pine mt-3">
+            <p className="text-body text-ink mt-3">
               …and this one is held 0.3s behind it.
             </p>
           </Reveal>

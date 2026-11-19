@@ -3,13 +3,13 @@ import { useRef, useState, type KeyboardEvent } from 'react'
 const LENGTH = 6
 
 const CIRCLE =
-  'bg-cloud border-pine text-pine size-11 rounded-full border text-center text-2xl font-semibold ' +
-  'focus-visible:outline-pine focus-visible:outline-2 focus-visible:outline-offset-2 ' +
-  'disabled:opacity-70 sm:size-14'
+  'bg-frost border-ink text-ink aspect-square max-w-11 min-w-0 flex-1 border text-center text-2xl font-semibold ' +
+  'focus-visible:outline-ink focus-visible:outline-2 focus-visible:outline-offset-2 ' +
+  'disabled:opacity-70 sm:max-w-14'
 
 /**
- * Six single-digit circles for the emailed sign-in code. Typing advances,
- * Backspace on an empty circle steps back, and a pasted or autofilled code
+ * Six single-digit boxes for the emailed sign-in code. Typing advances,
+ * Backspace on an empty box steps back, and a pasted or autofilled code
  * (iOS/Android drop the whole code into the first box) is spread across all
  * six. `onChange` reports the digits entered so far; `onComplete` fires once
  * every circle is filled.
@@ -70,7 +70,7 @@ export function CodeInput({
   }
 
   return (
-    <fieldset aria-labelledby={labelledBy} className="flex gap-2 sm:gap-3">
+    <fieldset aria-labelledby={labelledBy} className="flex min-w-0 gap-2 sm:gap-3">
       {digits.map((digit, index) => (
         <input
           key={index}

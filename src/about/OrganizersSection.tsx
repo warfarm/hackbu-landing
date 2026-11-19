@@ -9,14 +9,11 @@ import {
 
 const EMAIL_ON_FROST = `${LINK_ON_FROST} underline underline-offset-4`
 
-/** Portrait frame on cloud — frost fill reads as the empty slot. */
-const PHOTO_ON_CLOUD = 'aspect-[4/5] w-full border-frost bg-frost border'
+/** Portrait frame: the panel reads as the empty slot. */
+const PHOTO_ON_CLOUD = 'aspect-[4/5] w-full hud-panel border'
 
-/**
- * Portrait frame on frost — cloud fill + stone edge so the slot stays visible
- * (frost-on-frost is 1:1; same rule as the get-involved card).
- */
-const PHOTO_ON_FROST = 'aspect-[4/5] w-full border-stone/60 bg-cloud border'
+/** Portrait frame inside a band: the same panel treatment. */
+const PHOTO_ON_FROST = 'aspect-[4/5] w-full hud-panel border'
 
 const SENIOR_ORGANIZERS: {
   role: string
@@ -91,7 +88,6 @@ export function OrganizersSection() {
       <Section
         id="organizers"
         labelledBy="senior-organizers-title"
-        className="bg-frost"
       >
         <Reveal>
           <SectionHeader
@@ -114,7 +110,7 @@ export function OrganizersSection() {
                 lazy
               />
               <Eyebrow className="mt-4">{person.role}</Eyebrow>
-              <p className="font-display text-display-md text-pine mt-2 font-semibold">
+              <p className="font-display text-display-md text-ink mt-2 font-semibold">
                 {person.name}
               </p>
               {person.email ? (
@@ -133,7 +129,7 @@ export function OrganizersSection() {
       <Section
         id="organizer-team"
         labelledBy="organizers-title"
-        className="bg-cloud relative overflow-hidden"
+        className="relative overflow-hidden"
       >
         <div
           aria-hidden
@@ -159,7 +155,7 @@ export function OrganizersSection() {
                   className={PHOTO_ON_CLOUD}
                   lazy
                 />
-                <p className="font-display text-display-md text-pine mt-4 font-semibold">
+                <p className="font-display text-display-md text-ink mt-4 font-semibold">
                   {person.name}
                 </p>
               </RevealItem>

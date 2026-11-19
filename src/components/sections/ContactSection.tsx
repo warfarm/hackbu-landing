@@ -3,7 +3,7 @@ import { ExternalLink, LINK_ON_CLOUD, MailLink } from '../ExternalLink'
 import { Reveal, RevealGroup, RevealItem } from '../Reveal'
 import { CONTACT_EMAIL, ORGANIZERS_ANCHOR } from '../../lib/links'
 
-/* This section is on cloud, so brick is the hover. */
+/* Links on the page ground take the underline hover. */
 const LINK_CLASSES =
   'font-display text-display-md font-semibold underline underline-offset-8 ' +
   LINK_ON_CLOUD
@@ -14,7 +14,7 @@ const LINK_CLASSES =
  */
 export function ContactSection() {
   return (
-    <Section id="contact" labelledBy="contact-title" className="bg-cloud">
+    <Section id="contact" labelledBy="contact-title">
       <Reveal>
         <SectionHeader
           eyebrow="Contact"
@@ -31,7 +31,7 @@ export function ContactSection() {
             email={CONTACT_EMAIL}
             className={`${LINK_CLASSES} mt-4 inline-block`}
           />
-          <p className="text-caption text-pine/90 mt-4">
+          <p className="text-caption text-ink mt-4">
             Goes to the organizing team.
           </p>
         </RevealItem>
@@ -44,7 +44,7 @@ export function ContactSection() {
           >
             Organizers
           </ExternalLink>
-          <p className="text-caption text-pine/90 mt-4">
+          <p className="text-caption text-ink mt-4">
             Who runs the workshops and the hackathon.
           </p>
         </RevealItem>

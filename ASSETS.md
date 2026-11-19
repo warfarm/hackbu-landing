@@ -1,5 +1,13 @@
 # Artwork assets
 
+> **Ice redesign (2026-11).** The landing page ships no campus photographs any
+> more: the hero and the section décor are three.js scenes (`src/three/`). `hackbuimage/`,
+> `public/artwork/photos/` and `public/artwork/landmarks/` are deleted, and
+> `npm run images` no longer produces them. Everything below about `hackbuimage/`,
+> `photos/hero-campus*`, the three section photographs and their byte budgets describes
+> the site before that change and is kept only as a record until this file is rewritten.
+> The About us, Sponsors, organizer and brand sections are still accurate.
+
 The site's images come from two read-only source directories, and everything the browser
 downloads is a derivative in `public/artwork/`:
 

@@ -24,10 +24,10 @@ import { SponsorsContactSection } from './SponsorsContactSection'
 export function SponsorsPage() {
   return (
     <LazyMotion features={domAnimation} strict>
-      <div className="bg-cloud font-sans text-pine min-h-screen">
+      <div className="font-sans text-ink min-h-screen">
         <a
           href="#main"
-          className="bg-cloud text-pine focus:outline-pine sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:px-4 focus:py-2 focus:outline-2"
+          className="bg-frost text-ink focus:outline-ink sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-none focus:px-4 focus:py-2 focus:outline-2"
         >
           Skip to content
         </a>

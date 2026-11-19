@@ -2,9 +2,13 @@ import { Section, SectionHeader } from '../Layout'
 import { ButtonLink } from '../ButtonLink'
 import { ExternalLink, LINK_ON_FROST } from '../ExternalLink'
 import { Reveal } from '../Reveal'
-import { SectionPhoto } from '../SectionPhoto'
-import { APPLICATION_PATH, REGISTER_PATH } from '../../lib/links'
-import { SECTION_PHOTOS } from '../../lib/images'
+import { SnowCanvas } from '../../three/SnowCanvas'
+import {
+  APPLICATION_PATH,
+  HACKATHON_DATES,
+  REGISTER_PATH,
+  VENUE,
+} from '../../lib/links'
 
 /**
  * "Registration" — the conversion point of the landing page, and the reason
@@ -18,8 +22,8 @@ import { SECTION_PHOTOS } from '../../lib/images'
  *     ("Registration opens in December", "sign up to be notified") is gone
  *     now that the form is live at /register.
  *   - the landing page's old Get involved section — the frost card with the
- *     page's largest button and a demoted text link under a hairline, and the
- *     snow-walk photograph as a bleed down the window's right edge. That card
+ *     page's largest button and a demoted text link under a hairline, and a
+ *     picture as a bleed down the window's right edge. That card
  *     was built to be the page's single conversion action, which is exactly
  *     this section's job; the button now says "Register" instead of "Join the
  *     Discord".
@@ -33,23 +37,22 @@ import { SECTION_PHOTOS } from '../../lib/images'
  * sends someone off to find a file halfway through the form.
  *
  * **Layout.** From `md` up the header and the card are held to half the
- * column and the photograph is a `.photo-bleed` (src/index.css) behind them,
- * running off the right edge of the window for the section's full height,
- * feathered into the copy. Both text blocks are `relative z-10`, above the
- * absolutely positioned photo. Below `md` the photo is a 3:2 block in flow
- * between the header and the card.
+ * column and a snow-scene vignette is a `.scene-bleed` (src/index.css)
+ * behind them, running off the right edge of the window for the section's
+ * full height, feathered into the copy. It is the `igloo` scene — a
+ * miniature igloo frozen in a block of ice (src/three/). Both text blocks are
+ * `relative z-10`, above the absolutely positioned scene. Below `md` the
+ * scene is a 3:2 block in flow between the header and the card.
  *
- * **Surfaces.** The card is `bg-frost` with a `border-stone/60` edge — frost
- * on frost would measure 1.00:1, an edge that cannot render (P4-3) — so its
- * secondary link takes the frost treatment: underline on hover, never brick
- * (LINK_ON_FROST in ExternalLink.tsx).
+ * **Surfaces.** The card is a `.hud-panel`; its secondary link takes the
+ * underline hover (LINK_ON_FROST in ExternalLink.tsx).
  */
 export function RegisterSection() {
   return (
     <Section
       id="register"
       labelledBy="register-title"
-      className="bg-cloud overflow-x-clip"
+      className="overflow-x-clip"
     >
       <div className="relative flex flex-col">
         <Reveal className="relative z-10 md:max-w-[50%]">
@@ -61,21 +64,22 @@ export function RegisterSection() {
           />
         </Reveal>
 
-        <Reveal className="photo-bleed mt-10 md:mt-0" delay={0.05}>
-          <SectionPhoto
-            photo={SECTION_PHOTOS.snowWalk}
-            className="aspect-[3/2] w-full md:aspect-auto md:h-full"
+        <Reveal className="scene-bleed mt-10 md:mt-0" delay={0.05}>
+          <SnowCanvas
+            variant="igloo"
+            callouts={{ title: ["Registration","Open"], reading: [HACKATHON_DATES.short, VENUE.name] }}
+            className="scene-feather aspect-[3/2] w-full md:aspect-auto md:h-full"
           />
         </Reveal>
 
         <Reveal delay={0.1} className="relative z-10 md:max-w-[50%]">
-          <div className="border-stone/60 bg-frost mt-12 rounded-3xl border p-8 sm:p-12">
+          <div className="hud-panel mt-12 rounded-3xl border p-8 sm:p-12">
             <div className="flex flex-col items-start gap-8">
               <div className="max-w-md">
-                <p className="font-display text-display-md text-pine font-semibold">
+                <p className="font-display text-display-md text-ink font-semibold">
                   Register for HackBU 2027
                 </p>
-                <p className="text-body text-pine mt-3">
+                <p className="text-body text-ink mt-3">
                   Tell us about yourself, your school and what you’d like to
                   build. Have your resume ready — the form asks for one, as a
                   PDF or Word file up to 5 MB. No hackathon experience needed.
@@ -90,7 +94,7 @@ export function RegisterSection() {
               </ButtonLink>
             </div>
 
-            <p className="text-caption text-pine/90 border-stone/60 mt-8 border-t pt-6">
+            <p className="text-caption text-ink border-ink/20 mt-8 border-t pt-6">
               Already registered?{' '}
               <ExternalLink
                 href={APPLICATION_PATH}

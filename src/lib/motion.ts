@@ -33,7 +33,7 @@ import { cubicBezier, useReducedMotion } from 'motion/react'
  * enough to freeze the animation; a component that buys scroll distance (a
  * tall track, a pinned stage) must also give that distance back, or a
  * reduced-motion user is stranded in dead scroll space. See `Hero.tsx`, which
- * collapses its 260dvh track to a single viewport.
+ * collapses its 180dvh track to a single viewport.
  *
  * Note: motion captures the value in `useState` at mount and never re-renders
  * on a change — the underlying media query *is* subscribed to (it updates a

@@ -7,11 +7,8 @@ import type { ReactNode } from 'react'
  * exists so the documented components can be shown *as themselves*, with a
  * frame around them that is visibly not part of what is being documented.
  *
- * It draws on the same nine tokens and the same type scale as the page: cloud
- * and frost for grounds, frost for rules and borders, pine for text, pine/90
- * for labels, brick nowhere (it is the page's interactive accent, and the sheet
- * has no interactions of its own worth spending it on) — except where a real
- * component brings it.
+ * It draws on the same tokens and type scale as the page: a frost ground, ink
+ * at 20% for rules and borders, and ink for text.
  */
 
 /* -------------------------------------------------------------------------- */
@@ -50,16 +47,16 @@ export function SheetSection({
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-28 py-14 sm:py-20">
       <Column>
-        <p className="text-eyebrow text-pine/90 font-medium uppercase">
+        <p className="text-eyebrow text-ink font-medium uppercase">
           Part {number}
         </p>
         <h2
           id={`${id}-title`}
-          className="font-display text-display-lg text-pine mt-3 font-semibold text-balance"
+          className="font-display text-display-lg text-ink mt-3 font-semibold text-balance"
         >
           {title}
         </h2>
-        {intro ? <div className="text-body text-pine mt-4 max-w-2xl">{intro}</div> : null}
+        {intro ? <div className="text-body text-ink mt-4 max-w-2xl">{intro}</div> : null}
         <div className="mt-10 flex flex-col gap-10">{children}</div>
       </Column>
     </section>
@@ -82,13 +79,13 @@ export function Entry({
   children: ReactNode
 }) {
   return (
-    <article className="border-frost rounded-2xl border">
-      <header className="border-frost border-b px-5 py-5 sm:px-7">
-        <h3 className="font-display text-display-md text-pine font-semibold">
+    <article className="border-ink/20 rounded-2xl border">
+      <header className="border-ink/20 border-b px-5 py-5 sm:px-7">
+        <h3 className="font-display text-display-md text-ink font-semibold">
           {name}
         </h3>
-        <p className="text-caption text-pine/90 mt-2 break-words">{path}</p>
-        <p className="text-body text-pine mt-3 max-w-2xl">{use}</p>
+        <p className="text-caption text-ink mt-2 break-words">{path}</p>
+        <p className="text-body text-ink mt-3 max-w-2xl">{use}</p>
       </header>
       <div className="flex flex-col gap-7 px-5 py-6 sm:px-7">{children}</div>
     </article>
@@ -105,7 +102,7 @@ export function Block({
 }) {
   return (
     <section>
-      <h4 className="text-eyebrow text-pine/90 font-medium uppercase">{title}</h4>
+      <h4 className="text-eyebrow text-ink font-medium uppercase">{title}</h4>
       <div className="mt-4">{children}</div>
     </section>
   )
@@ -118,7 +115,7 @@ export function Block({
  */
 export function Rule({ children }: { children: ReactNode }) {
   return (
-    <p className="text-body text-pine border-stone/60 max-w-2xl border-l-2 pl-4">
+    <p className="text-body text-ink border-ink/20 max-w-2xl border-l-2 pl-4">
       {children}
     </p>
   )
@@ -142,25 +139,25 @@ export type PropRow = {
  */
 export function Props({ rows }: { rows: readonly PropRow[] }) {
   return (
-    <dl className="border-frost border-t">
+    <dl className="border-ink/20 border-t">
       {rows.map((row) => (
         <div
           key={row.name}
-          className="border-frost grid gap-x-6 gap-y-1 border-b py-3 md:grid-cols-[minmax(0,10rem)_minmax(0,16rem)_1fr]"
+          className="border-ink/20 grid gap-x-6 gap-y-1 border-b py-3 md:grid-cols-[minmax(0,10rem)_minmax(0,16rem)_1fr]"
         >
-          <dt className="text-caption text-pine font-medium break-words">
+          <dt className="text-caption text-ink font-medium break-words">
             {row.name}
             {row.fallback === undefined ? (
-              <span className="text-pine/90 font-normal"> (required)</span>
+              <span className="text-ink font-normal"> (required)</span>
             ) : null}
           </dt>
-          <dd className="text-caption text-pine/90 break-words">
+          <dd className="text-caption text-ink break-words">
             {row.type}
             {row.fallback !== undefined ? (
-              <span className="text-pine/90"> — default {row.fallback}</span>
+              <span className="text-ink"> — default {row.fallback}</span>
             ) : null}
           </dd>
-          <dd className="text-caption text-pine/90">{row.note}</dd>
+          <dd className="text-caption text-ink">{row.note}</dd>
         </div>
       ))}
     </dl>
@@ -178,17 +175,17 @@ export function Rows({
   rows: readonly { name: string; value: string; note: ReactNode }[]
 }) {
   return (
-    <ul className="border-frost border-t">
+    <ul className="border-ink/20 border-t">
       {rows.map((row) => (
         <li
           key={row.name}
-          className="border-frost grid gap-x-6 gap-y-1 border-b py-3 md:grid-cols-[minmax(0,14rem)_minmax(0,12rem)_1fr]"
+          className="border-ink/20 grid gap-x-6 gap-y-1 border-b py-3 md:grid-cols-[minmax(0,14rem)_minmax(0,12rem)_1fr]"
         >
-          <span className="text-caption text-pine font-medium break-words">
+          <span className="text-caption text-ink font-medium break-words">
             {row.name}
           </span>
-          <span className="text-caption text-pine/90 break-words">{row.value}</span>
-          <span className="text-caption text-pine/90">{row.note}</span>
+          <span className="text-caption text-ink break-words">{row.value}</span>
+          <span className="text-caption text-ink">{row.note}</span>
         </li>
       ))}
     </ul>
@@ -218,13 +215,13 @@ export function Ground({
   className?: string
 }) {
   return (
-    <div className="border-frost overflow-hidden rounded-xl border">
+    <div className="border-ink/20 overflow-hidden rounded-xl border">
       {label ? (
-        <p className="text-eyebrow text-pine/90 border-frost bg-cloud border-b px-4 py-2 font-medium uppercase">
+        <p className="text-eyebrow text-ink border-ink/20 bg-frost border-b px-4 py-2 font-medium uppercase">
           {label}
         </p>
       ) : null}
-      <div className={`${tone === 'cloud' ? 'bg-cloud' : 'bg-frost'} p-5 sm:p-7 ${className}`}>
+      <div className={`${tone === 'cloud' ? 'bg-frost' : 'bg-frost'} p-5 sm:p-7 ${className}`}>
         {children}
       </div>
     </div>
@@ -233,7 +230,7 @@ export function Ground({
 
 /** A caption under a specimen: the measured number, the state, the caveat. */
 export function Caption({ children }: { children: ReactNode }) {
-  return <p className="text-caption text-pine/90 mt-3">{children}</p>
+  return <p className="text-caption text-ink mt-3">{children}</p>
 }
 
 /**
@@ -252,13 +249,13 @@ export function Stage({
   className?: string
 }) {
   return (
-    <figure className="border-frost overflow-hidden rounded-2xl border">
-      <figcaption className="text-eyebrow text-pine/90 border-frost bg-cloud border-b px-4 py-2 font-medium uppercase">
+    <figure className="border-ink/20 overflow-hidden rounded-2xl border">
+      <figcaption className="text-eyebrow text-ink border-ink/20 bg-frost border-b px-4 py-2 font-medium uppercase">
         {label}
       </figcaption>
       <div className={className}>{children}</div>
       {note ? (
-        <p className="text-caption text-pine/90 border-frost bg-cloud border-t px-4 py-3">
+        <p className="text-caption text-ink border-ink/20 bg-frost border-t px-4 py-3">
           {note}
         </p>
       ) : null}

@@ -37,15 +37,14 @@ import {
  * **Meals.** Food is the thing people scan a schedule for, so a meal row is
  * marked twice: a filled dot on the rail instead of a ring, and a "Meal" /
  * "Snack" tag beside the name. The tag is real text — the distinction never
- * rests on the dot's fill alone (WCAG 1.4.1) — and it stays in the pine/frost
- * pair rather than borrowing `brick`, which is the site's one accent and means
- * "act on this".
+ * rests on the dot's fill alone (WCAG 1.4.1) — and it stays in the ink/frost
+ * pair rather than borrowing the accent, which means "act on this".
  *
  * **Layout.** Below `sm` each entry is a single column — time, name,
  * description — beside a rail on the far left, which holds at 360px with room
  * to spare. From `sm` the time moves into a fixed left column and the rail runs
  * between time and name, the conventional timeline shape. From `lg` the two
- * days sit side by side. The rail is decorative (`stone`, a hairline token)
+ * days sit side by side. The rail is decorative (`ink` at 30%)
  * and so is each dot; both are `aria-hidden`.
  *
  * **Motion.** The header is a `<Reveal>`; each day is a `<RevealGroup>`, so its
@@ -67,7 +66,7 @@ function formatTime(time: TimelineEntry['time']): string {
 
 export function TimelineSection() {
   return (
-    <Section id="timeline" labelledBy="timeline-title" className="bg-cloud">
+    <Section id="timeline" labelledBy="timeline-title">
       <Reveal>
         <SectionHeader
           eyebrow="HackBU 2027 • Jan 30 – Jan 31"
@@ -75,8 +74,8 @@ export function TimelineSection() {
           title="The weekend, hour by hour."
           lede="From check-in on Saturday morning to the awards on Sunday afternoon: when the clock starts, when it stops, and when the food shows up."
         />
-        <p className="text-caption text-pine/90 mt-5 max-w-2xl">
-          <strong className="text-pine font-medium">Tentative.</strong> These
+        <p className="text-caption text-ink mt-5 max-w-2xl">
+          <strong className="text-ink font-medium">Tentative.</strong> These
           times are based on our past schedules, mostly last year’s. Final
           times will be posted closer to the event. All times are Eastern.
         </p>
@@ -96,16 +95,16 @@ function TimelineDayColumn({ day }: { day: TimelineDay }) {
 
   return (
     <RevealGroup>
-      <RevealItem className="border-frost flex items-baseline justify-between gap-4 border-b pb-4">
+      <RevealItem className="border-ink/20 flex items-baseline justify-between gap-4 border-b pb-4">
         <h3
           id={headingId}
-          className="font-display text-display-md text-pine font-semibold"
+          className="font-display text-display-md text-ink font-semibold"
         >
           {day.weekday}
         </h3>
         <time
           dateTime={day.date}
-          className="text-caption text-pine/90 font-medium"
+          className="text-caption text-ink font-medium"
         >
           {day.dateLabel}
         </time>
@@ -153,7 +152,7 @@ function TimelineRow({
       {isLast ? null : (
         <span
           aria-hidden="true"
-          className="bg-stone absolute top-2.5 -bottom-2.5 left-[5px] w-0.5 sm:top-3.5 sm:-bottom-3.5 sm:left-[calc(6rem+1.25rem-1px)]"
+          className="bg-ink/30 absolute top-2.5 -bottom-2.5 left-[5px] w-0.5 sm:top-3.5 sm:-bottom-3.5 sm:left-[calc(6rem+1.25rem-1px)]"
         />
       )}
 
@@ -164,24 +163,24 @@ function TimelineRow({
       */}
       <span
         aria-hidden="true"
-        className={`border-pine absolute top-1 left-0 h-3 w-3 rounded-full border-2 sm:top-2 sm:left-[calc(6rem+1.25rem-6px)] ${
-          isFood ? 'bg-pine' : 'bg-cloud'
+        className={`border-ink absolute top-1 left-0 h-3 w-3 rounded-none border-2 sm:top-2 sm:left-[calc(6rem+1.25rem-6px)] ${
+          isFood ? 'bg-ink' : 'bg-frost'
         }`}
       />
 
       <time
         dateTime={`${day.date}T${entry.time}${TIMELINE_UTC_OFFSET}`}
-        className="text-caption text-pine block font-medium tabular-nums sm:text-right"
+        className="text-caption text-ink block font-medium tabular-nums sm:text-right"
       >
         {formatTime(entry.time)}
       </time>
 
       <div className="mt-1 sm:mt-0">
-        <p className="text-body text-pine flex flex-wrap items-center gap-x-3 gap-y-1 font-medium">
+        <p className="text-body text-ink flex flex-wrap items-center gap-x-3 gap-y-1 font-medium">
           <span>{entry.title}</span>
           {entry.food ? <FoodTag kind={entry.food} /> : null}
         </p>
-        <p className="text-caption text-pine/90 mt-1 max-w-lg text-pretty">
+        <p className="text-caption text-ink mt-1 max-w-lg text-pretty">
           {entry.description}
         </p>
       </div>
@@ -190,13 +189,13 @@ function TimelineRow({
 }
 
 /**
- * The "Meal" / "Snack" marker. Frost fill, pine text (well past AA on frost),
+ * The "Meal" / "Snack" marker. Frost fill, ink text (well past AA on frost),
  * and a knife-and-fork glyph that is decoration only — the word carries the
  * meaning, for screen readers and for anyone who does not read the icon.
  */
 function FoodTag({ kind }: { kind: NonNullable<TimelineEntry['food']> }) {
   return (
-    <span className="bg-frost text-pine text-caption inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-medium">
+    <span className="bg-frost text-ink text-caption inline-flex items-center gap-1.5 rounded-none px-2.5 py-0.5 font-medium">
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"

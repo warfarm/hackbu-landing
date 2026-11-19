@@ -20,38 +20,6 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!--
-      LCP preload for the hero photograph.
-
-      The hero <img> lives inside the React bundle, so without this the browser
-      cannot discover it until the module graph has parsed and the app has
-      mounted. `imagesrcset`/`imagesizes` are identical to the <picture>
-      sources in src/components/Hero.tsx (via src/lib/images.ts) after srcset
-      whitespace normalisation (and byte-identical in the built HTML, which is
-      what the browser parses), so the preload and the element resolve to the
-      same URL and the image is fetched once.
-
-      `type="image/avif"` gates the hint on AVIF support, which is the same
-      condition that decides whether <picture> picks the AVIF <source> — so a
-      browser without it skips the preload rather than warming the wrong file,
-      and still gets the WebP source normally. `href` is deliberately omitted:
-      with `imagesrcset` present it is redundant, and a stale `href` is the
-      usual way a preload ends up double-fetching.
-    -->
-    <link
-      rel="preload"
-      as="image"
-      type="image/avif"
-      fetchpriority="high"
-      imagesrcset="
-        /artwork/photos/hero-campus-640.avif 640w,
-        /artwork/photos/hero-campus-960.avif 960w,
-        /artwork/photos/hero-campus-1280.avif 1280w,
-        /artwork/photos/hero-campus-1600.avif 1600w,
-        /artwork/photos/hero-campus-2048.avif 2048w
-      "
-      imagesizes="(min-aspect-ratio: 2048/1151) 120vw, 213.52vh"
-    />
     <meta
       name="description"
       content="HackBU 2027, Binghamton University's hackathon: January 30–31, 2027, in the University Union. Build something in a weekend. No experience required — registration is open."
@@ -92,11 +60,12 @@
 
     <!--
       Mobile browser chrome takes the page ground rather than the UA default.
-      `cloud` (#f7f5ee) from src/index.css's @theme — one of the two literal
-      hexes outside it, the other being public/404.html, which cannot reach the
-      stylesheet either. There is no dark scheme to vary it against.
+      `frost` (#dce3ea) from src/index.css's @theme, written out because a meta
+      tag cannot read the stylesheet. Every root HTML entry and public/404.html
+      carry the same literal, so they change together. There is no dark scheme
+      to vary it against.
     -->
-    <meta name="theme-color" content="#f7f5ee" />
+    <meta name="theme-color" content="#dce3ea" />
 
     <title>HackBU 2027 · Binghamton University's hackathon</title>
   </head>

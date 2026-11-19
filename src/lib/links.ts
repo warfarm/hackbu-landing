@@ -22,15 +22,15 @@ export const GOOGLE_CALENDAR_URL =
 
 /**
  * Embeddable month view of the same public calendar.
- * bgcolor matches `--color-cloud`; title is hidden because the section supplies one.
+ * bgcolor matches `--color-frost`; title is hidden because the section supplies one.
  */
 export const GOOGLE_CALENDAR_EMBED_URL =
   'https://calendar.google.com/calendar/embed?' +
   new URLSearchParams({
     src: GOOGLE_CALENDAR_ID,
     ctz: 'America/New_York',
-    bgcolor: '#f7f5ee',
-    color: '#3c5c48',
+    bgcolor: '#dce3ea',
+    color: '#295374',
     showTitle: '0',
     showPrint: '0',
     showTabs: '1',
@@ -65,20 +65,13 @@ export const REGISTER_PATH = '/register'
 /** Applicant portal: sign in with an email code, view status, RSVP. */
 export const APPLICATION_PATH = '/application'
 
-/**
- * The HackBU 2027 schedule — the timeline section on the Hackathons page
- * (`<section id="timeline">` there). The landing page's event overview links
- * to it rather than repeating a schedule that would drift out of step.
- */
-export const SCHEDULE_ANCHOR = `${HACKATHONS_PATH}#timeline`
-
 /* -------------------------------------------------------------------------- */
 /* HackBU 2027 — dates and venue                                              */
 /* -------------------------------------------------------------------------- */
 
 /**
  * The hackathon's dates, written once. The landing page shows them in the
- * hero, the event overview and the FAQ; `start`/`end` feed `<time dateTime>`
+ * hero (in the lockup and etched into the snow) and the FAQ; `start`/`end` feed `<time dateTime>`
  * so the dates are machine-readable wherever they appear. The dates are the
  * sponsorship packet's (src/sponsors/SponsorshipTiersSection.tsx): Saturday
  * 30 January to Sunday 31 January 2027.
@@ -144,12 +137,15 @@ export const VENUE_DIRECTIONS_URL =
   'https://www.google.com/maps/dir/?' +
   new URLSearchParams({ api: '1', destination: VENUE_QUERY }).toString()
 
-/** Header nav destinations (the Discord CTA is separate). */
+/**
+ * Header nav text links. Registration is not one of them: it is the header's
+ * filled Register button (REGISTER_PATH), and Discord is the outlined one
+ * beside it — see src/components/SiteHeader.tsx.
+ */
 export const NAV_LINKS = [
   { label: 'About Us', href: ABOUT_PATH },
   { label: 'Sponsors', href: SPONSORS_PATH },
   { label: 'Hackathons', href: HACKATHONS_PATH },
-  { label: 'Registration', href: REGISTER_PATH },
 ] as const
 
 /** Site pages split into two footer columns. */

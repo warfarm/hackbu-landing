@@ -14,10 +14,10 @@ import { ApplicationPortal } from './ApplicationPortal'
 export default function ApplicationApp() {
   return (
     <LazyMotion features={domAnimation} strict>
-      <div id="top" className="bg-cloud font-sans text-pine min-h-screen">
+      <div id="top" className="font-sans text-ink min-h-screen">
         <a
           href="#main"
-          className="bg-cloud text-pine focus:outline-pine sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:px-4 focus:py-2 focus:outline-2"
+          className="bg-frost text-ink focus:outline-ink sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-none focus:px-4 focus:py-2 focus:outline-2"
         >
           Skip to content
         </a>
@@ -31,7 +31,7 @@ export default function ApplicationApp() {
                 <Eyebrow>Applicants</Eyebrow>
                 <h1
                   id="application-title"
-                  className="font-display text-display-xl text-pine mt-5 font-semibold text-balance"
+                  className="font-display text-display-xl text-ink mt-5 font-semibold text-balance"
                 >
                   My application
                 </h1>

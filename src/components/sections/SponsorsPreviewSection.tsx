@@ -24,16 +24,14 @@ import { CONTACT_EMAIL, SPONSORS_PATH } from '../../lib/links'
  * (src/sponsors/SponsorshipTiersSection.tsx) — send engineers, judge, sponsor a
  * prize category — so nothing is promised here that the packet does not offer.
  *
- * **Surfaces.** The section is cloud; the call-to-action card is frost with a
- * `stone/60` edge, the same card as the old Get involved section (frost on
- * frost would be an edge that cannot render, P4-3), so its email link takes
- * the frost treatment — underline on hover, never brick (LINK_ON_FROST). The
+ * **Surfaces.** The call-to-action card is a `.hud-panel`; its email link takes
+ * the underline hover (LINK_ON_FROST). The
  * button is the site's <ButtonLink> at `md`: one size below the Registration
  * section's, which is the page's main conversion and keeps the largest one.
  */
 export function SponsorsPreviewSection() {
   return (
-    <Section id="sponsors" labelledBy="sponsors-title" className="bg-cloud">
+    <Section id="sponsors" labelledBy="sponsors-title">
       <Reveal>
         <SectionHeader
           eyebrow="Sponsors"
@@ -44,20 +42,20 @@ export function SponsorsPreviewSection() {
       </Reveal>
 
       <RevealGroup className="mt-12 grid gap-6 md:grid-cols-2">
-        <RevealItem className="border-frost bg-frost/25 flex min-h-[16rem] flex-col items-center justify-center rounded-3xl border p-8 text-center sm:p-12">
-          <p className="font-display text-display-lg text-pine font-semibold">
+        <RevealItem className="hud-panel flex min-h-[16rem] flex-col items-center justify-center rounded-3xl border p-8 text-center sm:p-12">
+          <p className="font-display text-display-lg text-ink font-semibold">
             Coming soon
           </p>
-          <p className="text-caption text-pine/90 mt-3 text-balance">
+          <p className="text-caption text-ink mt-3 text-balance">
             HackBU 2027’s sponsors will be announced here.
           </p>
         </RevealItem>
 
-        <RevealItem className="border-stone/60 bg-frost flex flex-col rounded-3xl border p-8 sm:p-12">
-          <p className="font-display text-display-md text-pine font-semibold">
+        <RevealItem className="hud-panel flex flex-col rounded-3xl border p-8 sm:p-12">
+          <p className="font-display text-display-md text-ink font-semibold">
             Want your company here?
           </p>
-          <p className="text-body text-pine mt-3 max-w-xl">
+          <p className="text-body text-ink mt-3 max-w-xl">
             Meet Binghamton’s student developers, put your API in their hands
             for a weekend, and sponsor a prize category. The tiers, what each
             one includes, and how to request our sponsorship packet are on the
@@ -68,7 +66,7 @@ export function SponsorsPreviewSection() {
               Sponsor HackBU 2027
             </ButtonLink>
           </div>
-          <p className="text-caption text-pine/90 border-stone/60 mt-8 border-t pt-6">
+          <p className="text-caption text-ink border-ink/20 mt-8 border-t pt-6">
             Questions first? Email{' '}
             <MailLink
               email={CONTACT_EMAIL}

@@ -40,10 +40,10 @@ const CALENDAR_LINK_CLASSES =
 export function AboutPage() {
   return (
     <LazyMotion features={domAnimation} strict>
-      <div className="bg-cloud font-sans text-pine min-h-screen">
+      <div className="font-sans text-ink min-h-screen">
         <a
           href="#main"
-          className="bg-cloud text-pine focus:outline-pine sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:px-4 focus:py-2 focus:outline-2"
+          className="bg-frost text-ink focus:outline-ink sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-none focus:px-4 focus:py-2 focus:outline-2"
         >
           Skip to content
         </a>
@@ -51,21 +51,21 @@ export function AboutPage() {
         <SiteHeader currentHref={ABOUT_PATH} />
 
         <main id="main" className="pt-16 sm:pt-20">
-          <Section id="about" labelledBy="about-page-title" className="bg-cloud">
+          <Section id="about" labelledBy="about-page-title">
             <div className="grid items-center gap-10 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14">
               <Reveal>
                 <header>
                   <Eyebrow>About Us</Eyebrow>
                   <h1
                     id="about-page-title"
-                    className="font-display text-display-lg text-pine mt-4 font-semibold text-balance"
+                    className="font-display text-display-lg text-ink mt-4 font-semibold text-balance"
                   >
                     The team behind the hackathon
                   </h1>
-                  <p className="text-lede text-pine mt-5">
+                  <p className="text-lede text-ink mt-5">
                     We host Binghamton University's annual hackathon, organizing, planning, and collaborating with various on campus and off campus partners. Between hackathons we run weekly workshops on campus, open to every major.
                   </p>
-                  <p className="text-lede text-pine mt-5">
+                  <p className="text-lede text-ink mt-5">
                     Experience isn’t necessary — many of our members started with little to no programming. Wanna help organize? Reach out to{' '}
                     <a href="#organizers" className={INLINE_LINK}>
                       an organizer
@@ -76,7 +76,7 @@ export function AboutPage() {
               </Reveal>
 
               <Reveal delay={0.1}>
-                <figure className="border-frost mx-auto aspect-[4/3] w-full max-w-lg overflow-hidden rounded-2xl border md:max-w-none">
+                <figure className="border-ink/20 mx-auto aspect-[4/3] w-full max-w-lg overflow-hidden rounded-2xl border md:max-w-none">
                   <picture>
                     <source
                       type="image/avif"
@@ -105,7 +105,6 @@ export function AboutPage() {
           <Section
             id="workshops"
             labelledBy="workshops-title"
-            className="bg-cloud"
           >
             <div className="grid items-center gap-10 md:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-14">
               <Reveal className="order-last md:order-none">
@@ -123,7 +122,7 @@ export function AboutPage() {
                   title="Weekly workshops and events"
                   lede="Our main recurring event is our weekly workshop, held every Monday at 7:30 PM. We also have occasional special events on other days, sometimes in collaboration with other computer science groups on campus."
                 />
-                <p className="text-lede text-pine mt-5 max-w-2xl">
+                <p className="text-lede text-ink mt-5 max-w-2xl">
                   Each week we walk through building something hands-on — web
                   development one week, mobile the next — covering tools like
                   Python, PyTorch, HTML/CSS, and SQL. There’s no application and
@@ -136,12 +135,12 @@ export function AboutPage() {
             <Reveal delay={0.1}>
               <div id="calendar" className="mt-16 scroll-mt-24 sm:mt-20">
                 <Eyebrow>Calendar</Eyebrow>
-                <p className="text-lede text-pine mt-4 max-w-2xl">
+                <p className="text-lede text-ink mt-4 max-w-2xl">
                   Weekly workshops and special events live on the HackBU
                   calendar. Times and locations may change — check here for the
                   latest.
                 </p>
-                <div className="border-frost bg-cloud mt-8 overflow-hidden rounded-2xl border">
+                <div className="hud-panel mt-8 overflow-hidden rounded-2xl border">
                   <iframe
                     title="HackBU event calendar"
                     src={GOOGLE_CALENDAR_EMBED_URL}
@@ -162,7 +161,7 @@ export function AboutPage() {
                 >
                   Add to Google Calendar
                 </ExternalLink>
-                <p className="text-caption text-pine/90 mt-4">
+                <p className="text-caption text-ink mt-4">
                   Subscribe so events show up in your Google account.
                 </p>
               </RevealItem>
@@ -175,7 +174,7 @@ export function AboutPage() {
                 >
                   Add with iCalendar
                 </ExternalLink>
-                <p className="text-caption text-pine/90 mt-4">
+                <p className="text-caption text-ink mt-4">
                   Works with Apple Calendar, Outlook, and other apps that take
                   an .ics link.
                 </p>

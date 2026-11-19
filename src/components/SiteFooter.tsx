@@ -9,8 +9,7 @@ import { CONTACT_EMAIL, SITE_PAGES, SOCIAL_LINKS } from '../lib/links'
  * dividers are made of.
  */
 
-/* The footer band is frost, so its links underline on hover rather than
-   turning brick — see LINK_ON_FROST in ExternalLink.tsx. */
+/* Footer links underline on hover — see LINK_ON_FROST in ExternalLink.tsx. */
 const FOOTER_LINK_CLASSES = `text-caption ${LINK_ON_FROST}`
 
 const SPLIT = Math.ceil(SITE_PAGES.length / 2)
@@ -19,12 +18,12 @@ const COLUMN_TWO = SITE_PAGES.slice(SPLIT)
 
 export function SiteFooter() {
   return (
-    <footer className="bg-frost">
+    <footer className="border-ink/20 bg-frost/70 border-t">
       <Container className="py-16 sm:py-20">
         <div className="grid gap-12 md:grid-cols-4 md:gap-8">
           <div className="md:col-span-1">
             <Wordmark className="text-2xl" />
-            <p className="text-caption text-pine/90 mt-4 max-w-xs">
+            <p className="text-caption text-ink mt-4 max-w-xs">
               The student tech club at Binghamton University. No experience
               required.
             </p>
@@ -35,12 +34,12 @@ export function SiteFooter() {
           <FooterColumn title="Follow" links={SOCIAL_LINKS} />
         </div>
 
-        <div className="border-stone/60 mt-14 flex flex-col gap-4 border-t pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-ink/20 mt-14 flex flex-col gap-4 border-t pt-8 sm:flex-row sm:items-center sm:justify-between">
           <MailLink
             email={CONTACT_EMAIL}
             className={`${FOOTER_LINK_CLASSES} underline underline-offset-4`}
           />
-          <p className="text-caption text-pine/90">
+          <p className="text-caption text-ink">
             {/*
              * The one value on the page that the server and the client can
              * legitimately disagree about. `npm run build` prerenders this

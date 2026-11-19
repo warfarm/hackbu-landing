@@ -15,14 +15,14 @@ import type { ReactNode } from 'react'
  *
  * 120rem, not the 64rem it started at: on anything up to a 1920px display
  * the column is effectively the window, and the content sits at the gutter —
- * 2rem from the window's edge. The landing page's section photos are bleeds
- * that run from inside the column to the window's right edge
- * (`.photo-bleed`, src/index.css), and against a 64rem column the copy on the
+ * 2rem from the window's edge. The landing page's section vignettes are
+ * bleeds that run from inside the column to the window's right edge
+ * (`.scene-bleed`, src/index.css), and against a 64rem column the copy on the
  * left sat a long way in from the window while the picture touched it — the
  * page read as off-centre. Pushing the copy out to the edge is the layout the
  * bleed was drawn for, and doing it here keeps the header, footer and every
  * section on the same line. The cap only bites on ultrawide screens, where a
- * line of text at the far left and a photo at the far right would stop
+ * line of text at the far left and a scene at the far right would stop
  * reading as one page.
  */
 export function Container({
@@ -55,8 +55,12 @@ export function Section({
     <section
       id={id}
       aria-labelledby={labelledBy}
-      className={`scroll-mt-24 py-20 sm:py-28 ${className}`}
+      className={`relative isolate scroll-mt-24 overflow-x-clip py-20 sm:py-28 ${className}`}
     >
+      {/* The section's name, huge and out of focus, behind its content. */}
+      <span aria-hidden="true" className="ghost-type">
+        {id.replaceAll('-', ' ').toUpperCase()}
+      </span>
       <Container>{children}</Container>
     </section>
   )
@@ -66,7 +70,7 @@ export function Section({
  * The small uppercase label that sits above a headline — section eyebrows,
  * card kickers, footer column titles.
  *
- * One treatment, defined once. The colour is `pine/90` rather than `haze`: haze
+ * One treatment, defined once. The colour is `ink` rather than `haze`: haze
  * is a scene colour and measures 2.72:1 on cloud, so it cannot legibly carry
  * this text at 12px (see the token comment in src/index.css).
  *
@@ -85,7 +89,7 @@ export function Eyebrow({
   className?: string
 }) {
   return (
-    <Tag className={`text-eyebrow text-pine/90 font-medium uppercase ${className}`}>
+    <Tag className={`hud-label text-eyebrow text-ink font-medium uppercase ${className}`}>
       {children}
     </Tag>
   )
@@ -110,11 +114,11 @@ export function SectionHeader({
       <Eyebrow>{eyebrow}</Eyebrow>
       <h2
         id={titleId}
-        className="font-display text-display-lg text-pine mt-4 font-semibold text-balance"
+        className="font-display text-display-lg text-ink mt-4 font-semibold text-balance"
       >
         {title}
       </h2>
-      {lede ? <p className="text-lede text-pine mt-5">{lede}</p> : null}
+      {lede ? <p className="text-lede text-ink mt-5">{lede}</p> : null}
     </header>
   )
 }

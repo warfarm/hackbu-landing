@@ -8,35 +8,63 @@ job: get students, most of them with no hackathon experience, to register. The c
 
 The landing page runs, top to bottom (see the doc comment in `src/App.tsx`):
 
-1. **Banner** — the hero photograph with the page's heading, the dates, the venue and a
-   Register link (`Hero.tsx`).
-2. **What HackBU 2027 is** — when, where, who and team size, and a link to the schedule on
-   the Hackathons page (`EventOverviewSection.tsx`).
-3. **Sponsors** — 2027 sponsors are not confirmed yet, so it says "Coming soon" and points
+1. **Banner** — the hero snow scene with the "HackBU 2027" lockup: the page's heading, the
+   dates, the venue, a countdown and a Register link (`Hero.tsx`).
+2. **Sponsors** — 2027 sponsors are not confirmed yet, so it says "Coming soon" and points
    companies at the Sponsors page (`SponsorsPreviewSection.tsx`).
-4. **Prize tracks** — last year's five tracks on a slowly spinning ring of cards; hovering,
-   tapping or focusing one stops the ring and types its description into a popover beside
-   it (`PrizeTracksSection.tsx`).
-5. **Registration** — the main Register button, and a link to My Application for people
+3. **Prize tracks** — last year's five tracks as a wall of 3D ice blocks laid in igloo courses,
+   each track's icon, number and name etched into its face (`src/three/iceWall.ts`);
+   choosing a block slides it forward, lit from inside, and shows the track in full beside the
+   wall (`PrizeTracksSection.tsx`). The blocks' buttons stay the controls; without WebGL they
+   are CSS ice instead.
+4. **Registration** — the main Register button, and a link to My Application for people
    who have already applied (`RegisterSection.tsx`).
-6. **FAQ** — hackathon questions as disclosures, beside an embedded Google Map of the
+5. **FAQ** — hackathon questions as disclosures, beside an embedded Google Map of the
    University Union with a "Get directions" link (`QuestionsSection.tsx`).
 
 Then the footer. Snowdrift dividers separate the sections.
 
-The hero is a real aerial photograph of the whole campus under snow — the Library Tower at
-the centre, brick buildings and dormitories around it, forested hills behind. On load it
-opens at a slight zoom (`PAN_START_SCALE = 1.2`) with its top edge pinned to the top of the
-screen;
-scrolling eases it back to its full frame, holds for a beat, then scrolls away to the
-content below. The event overview and the registration section each carry one more campus
-photograph, set into the page with feathered edges (`SectionPhoto.tsx` and
-`.photo-feather` in `src/index.css`); the FAQ carries the venue map in that place instead.
+The site's look follows [igloo.inc](https://www.igloo.inc/): a monochrome ice world, one
+glow colour, monospaced instrument-panel type, and a 3D scene that responds to scrolling.
+No asset or code comes from it. The hero (`src/three/`) is the HackBU logo — the same
+masks the header paints — lying under snow on a hillside. Moving a mouse anywhere over the
+snow brushes it away to ice — mottled, fractured, darkening in a halo around each letter — and
+the lettering glows through in `fern`. Above the logo the eyebrow line, and below it the
+dates, venue and countdown, are pressed into the snow; they clear with it and come back as it refills. Cleared snow
+slumps soft at the edges first, then drifts back unevenly, half filled after about five
+seconds. The brush mask lives on the GPU in float targets (32-bit where the GPU supports
+it, so the refill runs every frame), which is what keeps both smooth. Touch
+screens see the scene but cannot brush: a drag scrolls the page. The snow is one displaced sheet whose height and normals come from
+the brush mask, a drift texture and the logo itself, lit by a low raking sun and the sky
+(an environment map made from the sky shader), with snow glints, ground mist, bloom and a
+film finish. On load the scene washes in from the page ground while the camera settles from
+high above (about three seconds; phones and degraded quality tiers, which skip
+post-processing, get the settle without the wash); scrolling pulls it back toward the skyline, and in the
+last stretch a frost sheet with a diagonal "ice cut" edge rises over it, as igloo.inc cuts
+between scenes. A "Scroll down to discover" hint leaves on the first scroll. Below the hero,
+each section's giant blurred name and each divider's survey marks are scrubbed by the scroll
+(CSS scroll-driven animations, so they reverse on the way back up). None of this runs under
+reduced motion. Across the bottom, on a frost scrim, is the
+"HackBU 2027" lockup: eyebrow, headline, dates, venue, a days-to-go count and Register. The
+registration section carries a block of ice with an igloo frozen inside it (`igloo`; `pine` is
+only on the component sheet now), turning as it scrolls past, set into the page with feathered edges
+(`SnowCanvas.tsx` and `.scene-feather` in `src/index.css`). Every page shares the same ice
+ground, HUD panels, bracketed buttons and decoding headings.
 
-(The photograph replaced a cel-shaded illustration that opened at 3.8x on a sky band with
-a drifting cloud parallax over it. A photograph cannot take that magnification and has no
-sky-only band to open on, so the pan is a settle rather than a reveal, and the scroll
-track shrank from 260dvh to 180dvh with it.)
+Everything in the scenes is built in code from the palette tokens. The only files fetched
+are the two logo masks in `public/brand/`, the same ones the header paints; the grain, ice
+and digit textures are generated at runtime. three.js is its own chunk (`three`, about 142 KB gzipped),
+requested in the browser after hydration, the first time a scene nears the viewport, and
+never during the prerender. It is therefore off every page's critical path, but it is not
+free: on the landing page and on Hackathons a scene is in the first viewport, so the chunk
+is fetched straight after load. Without WebGL2 the hero is its CSS sky and the section
+scenes are removed from the layout.
+
+(Until 2026-11 the hero was an aerial photograph of the campus, and the two sections
+carried campus photographs too. Those four, their delivered originals (`hackbuimage/`)
+and an unused cartoon of the campus clock tower (`public/artwork/landmarks/`) are deleted;
+git history has them. The photographs that remain, on About us and Sponsors, are of people
+at HackBU events, not of places.)
 
 Six public pages live here now: the landing page plus **About us**, **Sponsors**,
 **Hackathons**, **Registration** and **My Application**, each a separate HTML entry with
@@ -51,8 +79,11 @@ connect it; `/application` is the applicant portal on the same backend.
 - **Vite** + **React** + **TypeScript**
 - **Tailwind CSS v4** via the `@tailwindcss/vite` plugin (theme lives in `src/index.css`,
   not a JS config)
-- **`motion`** (Framer Motion) for every animation — all scroll work goes through
-  `useScroll` / `useTransform` / `whileInView`. There are no `scroll` event listeners.
+- **`motion`** (Framer Motion) for the animations React drives — the hero's scroll work goes
+  through `useScroll` / `useTransform`, the section reveals through `whileInView`. Two
+  decorative drifts (section ghost words, divider marks) are CSS scroll-driven animations
+  instead, and the intro rises are CSS keyframes (see Animation below). There are no
+  `scroll` event listeners.
 - **Vercel** for hosting
 - `sharp` as a dev-only dependency for generating image derivatives
 
@@ -189,7 +220,8 @@ a page means three edits together — a `rollupOptions.input` entry, a `render*`
 `PAGES` row — or it ships with an empty root div.
 
 They share the component tree, so Rollup hoists what they all import into one `shared` chunk
-(plus `vendor` for `node_modules`) and each page's own entry chunk carries only its own code;
+(plus `vendor` for `node_modules`, and `three` — three.js alone, loaded on demand by the
+snow scenes) and each page's own entry chunk carries only its own code;
 nothing under `src/sheet/` reaches any other page's bundle, and the per-page section
 directory (`src/components/sections/hackathons/`) is deliberately kept out of `shared` so
 only its own page downloads it. The sheet's Tailwind utilities are kept out of the public
@@ -230,61 +262,28 @@ The sheet is `noindex, nofollow` and is not linked from any public page.
 
 ## Swapping the artwork
 
-Source images live in two read-only directories: `hackbuimage/`, the delivered
-photographs, and `artwork/`, the retired illustration and cloud cutouts kept as reference.
-The files the site actually ships are in `public/artwork/`.
+The landing page ships no artwork of its own: its hero and section décor are drawn by
+`src/three/snowScene.ts`. To change them, edit that file — the camera path is
+the hero's `frame`, the land is `terrainHeight`, the logo bed is `BED` and `BED_TILT`,
+and each part (terrain, sky, logo slab, snow cover, brush, mist, survey marks, ice, falling
+snow) is one `build*` function. Colours come in through
+the `--snow-*` properties on `.snow-scene` in `src/index.css`, which map to the `@theme`
+tokens; do not write a hex in the scene.
+
+Photographs are still used on About us and Sponsors, and live in `public/artwork/`:
 
 ```
-hackbuimage/                    read-only photographs, as delivered
-  hero.jpg                      the hero — winter aerial of campus at dusk, 2048 x 1151
-  winter-header.jpg             About section (sheet only) — the clock tower and plaza, 1600 x 600
-  1-KS1-WEB-2-1024x683.jpg      Registration — two students on a snowy path
-  47065170581_63875cf429_b.jpg  Event overview — winter walkway from above, 658 x 1024
-artwork/                        read-only originals, no longer shipped
-  campus/                       the retired illustration + its 4x Real-ESRGAN master
-  clouds/                       the retired cloud cutouts + their contact sheet
 public/artwork/
-  photos/hero-campus.jpg        the hero's JPEG fallback
-  photos/hero-campus-{640,960,1280,1600,2048}.{avif,webp}
-  photos/{plaza-winter,snow-walk,campus-path}.{jpg,avif,webp}
+  about/        the About us carousel
+  sponsors/     the Sponsors page photograph
+  organizers/   headshots and the team photo
+  mascot/       Baxter the Bearcat (not on any page at the moment)
+artwork/        read-only originals of the retired illustration and cloud cutouts
 ```
 
-To replace a photograph:
-
-1. Drop the new file into `hackbuimage/`. For the hero, keep the name `hero.jpg`;
-   for a section photo, either keep the existing name or update the `SECTION_PHOTOS`
-   table at the top of `scripts/generate-images.mjs`.
-2. Run `npm run images` to regenerate the JPEG fallback and the AVIF and WebP derivatives
-   in `public/artwork/photos/`. Nothing is enlarged: the hero ladder tops out at the
-   source's own width, so a wider source is the only way to a sharper hero.
-3. Update the dimensions and `alt` text in `src/lib/images.ts` (`HERO_WIDTH` /
-   `HERO_HEIGHT` / `HERO_ALT`, or the `SECTION_PHOTOS` entry), and `ASSETS.md`.
-4. Commit the regenerated derivatives along with the new source.
-
-### If the new hero photograph is framed differently
-
-Three things in the hero are tied to the specific photograph and will need re-deriving:
-
-- **`PAN_START_SCALE`** in `src/components/Hero.tsx` (currently `1.2`). Keep the `sizes`
-  multiplier in `src/lib/images.ts` (`HERO_SIZES`) and the preload's `imagesizes` in
-  `index.html` equal to it. Do not push it far: retina screens already draw the 2048px
-  photo about 1.9x at scale 1.
-- **`object-position`** on the hero `<img>` (currently `77% 0%`). The horizontal value is
-  the focal crop — the Library Tower stands at 0.70 of this frame's width, and `77%`
-  centres it in a phone's narrow crop while a laptop still sees nearly the whole frame.
-  A photo with its landmark elsewhere wants its own value (the earlier daytime aerial had
-  the tower dead centre and used `50%`). The vertical `0%` pins the top edge and, together
-  with `transform-origin: top`, is what keeps the framing aspect-independent; leave it at
-  `0%`.
-- **`HERO_SIZES`**'s aspect-ratio breakpoint (`2048/1151`), which is the photo's own ratio.
-- **The cover layer** (pine wash + film grain) over the photo in `Hero.tsx`, which hides
-  softness; a ≥3000px original may not need it.
-
-The hero used to layer twelve drifting cloud cutouts over a cel-shaded illustration
-(`HeroClouds.tsx`, `public/artwork/clouds/`, `public/artwork/campus/`). All of it was
-removed when the photograph landed. Everything retired stays in `artwork/` as read-only
-reference; nothing copies it into `public/`, so `npm run images` never encodes it and the
-browser never downloads it.
+To replace one, drop the new JPEG over the old one, run `npm run images` to regenerate
+its AVIF and WebP, update its dimensions and `alt` in `src/lib/images.ts`, and commit the
+derivatives with the source.
 
 ## Swapping the branding
 
@@ -321,62 +320,65 @@ and its pale green must not enter the stylesheet.
 
 ## Conventions worth knowing before editing
 
-**Colour.** Eight palette tokens plus one logo-only token, defined once in the `@theme`
+**Colour.** Nine palette tokens plus one logo-only token, defined once in the `@theme`
 block of `src/index.css`, and nothing else — no arbitrary hex, no default Tailwind
 palette colours, no `#000000`.
 
 | Token | Hex | Role |
 | --- | --- | --- |
-| `sky` | `#4A96D2` | hero sky |
-| `horizon` | `#A8D0EB` | **currently unused** — the sky is a single flat field, not a gradient |
-| `cloud` | `#F4F8FB` | page background below the fold — fresh-snow white |
-| `frost` | `#DBE6F0` | dividers, muted surfaces, card fills — ice blue |
-| `brick` | `#A2593A` | the single accent — links, buttons, hover |
-| `stone` | `#B1C2D2` | tertiary / decorative only — glacier grey hairlines |
-| `pine` | `#3C5C48` | body text, headings, focus rings, the button hover fill and the toggle's border/hover fill (never pure black) |
-| `haze` | `#7C99B4` | **currently unused** — retired from text (2.78:1 on `cloud`, below AA) and not used as a scene colour either |
-| `fern` | `#339966` | **logo only** — the two brand marks, and nothing else |
+| `sky` | `#4A96D2` | 3D scenes only — the blue in the shadows |
+| `horizon` | `#A8D0EB` | the accent — Register, the block behind the hero's year, divider wedges, hovers, and the ice blocks' glow |
+| `cloud` | `#F7F5EE` | 3D scenes only — snowflakes, sunlight, survey lines |
+| `frost` | `#DCE3EA` | the page ground, the header, panels (at 74%), the hero scrim, labels on ink |
+| `brick` | `#A2593A` | retired from the interface; only the bark of the frozen pine |
+| `stone` | `#C4B79E` | retired; hairlines are `ink` at 20–25% |
+| `ink` | `#295374` | the accent blue made dark enough to read: all text, hairlines, focus rings, solid buttons (6.28:1 on `frost`) |
+| `pine` | `#3C5C48` | retired; the old green ink |
+| `haze` | `#7C99B4` | scene colour only — igloo blocks, scoured ground, distance haze, the out-of-focus section words; never text |
+| `fern` | `#339966` | **logo only** — the two brand marks, and the glow of the logo in the hero's snow |
 
-`brick` is the **only** accent; adding a second one is a design regression. `haze` is
-retired from text use — it measures 2.78:1 on `cloud`, well below WCAG AA. Secondary text
-uses `pine/90`.
+`horizon` is the **only** accent; adding a second one is a design regression, and so is a
+new token or shade for a state (a hover is drawn with the existing colours). `horizon` is a
+fill, never text: it measures about 1.3:1 on `frost`. Tints are tokens at reduced strength.
+`haze` never carries text. Secondary text is full `ink`: tints fall under AA on the
+tinted ground. The one exception is form placeholders, `ink/90` on solid `frost` (5.04:1).
 
 `fern` is the brand green and is **not** an accent. It exists so the two logo marks —
 which ship in two different greens, neither of them a palette colour — can be normalised
 to one. It fills the marks and nothing else: no link, button, border, background or text.
-It measures 3.34:1 on `cloud`, which a logotype is exempt from and a word is not.
+It measures 3.27:1 on `cloud`, which a logotype is exempt from and a word is not.
 
-Link hover is a per-surface rule, and it lives in one place. `LINK_ON_CLOUD` and
-`LINK_ON_FROST` in `src/components/ExternalLink.tsx` are the only two **text-link**
-treatments on the page: brick hover on `cloud` (4.89:1), underline hover on `frost`, because brick on
-frost measures 4.12:1 and fails AA. Pick by the surface the link is painted on.
+**Type.** One family, IBM Plex Mono (400, 500, 600), self-hosted. Because it is monospaced,
+`DecodeHeadings` can scramble and resolve headings and labels in an `aria-hidden` overlay
+that lines up with the real text, which is never changed. It runs once per page from
+`SiteHeader`, after hydration, and never starts under reduced motion.
 
-There is a third named treatment, and it is not for links: `TOGGLE_ON_CLOUD` in
-`src/components/controls.ts` — the small outlined pill `<button>` (the header's menu
-toggle, and two controls on the component sheet). Border `pine` on `cloud` at **6.98:1**,
-clearing the 3:1 of WCAG 1.4.11, and a `pine` hover fill with the label flipping to
-`cloud`. It replaces a `frost` border and `frost` hover fill that measured 1.19:1 — a
-boundary and a hover state that could not be seen. `pine` rather than `brick`, because
-`brick` still means "join the Discord" and nothing else. Three treatments, then: two for
-links, one for the outlined button, and no fourth without a line here.
+**Surfaces.** The ground is painted once, on a fixed layer (`body::before` in
+`src/index.css`): `frost`, a faint `horizon` bloom and a dot grid. Sections have no
+background of their own. Cards are `.hud-panel`; labels are `.hud-label`; every `Section`
+puts its name, huge and out of focus, behind its content (`.ghost-type`). All sized radii
+are zero in `@theme`.
+
+**Links and buttons.** `LINK_ON_CLOUD` and `LINK_ON_FROST` both hover to an underline.
+`TOGGLE_ON_CLOUD` is the outlined control. `ButtonLink` has three tones, all in square
+brackets (`.hud-btn`): `ink` (solid, turning `horizon`), `register` (`horizon` with a
+`ink` label and edge, for Register alone) and `outline` (Discord in the header).
 
 **Animation.** Only `transform` and `opacity` are ever animated — never `top`, `left`,
-`width`, `height`, `margin` or `background-position`. Every animation is gated behind
-`usePrefersReducedMotion()` from `src/lib/motion.ts`; under
-`prefers-reduced-motion: reduce` the hero pan and the section reveals all render at
+`width`, `height`, `margin` or `background-position`. Animation driven from React is gated
+behind `usePrefersReducedMotion()` from `src/lib/motion.ts`; animation that lives in CSS
+(the intro rises, the hint's bob, and the scroll-driven `ghost-drift` / `mark-drift` in
+`src/index.css`) is gated by the `prefers-reduced-motion` media query instead, because the
+hook cannot answer before hydration and these run from the first paint. Under
+`prefers-reduced-motion: reduce` the hero's camera move, the snow scenes and the section
+reveals all render at
 rest, and the hero's tall scroll track collapses so no dead scroll space is left
 behind.
 
-**Text over the photograph.** The hero carries the page's `<h1>`, its lede, the
-hackathon's dates and venue, and one link — Register — over the top of the photograph,
-under a pine gradient wash and a text-shadow confined to the top band of the frame. That
-link is the only thing in the hero's tab order (the section itself carries `tabIndex={-1}`
-only so the logo link's `#top` target can take focus programmatically), and it is the one
-button on the site that does not use `ButtonLink`: a pine button on the pine wash has no
-edge and its pine focus ring disappears, so it inverts — cloud fill with a pine label
-(6.83:1), brick fill with a cloud label on hover (4.78:1), and a cloud focus ring. Nothing
-else sits on the photograph: body copy and every other button live in the sections below,
-on cloud and frost.
+**Text over the hero scene.** The lockup and the facts beside it sit on the `hero-scrim`,
+which is solid `frost` behind the type, so `ink` text keeps 6.28:1 whatever the scene is doing
+and whether or not WebGL loaded. The reference site sets
+pale text straight over its scene; this one deliberately does not.
 
 ## Layout
 
@@ -399,23 +401,29 @@ src/
     motion.ts                usePrefersReducedMotion, the hero pan's easing + range helpers
     images.ts                <picture> source sets + brand mark geometry
   components/
-    Hero.tsx                 sticky stage + scroll-driven settle of the hero photo
-    SectionPhoto.tsx         a section photograph with feathered edges
+    Hero.tsx                 sticky stage + scroll-driven camera move over the snow scene
     Reveal.tsx               whileInView reveals (enter-once, staggered)
     Layout.tsx               Container / Section / Eyebrow / SectionHeader
     SiteHeader.tsx           fixed header, collapses to a menu below `lg` (1024px)
     SiteFooter.tsx           the site pages in two columns, contact, socials
-    SnowdriftDivider.tsx     inline SVG snowdrift dividers
-    ButtonLink.tsx           the site's one button treatment
+    SnowdriftDivider.tsx     the diagonal "ice cut" section dividers
+    DecodeHeadings.tsx       the headings' scramble-to-text reveal
+    ButtonLink.tsx           the link-buttons: ink, register (horizon) and outline tones
     ExternalLink.tsx         same-site vs new-tab routing + the two text-link treatments
-    controls.ts              TOGGLE_ON_CLOUD — the outlined pill button
+    controls.ts              TOGGLE_ON_CLOUD — the outlined button
     Wordmark.tsx             the logo lockup, as masked fern marks
-    sections/                the landing page's sections: EventOverview, SponsorsPreview,
+    sections/                the landing page's sections: SponsorsPreview,
                              PrizeTracks, Register, Questions (the FAQ + venue map); About,
                              GetInvolved and Contact are no longer on the page but are
                              still rendered on the component sheet
       hackathons/            HackathonIntro, Timeline + timeline.ts (the schedule
                              data, each time with the source it came from)
+  three/                     the 3D scenes
+    SnowCanvas.tsx           the React frame: lazy-loads the scene, runs the frame loop
+    snowScene.ts             the three.js scenes — the hero, and the two ice blocks
+    IceWallCanvas.tsx        the prize wall's frame: lazy-loads the wall, keeps it on the buttons
+    iceWall.ts               the prize wall's 3D ice blocks, each track etched into its face
+    palette.ts               reads the --snow-* palette both frames hand to three.js
   about/                     the About us page at /about
     main.tsx, AboutPage.tsx, PhotoCarousel.tsx, OrganizersSection.tsx
   sponsors/                  the sponsors page at /sponsors
@@ -426,14 +434,11 @@ src/
     main.tsx                 sheet entry: hydrateRoot in prod, createRoot in dev
     sheet.css, kit.tsx, ComponentSheet.tsx
     parts/                   Tokens, Primitives, Composed, Hero
-hackbuimage/                 the four delivered photographs — read-only source (see
-                             "Swapping the artwork")
 scripts/
   generate-images.mjs        photo derivatives + brand masks and app icons
   prerender.mjs              build-time prerender of all seven pages, run after `vite build`
 public/
-  artwork/                   photos/ (hero + section photographs and their derivatives),
-                             plus the About us and Sponsors photographs
+  artwork/                   the About us, Sponsors and organizer photographs
   brand/                     logo masks, favicons, app tile
   404.html                   the static 404 body (see "The pages, and how they are
                              routed" above)

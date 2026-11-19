@@ -8,7 +8,7 @@ import { CodeInput } from './CodeInput'
 
 const SESSION_KEY = 'hackbu:session'
 
-const CARD = 'border-frost bg-frost rounded-3xl border p-6 sm:p-10'
+const CARD = 'hud-panel rounded-3xl border p-6 sm:p-10'
 const LINK = `${LINK_ON_FROST} underline underline-offset-4`
 
 const ERRORS: Record<string, string> = {
@@ -153,7 +153,7 @@ export function ApplicationPortal() {
   if (view.step === 'loading') {
     return (
       <div className={CARD}>
-        <p className="text-body text-pine/90">Loading…</p>
+        <p className="text-body text-ink">Loading…</p>
       </div>
     )
   }
@@ -162,13 +162,13 @@ export function ApplicationPortal() {
     return (
       <form key="email" onSubmit={handleEmail} className={`${CARD} max-w-xl`}>
         <Eyebrow>Sign in</Eyebrow>
-        <p className="font-display text-display-md text-pine mt-4 font-semibold">
+        <p className="font-display text-display-md text-ink mt-4 font-semibold">
           Check your application
         </p>
-        <p className="text-body text-pine mt-3">
+        <p className="text-body text-ink mt-3">
           Enter the email you registered with and we’ll send you a 6-digit code.
         </p>
-        <label htmlFor="portal-email" className="text-body text-pine mt-6 block font-medium">
+        <label htmlFor="portal-email" className="text-body text-ink mt-6 block font-medium">
           Email
         </label>
         <input
@@ -184,7 +184,7 @@ export function ApplicationPortal() {
         <button type="submit" className={`${BUTTON} mt-6`} disabled={busy}>
           {busy ? 'Sending…' : 'Email me a code'}
         </button>
-        <p className="text-caption text-pine/90 mt-6">
+        <p className="text-caption text-ink mt-6">
           Haven’t registered yet?{' '}
           <ExternalLink href={REGISTER_PATH} className={LINK}>
             Register for HackBU
@@ -205,17 +205,17 @@ export function ApplicationPortal() {
         className={`${CARD} max-w-xl`}
       >
         <Eyebrow>Sign in</Eyebrow>
-        <p className="font-display text-display-md text-pine mt-4 font-semibold">
+        <p className="font-display text-display-md text-ink mt-4 font-semibold">
           Enter your code
         </p>
-        <p className="text-body text-pine mt-3">
+        <p className="text-body text-ink mt-3">
           We sent a 6-digit code to <strong className="font-medium">{view.email}</strong>. It
           expires in 10 minutes. Check your spam folder if you don’t see it.
         </p>
         <label
           id="portal-code-label"
           htmlFor="portal-code"
-          className="text-body text-pine mt-6 block font-medium"
+          className="text-body text-ink mt-6 block font-medium"
         >
           Code
         </label>
@@ -236,7 +236,7 @@ export function ApplicationPortal() {
           </button>
           <button
             type="button"
-            className={`${LINK} text-body self-start sm:self-auto`}
+            className={`${LINK} text-body self-start disabled:cursor-wait disabled:opacity-70 disabled:hover:no-underline sm:self-auto`}
             disabled={busy}
             onClick={() => requestCode(view.email)}
           >
@@ -244,7 +244,7 @@ export function ApplicationPortal() {
           </button>
           <button
             type="button"
-            className={`${LINK} text-body self-start sm:self-auto`}
+            className={`${LINK} text-body self-start disabled:cursor-wait disabled:opacity-70 disabled:hover:no-underline sm:self-auto`}
             disabled={busy}
             onClick={() => {
               setError('')
@@ -269,7 +269,7 @@ export function ApplicationPortal() {
             <Eyebrow>Application status</Eyebrow>
             <p
               id="status-title"
-              className="font-display text-display-md text-pine mt-4 font-semibold"
+              className="font-display text-display-md text-ink mt-4 font-semibold"
             >
               {STATUS_COPY[application.status].title}
             </p>
@@ -279,17 +279,17 @@ export function ApplicationPortal() {
           </button>
         </div>
 
-        <p className="text-body text-pine mt-3 max-w-xl">
+        <p className="text-body text-ink mt-3 max-w-xl">
           {STATUS_COPY[application.status].body}
         </p>
-        <p className="text-caption text-pine/90 mt-2">
+        <p className="text-caption text-ink mt-2">
           Signed in as {application.email}
           {application.submittedAt ? ` · Submitted ${application.submittedAt}` : ''}
         </p>
 
         {accepted ? (
           <div className="mt-8">
-            <p className="text-body text-pine font-medium">
+            <p className="text-body text-ink font-medium">
               {application.rsvp === 'Coming'
                 ? 'You’re confirmed as coming. See you there!'
                 : application.rsvp === 'Not coming'
@@ -323,20 +323,20 @@ export function ApplicationPortal() {
       </section>
 
       <section aria-labelledby="answers-title" className={CARD}>
-        <p id="answers-title" className="font-display text-display-md text-pine font-semibold">
+        <p id="answers-title" className="font-display text-display-md text-ink font-semibold">
           Your application
         </p>
         <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
           {application.answers.map((answer) => (
             <div key={answer.label}>
-              <dt className="text-caption text-pine/90">{answer.label}</dt>
-              <dd className="text-body text-pine mt-1 break-words whitespace-pre-wrap">
+              <dt className="text-caption text-ink">{answer.label}</dt>
+              <dd className="text-body text-ink mt-1 break-words whitespace-pre-wrap">
                 {answer.value || '—'}
               </dd>
             </div>
           ))}
         </dl>
-        <p className="text-caption text-pine/90 mt-8">
+        <p className="text-caption text-ink mt-8">
           Need to change something? Email{' '}
           <MailLink email={CONTACT_EMAIL} className={LINK} />.
         </p>

@@ -1,363 +1,317 @@
-import { useRef, useState } from 'react'
-import { m, useMotionValueEvent, useScroll, useTransform } from 'motion/react'
-import {
-  HERO_ALT,
-  HERO_HEIGHT,
-  HERO_JPG,
-  HERO_SIZES,
-  HERO_SRCSET,
-  HERO_WIDTH,
-} from '../lib/images'
+import { useMemo, useRef, useSyncExternalStore } from 'react'
+import { m, useScroll, useTransform } from 'motion/react'
 import {
   HERO_PAN_EASE,
   rangeProgress,
   usePrefersReducedMotion,
 } from '../lib/motion'
 import { HACKATHON_DATES, REGISTER_PATH, VENUE } from '../lib/links'
-import { ExternalLink } from './ExternalLink'
+import { SnowCanvas } from '../three/SnowCanvas'
+import type { SnowEtching } from '../three/snowScene'
+import { ButtonLink } from './ButtonLink'
 
 /**
- * The hero: a real aerial photograph of the whole campus under snow, settling
- * from a slight zoom to its full frame as the reader scrolls, with the page's
- * welcome headline across the top of the frame — the banner of the HackBU
- * 2027 landing page, so the headline is followed by the hackathon's dates,
- * its venue and the Register link.
+ * The hero: a full-bleed three.js world with the page's instruments laid over
+ * it, after igloo.inc's approach.
+ *
+ * Behind: the HackBU logo lying under snow on a hillside, lit by a low sun
+ * from the left. Moving a mouse over it brushes the snow away and the
+ * lettering glows through; the snow slumps and drifts slowly back.
+ * Scrolling pulls the camera back and down toward the skyline. In front: small monospaced
+ * chrome in the corners, and across the bottom the "HackBU 2027" lockup with
+ * the dates, the venue, a days-to-go count and Register.
+ *
+ * Unlike the reference, all of this is real HTML (prerendered, selectable,
+ * read by a screen reader), every word sits on a surface that passes contrast,
+ * and the page scrolls natively.
  *
  * Layer contract:
  *
  *   <section data-hero>            the scroll TRACK. Taller than the viewport
- *                                  purely to buy scroll distance for the pan.
- *     <div data-hero-stage>        sticky top-0, exactly one viewport tall.
- *       <div data-hero-artwork>    the photograph, as a <picture> — opened a
- *                                  little magnified and eased back to 1.
- *       <div data-hero-copy>       welcome headline + lede + date/Register
- *                                  row, above the photo.
+ *                                  purely to buy distance for the camera move.
+ *     <div data-hero-stage>        sticky top-0, one viewport tall. Its CSS
+ *                                  gradient is the fallback before and without
+ *                                  WebGL.
+ *       <SnowCanvas>               the scene. It is told where the header ends
+ *                                  and the lockup begins, and frames the logo
+ *                                  in the band between.
+ *       <div data-hero-cut>        the exit: a frost sheet with a diagonal
+ *                                  "ice cut" edge that rises over the scene in
+ *                                  the last stretch of the track, the way
+ *                                  igloo.inc cuts from one scene to the next.
+ *       "Scroll down" hint         top right; fades out on the first scroll.
+ *       <div data-hero-copy>       the lockup, on <div data-hero-scrim>.
  *
- * A pine wash and text-shadow keep cloud (cream) type readable over the
- * hills that fill the top of the photograph. (Until 2026-09 this was a
- * cel-shaded *illustration* opened at 3.8x on a sky band, with a drifting
- * cloud-cutout parallax over it; both went when the real photographs landed.
- * A photograph cannot take that magnification — there is no upscaled master
- * behind it and no sky-only band to hide in — so the pan below is a settle,
- * not a reveal.)
+ * The cut and the hint are scrubbed by the scroll (motion values, never a
+ * React render), so they reverse when the reader scrolls back up. Neither
+ * exists under reduced motion, where the track collapses to one screen.
  */
 
-/* -------------------------------------------------------------------------- */
-/* Geometry                                                                   */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Starting scale of the photograph.
- *
- * The image is rendered `object-cover` into a stage exactly one viewport tall,
- * with its top edge pinned to the top of the stage (see `origin-top` and the
- * `0%` vertical object-position below). Writing `f1` for the fraction of the
- * image's height that `object-cover` leaves visible at scale 1, **the visible
- * band at scale S runs from 0 to f1/S**. The photograph is 2048 x 1151, a hair
- * under 16:9, so cover is height-bound on 1440x900 laptops and every phone
- * (`f1 = 1`) and the start frame shows the top 1/1.2 = 83% of the photo:
- * hills, athletic fields, the Library Tower and the academic buildings, with
- * the foreground residence halls arriving as the pan runs. Screens wider than 16:9 are
- * width-bound instead (`f1 < 1`) and lose a little more of the plaza, never
- * the top. The photograph has no sky at all — the hills run right off the top
- * edge — so unlike the illustration this replaced there is no "no buildings"
- * constraint to satisfy: the buildings *are* the picture.
- *
- * 1.2 is as far as the source should be pushed: the 2048px file is drawn 1601
- * CSS px wide on a 1440x900 screen even at scale 1 (see HERO_SIZES), so every
- * extra tenth of magnification is visible softness on a retina display. It is
- * enough to read as movement, and the eased curve does the rest. **Keep the
- * `sizes` multiplier in src/lib/images.ts equal to this.**
- */
-const PAN_START_SCALE = 1.2
-
-/**
- * Total height of the scroll track. The sticky stage is one viewport tall, so
- * the stage stays pinned for `180 - 100 = 80dvh` of scrolling. (It was 260dvh
- * for the illustration's 3.8x reveal; a 1.2x settle stretched over 160dvh
- * would read as the page having stalled.)
- */
+/** Total height of the scroll track: the stage stays pinned for 80dvh. */
 const TRACK_HEIGHT = 'h-[180dvh]'
 
 /**
- * Fraction of the pinned scroll the pan itself consumes. The pan finishes at
- * 0.75 (= 60dvh of scrolling) and the remaining 0.25 (= 20dvh) is a hold on
- * the finished frame before the stage unpins and the hero scrolls away.
+ * Fraction of the pinned scroll the camera move consumes. It finishes at 0.75
+ * (= 60dvh of scrolling); the remaining 20dvh is a hold on the finished frame.
  */
 const PAN_SCROLL_FRACTION = 0.75
 
-/**
- * Where the photograph sits in the stage.
- *
- *   object-position `77% 0%`   the photo's top edge sits on the stage's top
- *                              edge before any transform, at every aspect
- *   transform-origin `top`     scaling then grows downward from that edge
- *
- * The vertical `0%` + `origin-top` pair pins the top of the frame to the top
- * of the stage for all S with no translate at all — the scheme the
- * illustration used, kept because it is aspect-independent: the visible band
- * is `0 .. f1/S` everywhere. (`origin-top` is `50% 0%`, so the horizontal half
- * of the scale still grows about the stage's centre.)
- *
- * The horizontal `77%` is the focal crop. The Library Tower stands at 0.70 of
- * the frame's width, off to the right. On a 390x844 phone `cover` keeps only
- * 26% of the width, and 77% slides that window to run 0.57–0.83 — centred on
- * the tower. On a 1440x900 laptop it keeps 90%, and 77% trims 7.7% from the
- * left and 2.3% from the right, so the whole campus still reads. (An earlier
- * hero with the tower dead centre used `50%`.)
- */
-const HERO_OBJECT_POSITION = 'object-[77%_0%]'
+/** How much of the top of the stage the fixed header hides, in CSS pixels. */
+const HEADER_HEIGHT = 80
 
 /**
- * Tileable film grain for the hero's cover layer: SVG fractal noise,
- * desaturated, inlined as a data URI so it costs no request.
+ * The lockup's year and the dates, read out of HACKATHON_DATES rather than
+ * retyped, so a date change is still one edit in src/lib/links.ts. The date
+ * drops the year because the headline directly beside it already says it.
  */
-const HERO_GRAIN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E" +
-  "%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E" +
-  "%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E" +
-  "%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"
+const EVENT_YEAR = HACKATHON_DATES.start.slice(0, 4)
+
+/** The lockup's eyebrow, also etched into the snow above the logo. */
+const EYEBROW = "Binghamton University's Premier Hackathon"
+const DATES_WITHOUT_YEAR = HACKATHON_DATES.short.replace(/,?\s*\d{4}$/, '')
+
+/** Midnight UTC of the first day, as a plain calendar date. */
+const START_DAY = Date.UTC(
+  Number(HACKATHON_DATES.start.slice(0, 4)),
+  Number(HACKATHON_DATES.start.slice(5, 7)) - 1,
+  Number(HACKATHON_DATES.start.slice(8, 10)),
+)
+
+/**
+ * "73 days to go": whole calendar days from the reader's own today to the first
+ * day. Empty from the first day on, so the row simply goes away.
+ */
+function daysToGoLabel(now = new Date()): string {
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+  const days = Math.round((START_DAY - today) / 86_400_000)
+  if (days <= 0) return ''
+  return `${days} ${days === 1 ? 'day' : 'days'} to go`
+}
+
+/**
+ * The count as the visitor's today sees it, never the build's. The prerender
+ * and the hydrating render both use the empty server snapshot and agree; React
+ * re-renders with the real value straight after. (`suppressHydrationWarning`
+ * would not do: React 19 leaves the prerendered text in place, so the number
+ * would be frozen at the build date.)
+ */
+const noSubscription = () => () => {}
+function useDaysToGo(): string {
+  return useSyncExternalStore(noSubscription, daysToGoLabel, () => '')
+}
+
+/** False in the prerender and the hydrating render, true after. */
+function useHydrated(): boolean {
+  return useSyncExternalStore(
+    noSubscription,
+    () => true,
+    () => false,
+  )
+}
+
+const FACT_ROW =
+  'border-ink/25 flex items-baseline justify-between gap-4 border-b py-[min(0.45rem,1dvh)]'
+const FACT_TERM = 'text-ink text-[0.6875rem] font-medium tracking-[0.1em] uppercase'
+const FACT_VALUE = 'text-ink text-right text-caption font-medium uppercase'
 
 export function Hero() {
   const trackRef = useRef<HTMLElement>(null)
+  const lockupRef = useRef<HTMLDivElement>(null)
   const reducedMotion = usePrefersReducedMotion()
+  const daysToGo = useDaysToGo()
+  const hydrated = useHydrated()
+  /**
+   * The lockup's eyebrow and facts again, pressed into the snow above and
+   * below the logo.
+   */
+  const etching = useMemo(
+    (): SnowEtching => ({
+      heading: EYEBROW,
+      facts: [
+        ['Dates', DATES_WITHOUT_YEAR],
+        ['Venue', VENUE.name],
+        ...(daysToGo ? [['Countdown', daysToGo] as const] : []),
+      ],
+    }),
+    [daysToGo],
+  )
 
-  // The page's only scroll subscription, and it is motion's, not ours — no
-  // hand-rolled `addEventListener('scroll', ...)` anywhere in src/. Everything
-  // downstream derives from this one value.
+  // The page's only scroll subscription, and it is motion's, not ours.
   const { scrollYProgress: progress } = useScroll({
     target: trackRef,
     offset: ['start start', 'end end'],
   })
 
   /**
-   * Eased pan progress. Under reduced motion this is pinned to 1 — the resting
-   * state — so the illustration renders statically at scale 1 with no
-   * scroll-linked movement at all.
+   * Eased camera progress, 0 at the top of the page and 1 at rest. Pinned to 1
+   * under reduced motion, so one still frame is drawn (brushing still works:
+   * it only ever happens because the visitor moved).
+   * <SnowCanvas> reads it with `.get()`, so scrolling never re-renders React.
    */
   const pan = useTransform(progress, (p) =>
     reducedMotion ? 1 : HERO_PAN_EASE(rangeProgress(p, 0, PAN_SCROLL_FRACTION)),
   )
-
-  const scale = useTransform(
-    pan,
-    (p) => PAN_START_SCALE + (1 - PAN_START_SCALE) * p,
-  )
-
-  /**
-   * Is the pan actually moving? `will-change` is held ONLY inside the open
-   * interval (0, PAN_SCROLL_FRACTION] — released at rest on both ends.
-   *
-   * The top release (p = 0) is the load-bearing one, and it is about
-   * *sharpness*, not memory (measured live in an 800x455 Chromium pane,
-   * 2026-09-03). With the hint present from the first render, the compositor
-   * rasters the image layer once around hydration — before or as the start-scale
-   * transform lands — and then, because `will-change` tells it not to
-   * re-raster on transform change, the start frame the reader sees is that
-   * stale raster GPU-stretched to the start scale: blurry at every srcset rung, and showing a
-   * subtly wrong crop. (Forced screenshots re-raster and hid this; toggling
-   * the hint off live snapped the frame sharp.) With no hint at p = 0 the
-   * browser paints the true start frame at full raster quality — this is
-   * the frame the page opens on and holds, so it is exactly where quality
-   * matters most. When scrolling starts the promotion arrives with the
-   * current (start-scale) transform, so the texture is rastered near its largest
-   * scale and is only ever GPU-*down*scaled as the pan proceeds — supersampled
-   * rather than smeared.
-   *
-   * The bottom release past `PAN_SCROLL_FRACTION` is P5-7 / P2-8, as before:
-   * `scale` stops changing there, but the compositor keeps whatever the hint
-   * bought for the life of the document. Measured with CDP `LayerTree` on
-   * GPU-backed Edge: at track progress 0.8 the hero `<img>` was still its
-   * own layer holding a full-viewport texture (5,130,000 B at 1440x900) with
-   * `WillChangeTransform` as its only compositing reason. Dropping the hint
-   * lets that texture go.
-   *
-   * Both directions re-arm when the reader scrolls back into the interval, so
-   * neither release is a one-way latch. It is motion's own
-   * `useMotionValueEvent` on the single `useScroll` value — still no `scroll`
-   * listener in `src/` — and the boolean changes at most twice per traversal,
-   * so React bails out of a re-render on every frame either side of a
-   * crossing.
+  /*
+   * Function transforms, not the [input] -> [output] form: motion hands an
+   * array-mapped opacity straight to a native scroll timeline, and with this
+   * track's offsets that came out inverted (the hint faded *in* on scroll).
    */
-  const [panning, setPanning] = useState(() => {
-    const p = progress.get()
-    return p > 0 && p <= PAN_SCROLL_FRACTION
-  })
-  useMotionValueEvent(progress, 'change', (p) => {
-    setPanning(p > 0 && p <= PAN_SCROLL_FRACTION)
-  })
+  /** The hint leaves with the first few percent of scroll. */
+  const hintOpacity = useTransform(progress, (p) => 1 - rangeProgress(p, 0, 0.05))
+  /** The brushing hint goes as the ice cut starts to cover the snow. */
+  const brushHintOpacity = useTransform(progress, (p) =>
+    reducedMotion ? 1 : 1 - rangeProgress(p, 0.6, 0.75),
+  )
+  /** The ice cut rises over the last third of the track, to just above the lockup. */
+  const cutY = useTransform(progress, (p) => `${100 - 60 * rangeProgress(p, 0.66, 1)}%`)
 
   return (
     <section
       id="top"
       data-hero
       ref={trackRef}
-      // The header's logo link points here. Without a tab index the anchor
-      // scrolls the page and leaves focus on <body>, so a keyboard user who
-      // activates it is returned to the top visually and left where they were
-      // in the tab order — the same shape as the skip link's target (P7-2, and
-      // P2-4 in src/App.tsx, where the reasoning is written out). -1 keeps it
-      // out of the tab order; `focus:outline-none` keeps the programmatic
-      // focus from drawing the UA ring around the whole 180dvh track.
+      // The header's logo link points here, so it has to be able to take
+      // focus; -1 keeps it out of the tab order, and the programmatic focus
+      // must not draw a ring around the whole track.
       tabIndex={-1}
       aria-labelledby="hero-title"
       // No `overflow-hidden` here: an overflow-clipped ancestor becomes the
-      // sticky element's scrollport and the stage would never pin. The stage
-      // clips the scaled artwork itself.
-      className={`bg-sky relative w-full focus:outline-none ${reducedMotion ? 'h-dvh' : TRACK_HEIGHT}`}
+      // sticky element's scrollport and the stage would never pin.
+      className={`relative w-full focus:outline-none ${reducedMotion ? 'h-dvh' : TRACK_HEIGHT}`}
     >
       <div
         data-hero-stage
-        className="sticky top-0 h-dvh w-full overflow-hidden"
+        className="from-haze/60 via-horizon/40 to-frost sticky top-0 h-dvh w-full overflow-hidden bg-gradient-to-b"
       >
-        <div data-hero-artwork className="absolute inset-0">
-          {/*
-           * `display: contents` so the <picture> adds no box of its own and
-           * the <img>'s `h-full` still resolves against the stage-sized div
-           * above it. AVIF first, WebP second, the JPEG as the `<img src>` a
-           * browser only reaches if it understands neither.
-           */}
-          <picture className="contents">
-            <source
-              type="image/avif"
-              srcSet={HERO_SRCSET.avif}
-              sizes={HERO_SIZES}
-            />
-            <source
-              type="image/webp"
-              srcSet={HERO_SRCSET.webp}
-              sizes={HERO_SIZES}
-            />
-            <m.img
-              src={HERO_JPG}
-              alt={HERO_ALT}
-              width={HERO_WIDTH}
-              height={HERO_HEIGHT}
-              draggable={false}
-              decoding="async"
-              fetchPriority="high"
-              // `will-change` only while the scale is actually moving: never
-              // under reduced motion (where it is pinned to 1), never at
-              // rest at scroll 0 (where the hint made the compositor show a
-              // stale low-res raster of the start frame), and released past
-              // `PAN_SCROLL_FRACTION` — see `panning` above.
-              className={`h-full w-full origin-top ${HERO_OBJECT_POSITION} object-cover select-none ${
-                reducedMotion || !panning ? '' : 'will-change-transform'
-              }`}
-              style={{ scale }}
-            />
-          </picture>
-        </div>
-
-        {/*
-         * Cover for a soft source. The photograph is 2048px wide and retina
-         * laptops and phones still draw it about 1.9–2.6x larger in device
-         * pixels (see HERO_SIZES), so it cannot be fully sharp. Two static layers, outside the
-         * scaled <img> so they never move with the pan, make that read as
-         * intentional rather than as blur:
-         *   - a pine wash, heavier at the edges, lowers the local contrast
-         *     that makes interpolation softness visible;
-         *   - a faint film grain gives the eye fine, crisp detail to resolve
-         *     instead of the smeared edges underneath. It is fractal noise,
-         *     not a regular dot screen: a grid of dots was tried first and
-         *     read as a halftone pattern, badly so on 3x phones.
-         * Revisit both once a >=3000px original replaces hackbuimage/hero.jpg.
-         */}
-        <div
-          aria-hidden="true"
-          data-hero-cover
-          className="pointer-events-none absolute inset-0"
-          style={{
-            backgroundImage:
-              'linear-gradient(to bottom, rgb(60 92 72 / 0.38), rgb(60 92 72 / 0.12) 40%, rgb(60 92 72 / 0.12) 60%, rgb(60 92 72 / 0.42)),' +
-              'radial-gradient(ellipse at center, transparent 55%, rgb(28 44 36 / 0.35))',
-          }}
-        />
-        <div
-          aria-hidden="true"
-          data-hero-grain
-          className="pointer-events-none absolute inset-0 opacity-[0.14] mix-blend-overlay"
-          style={{ backgroundImage: HERO_GRAIN, backgroundSize: '220px 220px' }}
+        <SnowCanvas
+          variant="hero"
+          progress={pan}
+          frameTop={HEADER_HEIGHT}
+          frameAbove={lockupRef}
+          etching={etching}
+          className="absolute inset-0"
         />
 
+        <m.div
+          aria-hidden="true"
+          data-hero-cut
+          style={{ y: cutY }}
+          className="pointer-events-none absolute inset-0 z-[5] motion-reduce:hidden"
+        >
+          <svg
+            viewBox="0 0 1440 100"
+            preserveAspectRatio="none"
+            focusable="false"
+            className="absolute inset-x-0 top-0 block h-[22%] w-full"
+          >
+            <path d="M0,100 V78 L1440,6 V100 Z" className="fill-frost" />
+            <path
+              d="M0,78 L1440,6"
+              vectorEffect="non-scaling-stroke"
+              className="stroke-ink/40 fill-none"
+              strokeWidth="1"
+            />
+          </svg>
+          <div className="bg-frost absolute inset-x-0 top-[22%] bottom-0" />
+        </m.div>
+
+        <m.div
+          aria-hidden="true"
+          style={{ opacity: hintOpacity }}
+          className="pointer-events-none absolute top-24 right-6 z-10 sm:right-8 lg:right-[max(2rem,calc(50vw-58rem))] motion-reduce:hidden"
+        >
+          <p className="text-ink bg-frost animate-intro-rise px-2 py-1 text-[0.6875rem] font-medium tracking-[0.12em] uppercase [animation-delay:1.4s]">
+            {'// Scroll down to discover '}
+            <span className="motion-safe:animate-hint-bob inline-block">↓</span>
+          </p>
+        </m.div>
+
         {/*
-         * Welcome copy across the top of the frame. Cleared below the fixed
-         * header (h-16 / sm:h-20). Pine wash + text-shadow keep the type
-         * readable over the hills that fill the top of the photograph.
-         *
-         * On load the headline and lede rise into place behind the header's
-         * slide-in (`intro-rise` / `intro-bar`, src/index.css): the bar lands
-         * at 0.7s, the headline starts at 0.45s, the lede at 0.6s and the
-         * date + Register row at 0.75s — the same 0.15s step again — so the
-         * four overlap into one gesture rather than queueing. Reduced motion
-         * drops the animation and shows the resting frame.
-         *
-         * The date line and the Register link are what make this the
-         * hackathon's banner rather than the club's: the one fact a visitor
-         * needs first, and the one action the page exists for. The wash is
-         * taller than it was for the two-line welcome (20rem, 24rem from
-         * `sm`; it was 14rem and 16rem) so it still runs past the bottom of
-         * the copy block and the button sits on pine, not on bare photograph.
-         * (Written in rem, not as class names: Tailwind scans comments too,
-         * and an old class name quoted here would ship as a dead rule.)
-         *
-         * Below `sm` the row is kept to one line — the date alone beside a
-         * smaller button, with the venue left to the overview section — because
-         * on a phone the focal crop (HERO_OBJECT_POSITION) puts the Library
-         * Tower directly under the copy, and a stacked date and button sat
-         * across the top of it.
-         *
-         * The copy block is `pointer-events-none` so it never swallows a
-         * click meant for the page; the link opts back in. It is the only
-         * control on the photograph, and it cannot take the site's one
-         * button treatment (<ButtonLink>): a pine fill on the pine wash has
-         * no edge, and its pine focus ring would vanish into the wash. So it
-         * inverts — cloud fill, pine label (6.83:1), brick fill with a cloud
-         * label on hover (4.78:1) — and its focus ring is cloud, offset
-         * clear of the fill, which is what reads against the washed photo.
-         * README's "Text over the photograph" records the exception.
+         * The lockup, on the frost scrim (the `hero-scrim` utility in
+         * src/index.css): ink type on frost, 6.28:1, whatever the scene does
+         * behind it. Side by side wherever there is width (`lockup-wide`),
+         * stacked on portrait phones. All spacing shrinks with the screen's
+         * height, so a phone on its side keeps it below the header.
          */}
         <div
           data-hero-copy
-          className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-6 pt-24 sm:pt-28"
+          className="absolute inset-x-0 bottom-0 z-10 px-6 pb-[clamp(0.875rem,4dvh,2.25rem)] sm:px-8"
         >
           <div
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-pine/80 via-pine/45 to-transparent sm:h-96"
+            data-hero-scrim
+            className="hero-scrim absolute inset-x-0 bottom-0"
           />
-          <div className="relative max-w-3xl text-center">
-            <h1
-              id="hero-title"
-              className="font-display text-display-xl text-cloud animate-intro-rise motion-reduce:animate-none font-bold text-balance [animation-delay:0.45s] [text-shadow:0_2px_4px_rgb(60_92_72_/_0.85),0_6px_28px_rgb(60_92_72_/_0.55)]"
-            >
-              Welcome to HackBU
-            </h1>
-            <p className="text-lede text-cloud animate-intro-rise motion-reduce:animate-none mt-3 font-medium text-pretty sm:mt-4 [animation-delay:0.6s] [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
-              Binghamton University&apos;s Premier Hackathon
-            </p>
-            <div className="animate-intro-rise motion-reduce:animate-none mt-4 flex flex-col items-center gap-5 sm:mt-6 sm:gap-6 [animation-delay:0.75s]">
-              <p className="text-body text-cloud font-medium [text-shadow:0_1px_3px_rgb(60_92_72_/_0.8),0_4px_18px_rgb(60_92_72_/_0.5)]">
-                <time dateTime={HACKATHON_DATES.start}>
-                  {HACKATHON_DATES.short}
-                </time>
-                <span className="hidden sm:inline">
-                  <span aria-hidden="true"> · </span>
-                  <span className="sr-only">, at the </span>
-                  {VENUE.name}
-                </span>
+          <div
+            ref={lockupRef}
+            className="lockup-wide:flex-row lockup-wide:items-end lockup-wide:justify-between relative mx-auto flex max-w-[116rem] flex-col gap-[min(1.25rem,2.4dvh)]"
+          >
+            <div>
+              <p className="hud-label text-ink animate-intro-rise motion-reduce:animate-none text-[0.6875rem] font-medium tracking-[0.12em] uppercase [animation-delay:0.35s] sm:text-[0.75rem]">
+                {EYEBROW}
               </p>
-              <ExternalLink
+              {/*
+               * The one thing to do here, so say so — but only where it can be
+               * done: a mouse, a wide screen, and a scene that has drawn
+               * (`.hero-hint` in src/index.css). On solid frost, so it keeps
+               * 6.28:1 whatever is cleared behind it.
+               */}
+              {/* The wrapper fades it as the ice cut covers the snow; the
+                  intro animation on the <p> would override an opacity set
+                  on the <p> itself. */}
+              <m.div
+                aria-hidden="true"
+                style={{ opacity: brushHintOpacity }}
+                className="absolute bottom-full -left-2 mb-2"
+              >
+                <p className="hero-hint text-ink bg-frost animate-intro-rise motion-reduce:animate-none hidden px-2 py-1 text-[0.6875rem] font-medium tracking-[0.12em] uppercase [animation-delay:1s]">
+                  {'// Move over the snow to uncover the logo'}
+                </p>
+              </m.div>
+              <h1
+                id="hero-title"
+                className="font-display text-display-hero lockup-wide:text-display-hero-wide text-ink animate-intro-rise motion-reduce:animate-none mt-[min(0.75rem,1.6dvh)] font-semibold whitespace-nowrap [animation-delay:0.45s]"
+              >
+                <span className="lockup-wide:inline block">HackBU</span>{' '}
+                <span className="bg-horizon lockup-wide:inline-block block w-fit px-[0.1em]">
+                  {EVENT_YEAR}
+                </span>
+              </h1>
+            </div>
+
+            <div className="animate-intro-rise motion-reduce:animate-none lockup-wide:w-[min(22rem,36vw)] w-full shrink-0 [animation-delay:0.6s]">
+              <dl>
+                <div className={FACT_ROW}>
+                  <dt className={FACT_TERM}>Dates</dt>
+                  <dd className={FACT_VALUE}>
+                    <time dateTime={HACKATHON_DATES.start}>
+                      {DATES_WITHOUT_YEAR}
+                    </time>
+                  </dd>
+                </div>
+                <div className={FACT_ROW}>
+                  <dt className={FACT_TERM}>Venue</dt>
+                  <dd className={FACT_VALUE}>{VENUE.name}</dd>
+                </div>
+                {/*
+                 * Reserved until hydration so the count arriving cannot move
+                 * the lockup; gone once the event has started.
+                 */}
+                {daysToGo || !hydrated ? (
+                  <div className={FACT_ROW}>
+                    <dt className={FACT_TERM}>Countdown</dt>
+                    <dd className={`${FACT_VALUE} min-h-[1lh]`}>{daysToGo}</dd>
+                  </div>
+                ) : null}
+              </dl>
+              <ButtonLink
                 href={REGISTER_PATH}
-                className="group bg-pine text-cloud ring-cloud/80 hover:bg-brick focus-visible:outline-cloud pointer-events-auto inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-xl font-bold shadow-[0_6px_24px_rgb(28_44_36_/_0.5)] ring-2 transition-[background-color,transform] duration-200 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:px-9 sm:py-4"
+                size="lg"
+                tone="register"
+                className="mt-[min(0.875rem,1.8dvh)] w-full py-[min(0.875rem,1.9dvh)]"
               >
                 Register now
-                <span
-                  aria-hidden
-                  className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
-                >
-                  →
-                </span>
-              </ExternalLink>
+              </ButtonLink>
             </div>
           </div>
         </div>

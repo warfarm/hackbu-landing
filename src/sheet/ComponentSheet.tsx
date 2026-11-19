@@ -66,10 +66,10 @@ export function ComponentSheet() {
 
   return (
     <LazyMotion features={domAnimation} strict>
-      <div data-reveals={reveals} className="bg-cloud text-pine font-sans min-h-screen">
+      <div data-reveals={reveals} className="bg-frost text-ink font-sans min-h-screen">
         <a
           href="#tokens"
-          className="bg-cloud text-pine focus:outline-pine sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:px-4 focus:py-2 focus:outline-2"
+          className="bg-frost text-ink focus:outline-ink sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-none focus:px-4 focus:py-2 focus:outline-2"
         >
           Skip to the sheet
         </a>
@@ -78,7 +78,7 @@ export function ComponentSheet() {
 
         <nav
           aria-label="Sheet sections"
-          className="bg-cloud border-frost sticky top-0 z-50 border-y"
+          className="bg-frost border-ink/20 sticky top-0 z-50 border-y"
         >
           <Column className="flex h-14 items-center justify-between gap-4">
             <ul className="-mx-2 flex min-w-0 items-center gap-1 overflow-x-auto px-2">
@@ -87,12 +87,12 @@ export function ComponentSheet() {
                   {/*
                    * The cloud link treatment comes from the constant, not from
                    * a copy of its class string (P3-8). One consequence, taken
-                   * deliberately: the focus ring is now the page's own — pine,
+                   * deliberately: the focus ring is now the page's own — ink,
                    * offset 4 — where this pill had hand-rolled offset 2.
                    */}
                   <a
                     href={`#${part.id}`}
-                    className={`${LINK_ON_CLOUD} text-caption block rounded-full px-3 py-2 whitespace-nowrap`}
+                    className={`${LINK_ON_CLOUD} text-caption block rounded-none px-3 py-2 whitespace-nowrap`}
                   >
                     {part.label}
                   </a>
@@ -106,7 +106,7 @@ export function ComponentSheet() {
               onClick={() =>
                 setReveals((mode) => (mode === 'resting' ? 'scroll' : 'resting'))
               }
-              className={`${TOGGLE_ON_CLOUD} text-caption shrink-0 rounded-full px-3 py-1.5`}
+              className={`${TOGGLE_ON_CLOUD} text-caption shrink-0 rounded-none px-3 py-1.5`}
             >
               Reveals:{' '}
               <span className="font-medium">
@@ -123,15 +123,15 @@ export function ComponentSheet() {
           <HeroPart />
         </main>
 
-        <footer className="border-frost bg-frost border-t">
+        <footer className="border-ink/20 bg-frost border-t">
           <Column className="py-10">
-            <p className="text-caption text-pine/90">
+            <p className="text-caption text-ink">
               Generated from the components themselves — every specimen above is
               the real component, imported and rendered. Update a component and
               this page updates with it; only the prose around it is written by
               hand.
             </p>
-            <p className="text-caption text-pine/90 mt-3">
+            <p className="text-caption text-ink mt-3">
               {/* This footer band is frost, so it takes the frost treatment —
                   the same rule the sheet documents in Part 2. */}
               <a href="/" className={LINK_ON_FROST}>
@@ -147,42 +147,41 @@ export function ComponentSheet() {
 
 function Masthead() {
   return (
-    <header className="bg-cloud">
+    <header className="bg-frost">
       <Column className="py-14 sm:py-20">
-        <p className="text-eyebrow text-pine/90 font-medium uppercase">
+        <p className="text-eyebrow text-ink font-medium uppercase">
           Internal · not linked from the site
         </p>
-        <h1 className="font-display text-display-xl text-pine mt-4 font-semibold text-balance">
+        <h1 className="font-display text-display-xl text-ink mt-4 font-semibold text-balance">
           The HackBU component sheet.
         </h1>
-        <p className="text-lede text-pine mt-6 max-w-2xl">
+        <p className="text-lede text-ink mt-6 max-w-2xl">
           Every component in the landing page in one place: the tokens they are
           built from, each primitive in isolation with all of its variants, and
           the composed pieces exactly as the page renders them.
         </p>
 
-        <ol className="border-frost mt-12 border-t">
+        <ol className="border-ink/20 mt-12 border-t">
           {PARTS.map((part, index) => (
-            <li key={part.id} className="border-frost border-b">
+            <li key={part.id} className="border-ink/20 border-b">
               {/*
                * Same constant here (P3-8). The hover recolour used to be
                * hand-rolled as `group-hover:text-brick` on the title span; it
-               * is now `LINK_ON_CLOUD`'s own `hover:text-brick`, inherited by
-               * the one span that does not set a colour of its own. The other
-               * two spans are `text-pine/90` and are unaffected, so the row
-               * looks and behaves exactly as before.
+               * is now `LINK_ON_CLOUD`'s own underline hover. Text decoration
+               * propagates to every span in the row, so hovering a row
+               * underlines all of it, not just the title.
                */}
               <a
                 href={`#${part.id}`}
                 className={`${LINK_ON_CLOUD} flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:gap-6`}
               >
-                <span className="text-eyebrow text-pine/90 font-medium uppercase sm:w-16 sm:shrink-0">
+                <span className="text-eyebrow text-ink font-medium uppercase sm:w-16 sm:shrink-0">
                   Part {index + 1}
                 </span>
                 <span className="text-body font-medium sm:w-56 sm:shrink-0">
                   {part.title}
                 </span>
-                <span className="text-caption text-pine/90">{part.blurb}</span>
+                <span className="text-caption text-ink">{part.blurb}</span>
               </a>
             </li>
           ))}

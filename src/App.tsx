@@ -2,9 +2,6 @@ import { domAnimation, LazyMotion } from 'motion/react'
 import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
 import { SnowdriftDivider } from './components/SnowdriftDivider'
-import { ScrollTwistLogo } from './components/ScrollTwistLogo'
-import { Snowfall } from './components/Snowfall'
-import { EventOverviewSection } from './components/sections/EventOverviewSection'
 import { SponsorsPreviewSection } from './components/sections/SponsorsPreviewSection'
 import { PrizeTracksSection } from './components/sections/PrizeTracksSection'
 import { RegisterSection } from './components/sections/RegisterSection'
@@ -24,29 +21,24 @@ import { SiteFooter } from './components/SiteFooter'
  * Order, top to bottom:
  *
  *   fixed header
- *   Hero                    the banner: campus photograph, <h1>, dates,
+ *   Hero                    the banner: three.js snow scene, <h1>, dates,
  *                           venue and the Register link
- *   EventOverviewSection    what HackBU 2027 is — when, where, who, teams —
- *                           and the link to the schedule on /hackathons
  *   SponsorsPreviewSection  2027 sponsors: "coming soon", and /sponsors
- *   PrizeTracksSection      last year's five prize tracks on a spinning ring;
- *                           hover, tap or focus a track to read it
+ *   PrizeTracksSection      last year's five prize tracks as a wall of ice
+ *                           blocks; choose one to read it
  *   RegisterSection         the conversion point: /register, and /application
  *                           for people who already applied
  *   QuestionsSection        the hackathon FAQ, with the map of the Union
  *   footer on frost
  *
- * The order is the reader's: first what the event is, then who is behind it
+ * The order is the reader's: the hero says what and when, then who is behind it
  * and what can be won, then the ask, then the leftover doubts — with the
  * questions last because "where exactly is it?" is the one people still have
  * after deciding to come. The banner carries a Register link too, so nobody
  * has to scroll to act.
  *
- * Content sections all sit on cloud, separated by the `drift-*` snowdrift
- * dividers (a frost bank with cloud drifts either side). SnowdriftDivider's
- * rule is to add a variant rather than repeat one in a row, so the three are
- * rotated a → b → c down the page, starting from `drift-c` under the hero (the
- * reasoning for that one is at the divider).
+ * Content sections sit on the page's ice ground, separated by the diagonal
+ * "ice cut" dividers (`SnowdriftDivider`), rotated so no two in a row match.
  *
  * The hero is the only element the scroll work touches; see
  * src/components/Hero.tsx for its layer contract.
@@ -65,18 +57,15 @@ import { SiteFooter } from './components/SiteFooter'
 export default function App() {
   return (
     <LazyMotion features={domAnimation} strict>
-      <div className="bg-cloud font-sans text-pine min-h-screen">
+      <div className="font-sans text-ink min-h-screen">
         <a
           href="#main"
-          className="bg-cloud text-pine focus:outline-pine sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:px-4 focus:py-2 focus:outline-2"
+          className="bg-frost text-ink focus:outline-ink sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-none focus:px-4 focus:py-2 focus:outline-2"
         >
           Skip to content
         </a>
 
         <SiteHeader homeHref="#top" intro />
-        {/* Snow first, bearcat second: both are fixed at z-20, so DOM order puts the logo over the flakes. */}
-        <Snowfall />
-        <ScrollTwistLogo />
 
         {/*
          * `tabIndex={-1}` so the skip link above actually moves focus.
@@ -98,26 +87,7 @@ export default function App() {
         <main id="main" tabIndex={-1} className="focus:outline-none">
           <Hero />
 
-          {/*
-           * A `drift-*` variant, not a sky-backed one. The divider is only ever
-           * *seen* after the stage unpins, i.e. after the pan has finished, and
-           * the finished frame ends on the snow-covered foreground plaza of the
-           * photograph — near-white snow cut by grey trodden paths. A saturated
-           * blue band under that would read as a stripe. (A `sky-to-cloud`
-           * variant did exist for the hero boundary, from when the hero's bottom
-           * edge was open sky. Nothing rendered it after this moved, and it has
-           * since been removed.)
-           *
-           * The `drift-*` variants band `bg-frost` with cloud-coloured drifts top
-           * and bottom, which under the plaza reads as a bank of settled snow
-           * carrying the eye into the page — the thing the component was built to
-           * do. `drift-c` specifically, so the rotation below can run a → b → c
-           * and its next use (prizes -> registration) is as far down the page
-           * as three shapes allow.
-           */}
-          <SnowdriftDivider variant="drift-c" />
-          <EventOverviewSection />
-
+          {/* Dividers are "ice cuts"; see SnowdriftDivider.tsx. */}
           <SnowdriftDivider variant="drift-a" />
           <SponsorsPreviewSection />
 

@@ -29,8 +29,10 @@
 
 /*
  * Self-hosted faces — exactly the three the finished pages use, and no more.
- * Fraunces 600 is every display heading; Inter 400 is body copy and Inter 500
- * is the eyebrows and button labels. (The logo is artwork, not type.)
+ * The whole site is set in IBM Plex Mono: 400 for copy, 500 for labels and
+ * buttons, 600 for headings. One monospaced family is what gives the pages
+ * their instrument-panel voice, and it is why headings can "decode" in place
+ * without moving a single neighbouring glyph. (The logo is artwork, not type.)
  *
  * These are hand-written rather than the three `@fontsource` `latin-*.css`
  * imports that used to sit in `src/main.tsx` / `src/sheet/main.tsx`, for two
@@ -63,34 +65,34 @@
  * `<link rel="preload" as="font">` hints in `index.html` (P5-5).
  */
 @font-face {
-  font-family: 'Fraunces';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 600;
-  src: url('@fontsource/fraunces/files/fraunces-latin-600-normal.woff2')
-    format('woff2');
-}
-
-@font-face {
-  font-family: 'Inter';
+  font-family: 'IBM Plex Mono';
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url('@fontsource/inter/files/inter-latin-400-normal.woff2')
+  src: url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2')
     format('woff2');
 }
 
 @font-face {
-  font-family: 'Inter';
+  font-family: 'IBM Plex Mono';
   font-style: normal;
   font-display: swap;
   font-weight: 500;
-  src: url('@fontsource/inter/files/inter-latin-500-normal.woff2')
+  src: url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2')
+    format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2')
     format('woff2');
 }
 
 /*
- * The site header is fixed and opaque (h-16, h-20 from `sm`), so anything the
+ * The site header is fixed (h-16, h-20 from `sm`), so anything the
  * browser scrolls to the top of the viewport lands underneath it. Section
  * anchors already carry `scroll-mt-24`, but sequential focus navigation scrolls
  * the *viewport*, not the anchor — without this, tabbing to a link just below
@@ -110,23 +112,31 @@
  *   --font-<name>   ->  font-<name>
  */
 @theme {
-  /* Palette — winter campus */
+  /* Palette. `frost` is the ground of the ice redesign, `ink` its ink,
+     `horizon` its one accent, `haze` and `sky` its 3D shadow tones. `cloud` is
+     the bright end of the scenes. `brick` and `stone` are retired from the UI
+     (the 3D scenes still read `brick` for ink bark). */
   --color-sky: #4a96d2;
   --color-horizon: #a8d0eb;
   --color-cloud: #f7f5ee;
   --color-frost: #dce3ea;
   --color-brick: #a2593a;
   --color-stone: #c4b79e;
+  /*
+   * The ink of the site: text, hairlines, focus rings and solid buttons. It is
+   * the accent blue taken dark enough to read (`sky` at 55%): 6.28:1 on
+   * `frost` and 4.99:1 on `horizon`. The light accent itself cannot be
+   * text. `pine`, the old ink, is retired.
+   */
+  --color-ink: #295374;
   --color-pine: #3c5c48;
   /*
-   * haze was defined as a scene colour, not a text colour — but it is
-   * currently unused anywhere in `src/`, the same as `horizon` above (see
-   * README's colour table). It was retired from text use because, measured
+   * haze was defined as a scene colour, not a text colour, and that is its
+   * only use: the snow scenes read it (and `horizon`) through `.snow-scene`
+   * below. It was retired from text use because, measured
    * against the two page backgrounds, it reaches only 2.72:1 on cloud and
    * 2.29:1 on frost — below WCAG AA for normal text (4.5:1) and below AA
-   * large (3:1) as well. Every eyebrow and caption uses `text-pine/90`
-   * instead (5.36:1 on cloud, 4.65:1 on frost), the lightest tint of the
-   * only token that clears AA on both.
+   * large (3:1) as well. Eyebrows and captions use full `ink`.
    */
   --color-haze: #7c99b4;
 
@@ -139,8 +149,8 @@
    * are rendered as `mask-image` shapes filled with this one token (see
    * `.brand-mark-*` below), which normalises them at paint time.
    *
-   * It is not an accent and never becomes one: pine carries text and the
-   * Discord button, brick is the warm hover. fern must not appear on a link, a
+   * It is not an accent and never becomes one: ink carries text, horizon is
+   * the one accent (Register). fern must not appear on a link, a
    * button, a border, a background or any text — it measures 3.27:1 on cloud
    * and 2.75:1 on frost, which is below AA for text at any size. Logotypes are
    * exempt from WCAG 1.4.3 and 1.4.11; nothing else on this page is, which is
@@ -148,11 +158,23 @@
    */
   --color-fern: #339966;
 
-  /* Typography — Fraunces for display, Inter for body.
-     Faces are self-hosted; the three @font-face rules are above. */
-  --font-display: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
-    Roboto, Helvetica, Arial, sans-serif;
+  /* Typography — one monospaced family. Both roles stay named so that a
+     heading and a paragraph can still diverge later. */
+  --font-display: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo,
+    Consolas, monospace;
+  --font-sans: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+    monospace;
+
+  /* Square corners: the sized radii are all zero, so every `rounded-*` in the
+     component tree resolves to a hard instrument edge. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
 
   /*
    * Type scale. Named steps so nothing hand-picks a size ad hoc.
@@ -166,26 +188,42 @@
    *   text-caption     secondary / meta text    (font-sans)
    *   text-eyebrow     uppercase section label  (font-sans)
    */
-  --text-display-xl: clamp(2.75rem, 7vw, 5rem);
-  --text-display-xl--line-height: 1.02;
-  --text-display-xl--letter-spacing: -0.02em;
+  --text-display-xl: clamp(2.125rem, 5.4vw, 4.25rem);
+  --text-display-xl--line-height: 1.04;
+  --text-display-xl--letter-spacing: -0.045em;
 
-  --text-display-lg: clamp(2rem, 4.2vw, 3rem);
-  --text-display-lg--line-height: 1.08;
-  --text-display-lg--letter-spacing: -0.015em;
+  /*
+   * The hero lockup ("HackBU 2027"). Two steps because the lockup changes
+   * shape (see `lockup-wide` below): on a portrait phone it stacks on two
+   * lines and can take ~21vw; from `sm`, or in landscape, it is one line and
+   * has to fit "HackBU 2027" across the viewport. The `dvh` terms keep it
+   * inside short screens, where the width terms alone would push the lockup
+   * up under the fixed header.
+   */
+  --text-display-hero: min(21vw, 7.5rem, 12dvh);
+  --text-display-hero--line-height: 0.95;
+  --text-display-hero--letter-spacing: -0.06em;
 
-  --text-display-md: clamp(1.25rem, 2.2vw, 1.5rem);
-  --text-display-md--line-height: 1.25;
-  --text-display-md--letter-spacing: -0.01em;
+  --text-display-hero-wide: min(8.4vw, 8rem, 17dvh);
+  --text-display-hero-wide--line-height: 0.95;
+  --text-display-hero-wide--letter-spacing: -0.06em;
 
-  --text-lede: clamp(1.125rem, 1.6vw, 1.375rem);
-  --text-lede--line-height: 1.55;
+  --text-display-lg: clamp(1.625rem, 3.1vw, 2.5rem);
+  --text-display-lg--line-height: 1.14;
+  --text-display-lg--letter-spacing: -0.04em;
 
-  --text-body: 1.0625rem;
-  --text-body--line-height: 1.65;
+  --text-display-md: clamp(1.0625rem, 1.6vw, 1.25rem);
+  --text-display-md--line-height: 1.3;
+  --text-display-md--letter-spacing: -0.02em;
 
-  --text-caption: 0.875rem;
-  --text-caption--line-height: 1.5;
+  --text-lede: clamp(1rem, 1.25vw, 1.125rem);
+  --text-lede--line-height: 1.6;
+
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.7;
+
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.55;
 
   --text-eyebrow: 0.75rem;
   --text-eyebrow--line-height: 1.1;
@@ -212,6 +250,17 @@
 @theme {
   --animate-intro-bar: intro-bar 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   --animate-intro-rise: intro-rise 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  --animate-hint-bob: hint-bob 1.8s ease-in-out infinite;
+
+  @keyframes hint-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
+    }
+  }
 
   @keyframes intro-bar {
     from {
@@ -231,6 +280,247 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+/*
+ * Hero lockup layouts (src/components/Hero.tsx).
+ *
+ * `lockup-wide`: "HackBU 2027" on one line and the dates in one row. From
+ * `sm` as usual, and also in any landscape window, because a phone turned
+ * sideways (568x320, 667x375, 844x390) is far too short for the stacked
+ * portrait lockup and would push it up under the header.
+
+ */
+@custom-variant lockup-wide {
+  @media (width >= 40rem), (orientation: landscape) {
+    @slot;
+  }
+}
+
+
+/*
+ * The hero scrim (`data-hero-scrim` in src/components/Hero.tsx): the ground the
+ * HackBU 2027 lockup stands on. `frost`, fading in over `--hero-scrim-fade`
+ * above the lockup and solid from the top of the lockup to the bottom of the
+ * frame — so ink type on it is ink on frost (6.28:1) whatever the 3D scene is
+ * doing behind, and the hero runs straight into the page's own ground below.
+ *
+ * It is sized to the lockup, not to the viewport: the element is a child of
+ * the copy block, pinned to its bottom and pulled up by the fade length.
+ */
+@utility hero-scrim {
+  --hero-scrim-fade: clamp(4rem, 12dvh, 8rem);
+  top: calc(-1 * var(--hero-scrim-fade));
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    color-mix(in srgb, var(--color-frost) 30%, transparent)
+      calc(var(--hero-scrim-fade) * 0.4),
+    color-mix(in srgb, var(--color-frost) 78%, transparent)
+      calc(var(--hero-scrim-fade) * 0.75),
+    var(--color-frost) var(--hero-scrim-fade)
+  );
+}
+
+/*
+ * The ice HUD system: what every page is made of.
+ *
+ * The ground is `frost` with a faint `horizon` bloom and a fixed dot grid,
+ * painted once on a fixed layer so sections need no background of their own.
+ * Panels are translucent frost behind an ink hairline with two corner ticks.
+ * Labels carry slashes; big blurred words drift behind sections; buttons sit
+ * in square brackets. Everything is `frost`, `horizon`, `haze` and `ink`:
+ * tints are the tokens at reduced strength, never a new colour.
+ */
+@layer base {
+  html {
+    background-color: var(--color-frost);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(
+        circle at center,
+        color-mix(in srgb, var(--color-ink) 26%, transparent) 1px,
+        transparent 1.5px
+      ),
+      radial-gradient(
+        110% 75% at 85% 0%,
+        color-mix(in srgb, var(--color-horizon) 24%, transparent),
+        transparent 65%
+      ),
+      linear-gradient(
+        to bottom,
+        transparent,
+        color-mix(in srgb, var(--color-haze) 8%, transparent)
+      );
+    background-size:
+      56px 56px,
+      auto,
+      auto;
+  }
+
+  ::selection {
+    background-color: var(--color-horizon);
+    color: var(--color-ink);
+  }
+}
+
+/*
+ * The hero's "move over the snow" hint: shown only with a mouse, on a wide
+ * screen, once the scene has drawn. Unlayered on purpose, so it outranks the
+ * element's own `hidden` utility.
+ */
+@media (width >= 64rem) and (hover: hover) and (pointer: fine) {
+  [data-hero-stage]:has([data-snow-scene][data-ready]) .hero-hint {
+    display: block;
+  }
+}
+
+/*
+ * Scroll-scrubbed parallax, the way igloo.inc ties its moving parts to the
+ * scroll position instead of playing them once: each section's giant blurred
+ * name slides against the scroll, and each divider's survey marks drift along
+ * its cut. They run on the scroll itself (CSS scroll-driven animations), so
+ * they reverse when the reader scrolls back, cost no JavaScript and animate
+ * only transform. Browsers without `animation-timeline` keep them still, and
+ * so does reduced motion. (`animation-timeline` comes after the shorthand,
+ * which would otherwise reset it.)
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ghost-type {
+      animation: ghost-drift linear both;
+      animation-timeline: view();
+    }
+    .drift-mark {
+      animation: mark-drift linear both;
+      animation-timeline: view();
+    }
+  }
+}
+
+@keyframes ghost-drift {
+  from {
+    transform: translateX(12vw);
+  }
+  to {
+    transform: translateX(-14vw);
+  }
+}
+
+@keyframes mark-drift {
+  from {
+    transform: translateX(-2.5vw);
+  }
+  to {
+    transform: translateX(2.5vw);
+  }
+}
+
+/*
+ * Forced colours (Windows high contrast). Unlayered, so these outrank the
+ * utilities they correct.
+ *
+ * - The logo is a `bg-fern` fill through a mask; forced colours swap the
+ *   fill for the page ground and the logo vanishes. Paint it in the system
+ *   text colour instead.
+ * - The hero scrim is a gradient image, which forced colours drop, leaving
+ *   the lockup straight over the scene. Give it a solid system ground — over
+ *   the lockup only: its fade strip above would become an opaque block over
+ *   the bottom of the scene.
+ * - The headline's tight line-height lets the text backplate that forced
+ *   colours draw behind it cover the eyebrow above; open the gap.
+ */
+@media (forced-colors: active) {
+  .brand-mark-bearcat,
+  .brand-mark-wordmark {
+    forced-color-adjust: none;
+    background-color: CanvasText;
+  }
+  [data-hero-scrim] {
+    top: 0;
+    background-color: Canvas;
+  }
+  #hero-title {
+    margin-top: 0.25em;
+  }
+}
+
+@layer components {
+  .hud-panel {
+    position: relative;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 22%, transparent);
+    background-color: color-mix(in srgb, var(--color-frost) 74%, transparent);
+  }
+
+  .hud-panel::before,
+  .hud-panel::after {
+    content: '';
+    position: absolute;
+    width: 0.625rem;
+    height: 0.625rem;
+    pointer-events: none;
+    border-color: var(--color-ink);
+    border-style: solid;
+  }
+
+  .hud-panel::before {
+    top: -1px;
+    left: -1px;
+    border-width: 1px 0 0 1px;
+  }
+
+  .hud-panel::after {
+    right: -1px;
+    bottom: -1px;
+    border-width: 0 1px 1px 0;
+  }
+
+  .hud-label::before {
+    /* The empty alternative keeps the slashes out of the accessible name. */
+    content: '////// ' / '';
+    white-space: pre;
+  }
+
+  .hud-btn::before {
+    content: '[' / '';
+    margin-right: 0.35em;
+    opacity: 0.6;
+  }
+
+  .hud-btn::after {
+    content: ']' / '';
+    margin-left: 0.35em;
+    opacity: 0.6;
+  }
+
+  /* The oversized out-of-focus word behind each section. */
+  .ghost-type {
+    position: absolute;
+    z-index: -1;
+    bottom: 0.08em;
+    left: -0.03em;
+    font-size: clamp(3.5rem, 15vw, 14rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    color: color-mix(in srgb, var(--color-haze) 18%, transparent);
+    filter: blur(0.07em);
+  }
+
+  /* Photographs join the monochrome: colour is held back, not removed. */
+  picture img {
+    filter: saturate(0.4) contrast(1.03);
   }
 }
 
@@ -329,20 +619,44 @@
  * Only one rung is ever fetched — an unmatched media query loads nothing.
  */
 /*
- * Feathered photograph edges — the landing page's section photos
- * (src/components/SectionPhoto.tsx).
+ * Snow scenes (src/three/SnowCanvas.tsx) — the three.js hero and the section
+ * vignettes that replaced the campus photographs.
  *
- * The photographs are opaque JPEG/AVIF/WebP with no alpha channel, so their
- * edges are dissolved at paint time instead: two linear gradients, one per
- * axis, each fully transparent at the edge and opaque from 12% in, intersected
- * so every side and every corner fades into the section background. Only the
- * alpha of the gradient is read, which is why the stops are plain `black`. A
- * browser without `mask-composite` unions the two layers instead, which leaves
- * the photo whole with only its corners softened — degraded, never broken. The
- * WebKit pair is the legacy spelling Safari still reads.
+ * `.snow-scene` is the box a scene is drawn in. It does two jobs:
+ *
+ *   - it is the positioned ancestor of the scene's absolutely placed <canvas>
+ *     (a utility such as `absolute` on the same element still wins, being in
+ *     a later layer);
+ *   - it republishes the palette as `--snow-*`, which is how the WebGL code
+ *     reads the `@theme` tokens without writing a hex of its own. Referencing
+ *     the tokens here is also what makes Tailwind emit the ones no utility
+ *     uses (`horizon`, `haze`).
+ *
+ * `.scene-feather` dissolves a vignette's edges into the section behind it:
+ * two linear gradients, one per axis, each fully transparent at the edge and
+ * opaque from 12% in, intersected so every side and every corner fades. Only
+ * the alpha of the gradient is read, which is why the stops are plain
+ * `black`. A browser without `mask-composite` unions the two layers instead,
+ * which leaves the scene whole with only its corners softened — degraded,
+ * never broken. The WebKit pair is the legacy spelling Safari still reads.
  */
 @layer components {
-  .photo-feather {
+  .snow-scene {
+    position: relative;
+    --snow-sky: var(--color-sky);
+    --snow-horizon: var(--color-horizon);
+    --snow-cloud: var(--color-cloud);
+    --snow-frost: var(--color-frost);
+    --snow-haze: var(--color-haze);
+    --snow-ink: var(--color-ink);
+    --snow-fern: var(--color-fern);
+    --snow-brick: var(--color-brick);
+    --snow-stone: var(--color-stone);
+  }
+}
+
+@layer components {
+  .scene-feather {
     -webkit-mask-image:
       linear-gradient(to right, transparent, black 12%, black 88%, transparent),
       linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
@@ -354,9 +668,9 @@
   }
 
   /*
-   * A section photo that leaves the content column and runs off the right
+   * A section vignette that leaves the content column and runs off the right
    * edge of the viewport, from `md` up (below that it stays in flow, a plain
-   * feathered block). It is applied to the photo's positioned wrapper, whose
+   * feathered block). It is applied to the scene's positioned wrapper, whose
    * containing block is a `relative` row inside the centred <Container>.
    *
    * `right: calc(50% - 50vw)`: the row is horizontally centred in the
@@ -365,17 +679,18 @@
    * value is negative, i.e. the box is pushed *out* of the row to the window
    * edge, whatever the row's width is. `100vw` counts a classic scrollbar,
    * so the box can overshoot by half a scrollbar: the sections that host a
-   * bleed photo are `overflow-x-clip` (clip, not hidden — it clips without
+   * bleed are `overflow-x-clip` (clip, not hidden — it clips without
    * making the section a scroll container). The feather then dissolves the
    * left edge into the copy beside it and the right edge at the window.
    *
    * `top`/`bottom` 0 stretch the box to the row's full height. The *left*
    * edge, not the width, is what is fixed: half the row, the same line the
-   * sections cap their text blocks at, so copy and picture meet at the
-   * middle of the window and the feather is all that softens the seam. A fixed width did not do this — on a wide window it left
-   * a band of empty background between the copy and the picture.
+   * sections cap their text blocks at, so copy and scene meet at the
+   * middle of the window and the feather is all that softens the seam. A
+   * fixed width did not do this — on a wide window it left a band of empty
+   * background between the copy and the scene.
    */
-  .photo-bleed {
+  .scene-bleed {
     @variant md {
       position: absolute;
       top: 0;
@@ -435,332 +750,273 @@
 }
 
 /* ========================================================================== */
-/* BEGIN prize-tracks ring (src/components/sections/PrizeTracksSection.tsx)   */
+/* BEGIN prize-tracks ice wall (src/components/sections/PrizeTracksSection.tsx) */
 /* ========================================================================== */
 /*
- * The 3D ring of wide prize-track cards, the description each card types when
- * it is open, and the static arrangement that replaces the ring under reduced
- * motion. The component's own doc comment explains the behaviour; this block
- * is the geometry and the card's two folding parts.
+ * The prize tracks as a wall of ice blocks. The component's doc comment
+ * explains the behaviour; this block is the masonry and the ice.
  *
- * Nesting, outermost first:
- *
- *   .prize-viewport  the perspective. Owns the sizes as custom properties —
- *                    card width/height, and the ring radius as a multiple of
- *                    the width — stepped up at `sm` and `lg`, so the geometry
- *                    is declared once and nothing in the component measures
- *                    it. As wide as the ring looks, centred, because it is
- *                    also the hover area: the open description stays open
- *                    while the pointer is inside it.
- *   .prize-scene     one card-sized box, centred; pushed back by the radius so
- *                    the front card sits at z = 0 (drawn at its real size),
- *                    and tipped back 8° so we look down onto the ring.
- *   .prize-ring      the part that turns. Its `transform` is written every
- *                    frame by the component and by nothing here.
- *   .prize-slot      one per card: turned `i × 360° / n` and pushed out by the
- *                    radius. `--i` is set per slot, `--n` on the ring.
- *   .prize-card      the front face (a <button>), and .prize-back behind it.
- *                    Both hide their backfaces, so exactly one shows.
- *
- * The radius is 0.84 × the card's width: just over the 0.69 at which five
- * cards would meet edge to edge, so the ring reads as one solid drum with a
- * hairline between its faces, and the two neighbours of the front card show
- * as narrow faces either side of it rather than vanishing into the distance.
- *
- * `transform-style: preserve-3d` has to be restated on every level: it is not
- * inherited, and any level without it flattens everything below into a plane.
- * For the same reason nothing inside the scene may carry `opacity < 1`,
- * `filter` or `overflow: hidden` on a preserve-3d element — each of those
- * forces flattening. The card's own `overflow-hidden`, and the opacity and
- * clipping of the folds inside it, are fine: the card is a leaf, not a 3D
- * container.
+ *   .ice-wall     the wall and the dome surveyed over it (`.ice-dome`, a
+ *                 dashed arc that shows in the corners the top course leaves).
+ *   .ice-courses  the tab list. Six columns from `sm`: the bottom course's
+ *                 three blocks span two each, the top course's two start one
+ *                 column in, so each bridges a joint below. One column on
+ *                 phones, the blocks staggered left and right instead.
+ *   .ice-brick    one block. Every colour is a palette token: `cloud` and
+ *                 `frost` for the body, `horizon` for the depth glowing up
+ *                 from its foot, `haze` for the shaded bevel. `ink` text keeps
+ *                 at least 5:1 on the deepest part of it (`horizon`).
  */
-@layer components {
-  .prize-viewport {
-    --card-w: min(19rem, 100vw - 3rem);
-    --card-h: 16rem;
-    --ring-r: calc(var(--card-w) * 0.84);
-    /*
-     * The 8° tip swings the front card down by r × sin 8° — at this radius
-     * enough to matter — so the viewport and the floor make room for it.
-     */
-    --front-drop: calc(var(--ring-r) * 0.14);
-    position: relative;
-    max-width: calc(var(--card-w) * 1.6);
-    height: calc(var(--card-h) + var(--front-drop) + 4.5rem);
-    margin-inline: auto;
-    perspective: 1500px;
-    perspective-origin: 50% 35%;
+.ice-wall {
+  position: relative;
+  padding-top: 3rem;
+}
 
-    /* The narrowest phones: the longest description needs the extra height. */
-    @media (width < 22.5rem) {
-      --card-h: 17.5rem;
-    }
+.ice-dome {
+  position: absolute;
+  inset: 0 0 1.5rem;
+  width: 100%;
+  height: calc(100% - 1.5rem);
+  pointer-events: none;
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+}
 
-    @variant sm {
-      --card-w: 34rem;
-      --card-h: 17rem;
-      perspective: 2400px;
-    }
+.ice-dome path {
+  vector-effect: non-scaling-stroke;
+}
 
-    @variant lg {
-      --card-w: 42rem;
-      --card-h: 18rem;
-      perspective: 3200px;
-    }
-  }
+.ice-courses {
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+}
 
-  /* A soft pine shadow where the ring meets the ground. */
-  .prize-floor {
-    position: absolute;
-    left: 50%;
-    top: calc(var(--card-h) + var(--front-drop));
-    width: 100%;
-    height: 5rem;
-    transform: translateX(-50%);
-    background: radial-gradient(
-      closest-side,
-      rgb(60 92 72 / 0.2),
-      rgb(60 92 72 / 0.07) 55%,
-      transparent
+.ice-brick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 9rem;
+  padding: 1rem 1.125rem 1.125rem;
+  background:
+    /* sheen across the top-left face */
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--color-cloud) 90%, transparent) 0%,
+      transparent 40%
+    ),
+    /* the grain the ice froze in */
+    repeating-linear-gradient(
+      104deg,
+      transparent 0 22px,
+      color-mix(in srgb, var(--color-cloud) 45%, transparent) 22px 23px,
+      transparent 23px 41px
+    ),
+    /* depth, glowing up from the foot */
+    radial-gradient(
+      120% 90% at 78% 115%,
+      color-mix(in srgb, var(--color-horizon) 80%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-cloud),
+      var(--color-frost) 55%,
+      color-mix(in srgb, var(--color-horizon) 45%, var(--color-frost))
     );
-    pointer-events: none;
-  }
+  /* A bevel: lit top and left edges, shaded bottom and right. */
+  box-shadow:
+    inset 0 2px 0 var(--color-cloud),
+    inset 2px 0 0 color-mix(in srgb, var(--color-cloud) 75%, transparent),
+    inset 0 -3px 0 color-mix(in srgb, var(--color-haze) 55%, transparent),
+    inset -2px 0 0 color-mix(in srgb, var(--color-haze) 35%, transparent);
+}
 
-  .prize-scene {
-    position: absolute;
-    top: 2.5rem;
-    left: 50%;
-    width: var(--card-w);
-    height: var(--card-h);
-    margin-left: calc(var(--card-w) / -2);
-    transform-style: preserve-3d;
-    transform: translateZ(calc(var(--ring-r) * -1)) rotateX(-8deg);
-  }
+.ice-brick:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
 
-  .prize-ring {
-    position: absolute;
-    inset: 0;
-    transform-style: preserve-3d;
-  }
+/* The chosen block: an ink rim inside the bevel. */
+.ice-brick[data-chosen] {
+  box-shadow:
+    inset 0 0 0 2px var(--color-ink),
+    inset 0 4px 0 var(--color-cloud),
+    inset 0 -5px 0 color-mix(in srgb, var(--color-haze) 55%, transparent);
+}
 
-  .prize-slot {
-    position: absolute;
-    inset: 0;
-    transform-style: preserve-3d;
-    transform: rotateY(calc(var(--i) * 360deg / var(--n)))
-      translateZ(var(--ring-r));
-  }
+/*
+ * Hover lifts the block 3px; this strip under it keeps the pointer over the
+ * block while it is up, so a pointer resting on its bottom edge cannot make
+ * it bob up and down.
+ */
+.ice-brick::after {
+  content: '';
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 7px;
+}
 
-  .prize-card,
-  .prize-back {
-    position: absolute;
-    inset: 0;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-  }
+/* Snow lying on the top course. */
+.ice-brick[data-course='top']::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 6%;
+  right: 14%;
+  height: 9px;
+  background: var(--color-cloud);
+  clip-path: polygon(
+    0 100%,
+    4% 45%,
+    14% 20%,
+    30% 35%,
+    46% 0,
+    63% 30%,
+    80% 10%,
+    94% 50%,
+    100% 100%
+  );
+  pointer-events: none;
+}
 
-  /* Hovered or open, the card lifts out of the ring towards the viewer. */
-  .prize-card {
-    transition:
-      transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1),
-      border-color 0.2s ease;
-  }
-
-  .prize-card[data-active='true'] {
-    transform: translateZ(1.5rem);
-  }
-
-  @media (hover: hover) {
-    .prize-card:hover {
-      transform: translateZ(1.5rem);
-    }
-  }
-
-  .prize-back {
-    transform: rotateY(180deg);
-  }
-
-  /*
-   * Fake lighting: a dark overlay whose opacity the component writes as
-   * `--shade` (0 facing the viewer, darker as the face turns edge-on). A
-   * custom property rather than an inline `opacity` — see the component.
-   */
-  .prize-shade {
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: rgb(22 36 28);
-    opacity: var(--shade, 0);
-    pointer-events: none;
-  }
-
-  /*
-   * The open card is lit whatever angle the ring stopped it at. The
-   * transition is declared only here, so it runs once on the way in and never
-   * chases the per-frame `--shade` writes while the ring turns.
-   */
-  .prize-card[data-active='true'] .prize-shade {
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-
-  /*
-   * The kicker and the description trade places when a card opens. Each is a
-   * one-row grid whose track goes between 0fr and 1fr — the one way to
-   * animate a height to and from "as tall as the content" — and the card
-   * bottom-aligns them under the name, so the name rides up as the
-   * description unfolds. Padding belongs on the grandchild: on the clipped
-   * child it would keep a folded row from reaching zero.
-   */
-  .prize-fold {
-    display: grid;
-    transition:
-      grid-template-rows 0.45s cubic-bezier(0.22, 0.61, 0.36, 1),
-      opacity 0.3s ease;
-  }
-
-  .prize-fold > * {
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .prize-kicker,
-  .prize-card[data-active='true'] .prize-description {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
-
-  .prize-description,
-  .prize-card[data-active='true'] .prize-kicker {
-    grid-template-rows: 0fr;
-    opacity: 0;
-  }
-
-  /*
-   * The typed lines sit over the sizer — an invisible copy of the whole text
-   * — in one grid cell, so the description is its final size from the first
-   * character. Each word of the sizer is a span the component reads line
-   * breaks from; `nowrap` keeps a hyphenated word from splitting across two
-   * lines inside its span. The lines themselves never wrap: each holds
-   * exactly what fitted on that line of the sizer.
-   */
-  .prize-description-text {
-    display: grid;
-    max-width: 34rem;
-  }
-
-  .prize-description-sizer,
-  .prize-description-lines {
-    grid-area: 1 / 1;
-  }
-
-  .prize-description-sizer {
-    visibility: hidden;
-    text-wrap: pretty;
-  }
-
-  .prize-description-sizer > span {
-    white-space: nowrap;
-  }
-
-  .prize-line {
-    display: block;
-    white-space: pre;
-  }
-
-  /*
-   * One caret per line, showing while that line types. When every line is
-   * done, the last line's caret stays and blinks.
-   */
-  .prize-caret {
-    display: inline-block;
-    width: 2px;
-    height: 1.05em;
-    margin-left: 1px;
-    vertical-align: -0.15em;
-    background: currentColor;
-    visibility: hidden;
-  }
-
-  .prize-line[data-state='typing'] .prize-caret {
-    visibility: visible;
-  }
-
-  .prize-description-lines[data-typing='false']
-    .prize-line:last-child
-    .prize-caret {
-    visibility: visible;
-    animation: prize-caret-blink 1.05s steps(1, end) infinite;
-  }
-
-  /*
-   * Reduced motion: no ring. The five cards stand flat in a wrapping row —
-   * one to a row on a phone — with no backs, no shading and no lift; an open
-   * card shows the sizer itself instead of typing, and folds without a
-   * transition. This is the media query and not the component's hook, so the
-   * prerendered first paint is already this layout. `!important` only where
-   * the component writes an inline style while it runs (the ring's
-   * transform).
-   */
-  @media (prefers-reduced-motion: reduce) {
-    .prize-viewport {
-      max-width: none;
-      height: auto;
-      perspective: none;
-    }
-
-    .prize-floor,
-    .prize-back,
-    .prize-shade,
-    .prize-description-lines {
-      display: none;
-    }
-
-    .prize-description-sizer {
-      visibility: visible;
-    }
-
-    .prize-scene,
-    .prize-ring {
-      position: static;
-      width: auto;
-      height: auto;
-      margin: 0;
-      transform: none !important;
-      transform-style: flat;
-    }
-
-    .prize-ring {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-    }
-
-    .prize-slot {
-      position: relative;
-      width: min(var(--card-w), 100%);
-      height: var(--card-h);
-      transform: none;
-      transform-style: flat;
-    }
-
-    .prize-card,
-    .prize-card:hover,
-    .prize-card[data-active='true'],
-    .prize-fold {
-      transform: none;
-      transition: none;
-    }
+/* Cut ice: chamfered corners where the browser can draw them. */
+@supports (corner-shape: bevel) {
+  .ice-brick {
+    border-radius: 9px;
+    corner-shape: bevel;
   }
 }
 
-@keyframes prize-caret-blink {
-  50% {
-    opacity: 0;
+/*
+ * The 3D wall (src/three/iceWall.ts) is drawing: it paints the ice, so the
+ * buttons drop their own and keep only their job — the click target, the
+ * focus ring and the text a screen reader reads (made transparent, not
+ * removed). The courses sit above the canvas so the buttons stay on top.
+ */
+.ice-courses {
+  z-index: 1;
+}
+
+.ice-wall[data-3d] .ice-brick {
+  background: none;
+  box-shadow: none;
+  color: transparent;
+  transform: none;
+  transition: none;
+}
+
+.ice-wall[data-3d] .ice-brick::before,
+.ice-wall[data-3d] .ice-brick svg {
+  visibility: hidden;
+}
+
+/* The dome arc goes behind the 3D blocks, not across them. */
+.ice-wall[data-3d] .ice-dome {
+  z-index: -1;
+}
+
+/* Phones: one staggered column, short blocks, no dome (it would only cut
+   through the gaps between them). */
+@media (width < 40rem) {
+  .ice-wall {
+    padding-top: 0.5rem;
+  }
+  .ice-dome {
+    display: none;
+  }
+  .ice-brick {
+    min-height: 6rem;
+  }
+  .ice-brick:nth-child(odd) {
+    margin-right: 1.5rem;
+  }
+  .ice-brick:nth-child(even) {
+    margin-left: 1.5rem;
+  }
+}
+
+@media (width >= 40rem) {
+  .ice-courses {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .ice-brick:nth-child(1) {
+    grid-area: 1 / 2 / 2 / 4;
+  }
+  .ice-brick:nth-child(2) {
+    grid-area: 1 / 4 / 2 / 6;
+  }
+  .ice-brick:nth-child(3) {
+    grid-area: 2 / 1 / 3 / 3;
+  }
+  .ice-brick:nth-child(4) {
+    grid-area: 2 / 3 / 3 / 5;
+  }
+  .ice-brick:nth-child(5) {
+    grid-area: 2 / 5 / 3 / 7;
+  }
+}
+
+/*
+ * Forced colours drop the gradients and the inset rim: give every block an
+ * edge, and the chosen one a heavy one.
+ */
+@media (forced-colors: active) {
+  /* The blocks are buttons, so their forced colours are the button pair. */
+  .ice-brick {
+    border: 1px solid ButtonText;
+  }
+  /* 2px heavier, and 2px less padding, so the content never shifts. */
+  .ice-brick[data-chosen] {
+    border-width: 3px;
+    border-color: Highlight;
+    padding: calc(1rem - 2px) calc(1.125rem - 2px) calc(1.125rem - 2px);
+  }
+  /* SVG strokes are not forced: the icons would stay ink on black. */
+  .ice-brick svg {
+    color: ButtonText;
+  }
+  /* Décor that turns into noise once its colours are forced: the snow caps
+     would cut the top edges, and the dome would show through the blocks. */
+  .ice-brick[data-course='top']::before,
+  .ice-dome {
+    display: none;
+  }
+  /* The 3D wall's ice would go unseen behind forced colours: keep the
+     buttons' own edges and text instead. */
+  .ice-canvas {
+    display: none;
+  }
+  .ice-wall[data-3d] .ice-brick {
+    color: ButtonText;
+  }
+  .ice-wall[data-3d] .ice-brick svg {
+    visibility: visible;
+  }
+}
+
+/* The giant blurred section words are texture; forced colours turn them into
+   bright shapes behind the copy. */
+@media (forced-colors: active) {
+  .ghost-type {
+    display: none;
+  }
+}
+
+/* The only motion: the chosen block rises out of the wall. */
+@media (prefers-reduced-motion: no-preference) {
+  .ice-brick {
+    transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .ice-brick:hover {
+    transform: translateY(-3px);
+  }
+  .ice-brick[data-chosen] {
+    transform: translateY(-6px);
   }
 }
 /* ========================================================================== */
-/* END prize-tracks ring                                                      */
+/* END prize-tracks ice wall                                                  */
 /* ========================================================================== */

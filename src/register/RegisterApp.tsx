@@ -18,10 +18,10 @@ import { RegistrationForm } from './RegistrationForm'
 export default function RegisterApp() {
   return (
     <LazyMotion features={domAnimation} strict>
-      <div id="top" className="bg-cloud font-sans text-pine min-h-screen">
+      <div id="top" className="font-sans text-ink min-h-screen">
         <a
           href="#main"
-          className="bg-cloud text-pine focus:outline-pine sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-full focus:px-4 focus:py-2 focus:outline-2"
+          className="bg-frost text-ink focus:outline-ink sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[60] focus:rounded-none focus:px-4 focus:py-2 focus:outline-2"
         >
           Skip to content
         </a>
@@ -36,17 +36,17 @@ export default function RegisterApp() {
                   <Eyebrow>Registration</Eyebrow>
                   <h1
                     id="register-title"
-                    className="font-display text-display-xl text-pine mt-5 font-semibold text-balance"
+                    className="font-display text-display-xl text-ink mt-5 font-semibold text-balance"
                   >
                     Register for HackBU
                   </h1>
-                  <p className="text-lede text-pine mt-6 max-w-2xl">
+                  <p className="text-lede text-ink mt-6 max-w-2xl">
                     Tell us a bit about yourself. You’ll get a confirmation email
                     right away, and we’ll email you again once your application
                     has been reviewed.
                   </p>
-                  <div className="border-pine/70 mt-6 border-l-4 pl-4">
-                    <p className="text-body text-pine">
+                  <div className="border-ink/70 mt-6 border-l-4 pl-4">
+                    <p className="text-body text-ink">
                       <span className="font-medium">New to hackathons?</span>{' '}
                       <ExternalLink
                         href={HACKATHONS_PATH}
@@ -56,7 +56,7 @@ export default function RegisterApp() {
                       </ExternalLink>
                       . No experience required.
                     </p>
-                    <p className="text-body text-pine mt-2">
+                    <p className="text-body text-ink mt-2">
                       <span className="font-medium">Already registered?</span>{' '}
                       <ExternalLink
                         href={APPLICATION_PATH}

@@ -51,19 +51,13 @@ function siteOrigin(): Plugin {
  * entry here and Vite emits each as a content-hashed asset — so the hashes are
  * read back out of the bundle below rather than written down anywhere.
  *
- * All three, not just the two above the fold. Fraunces is display-only and the
- * hero carries no type, so the earlier reading was that preloading it would
- * compete with the LCP image for bandwidth; against that, `<AboutSection>`'s
- * <h1> is the first thing under the hero and is set in it, `font-display: swap`
- * means a late face is a reflow rather than a delay, and 18 KB is small next to
- * the 495 KB of imagery the same connection is already carrying. Preloading the
- * set the page actually uses is the simpler contract, and it is the whole set:
- * Fraunces 600, Inter 400, Inter 500 and nothing else.
+ * All three: IBM Plex Mono 400, 500 and 600 are the whole set the pages use,
+ * and `font-display: swap` means a late face is a reflow rather than a delay.
  */
 const PRELOADED_FONTS = [
-  'fraunces-latin-600-normal',
-  'inter-latin-400-normal',
-  'inter-latin-500-normal',
+  'ibm-plex-mono-latin-400-normal',
+  'ibm-plex-mono-latin-500-normal',
+  'ibm-plex-mono-latin-600-normal',
 ]
 
 /**
@@ -71,8 +65,7 @@ const PRELOADED_FONTS = [
  *
  * Without it the faces cannot be requested until the stylesheet has arrived
  * *and* style resolution has found an element using each family — which is late,
- * and above-the-fold text on this page is Inter (the header's nav links are
- * Inter 500, body copy is Inter 400). The preload starts them alongside the
+ * and every line of text above the fold is set in them. The preload starts them alongside the
  * stylesheet instead. See P5-5.
  *
  * The filenames are content-hashed, so they cannot be written by hand. `order:
@@ -89,9 +82,8 @@ const PRELOADED_FONTS = [
  * the end of the head, so the three font requests are queued ahead of the
  * request that would otherwise have to complete before they could start.
  *
- * Every entry but `components.html`. The four public pages all set their body
- * copy in Inter 400/500 above the fold and their headings in Fraunces 600, and
- * each is a plausible cold first visit — an inbound link to `/about` or
+ * Every entry but `components.html`. The public pages all use these faces above
+ * the fold, and each is a plausible cold first visit — an inbound link to `/about` or
  * `/sponsors` has exactly the same problem `index.html` had. The component
  * sheet is excluded because it is internal, is `noindex`, and is never a cold
  * first visit that matters. The three faces are the same three assets on every
@@ -231,9 +223,20 @@ function manualChunks(id: string): string | undefined {
   // `rolldown-runtime-*.js` itself and never offers it to this function. It is
   // 589 B, it is named after what it is, and it is left alone.
   if (path.includes('modulepreload-polyfill')) return 'vendor'
+  // three.js is the one dependency that must NOT ride in `vendor`: that chunk
+  // is on every page's critical path, and three is ~142 KB gzipped that only
+  // the 3D scenes need. Named on its own it is reachable solely through
+  // `src/three/snowScene.ts` and `src/three/iceWall.ts`, which <SnowCanvas>
+  // and <IceWallCanvas> import dynamically, so it is fetched in the browser
+  // the first time a scene nears the viewport and never by the prerender.
+  if (path.includes('/node_modules/three/')) return 'three'
   if (path.includes('/node_modules/')) return 'vendor'
   if (SECTIONS_ONE_PAGE.test(path)) return undefined
   if (/\/src\/(components|lib)\//.test(path)) return 'shared'
+  // The scene's React frame is rendered by `shared` components (the hero, the
+  // landing sections), so it belongs with them; the scene module beside it is
+  // deliberately left unplaced, which is what keeps it a lazy chunk.
+  if (/\/src\/three\/SnowCanvas\./.test(path)) return 'shared'
   return undefined
 }
 // https://vite.dev/config/

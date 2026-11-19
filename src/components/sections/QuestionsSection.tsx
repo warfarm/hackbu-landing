@@ -38,7 +38,7 @@ import {
  *
  * **The map, and why it replaced the photograph.** Until the landing page
  * became the hackathon's, this section's right half was a portrait photograph
- * of a campus walkway, bled off the window's edge (`.photo-bleed`). That slot
+ * of a campus walkway, bled off the window's edge (`.scene-bleed` now). That slot
  * now holds a Google Map of the University Union, for three reasons:
  *
  *   - "Where is it?" is the question a visitor from another school cannot
@@ -52,9 +52,7 @@ import {
  *     it is a card: the same `rounded-2xl` frost-edged box as the About page's
  *     calendar embed, held inside the column.
  *   - Two pictures in one section fight each other (it is why Baxter left the
- *     old About section). The walkway photograph moved up the page instead,
- *     to the event overview (EventOverviewSection.tsx), whose tall copy
- *     column suits a portrait frame.
+ *     old About section).
  *
  * From `lg` up the questions and the map are two columns and the map card is
  * `sticky`, so it stays beside whichever answer is open as the list scrolls
@@ -71,7 +69,7 @@ import {
  * a map in a frame is not something a screen reader can read.
  */
 
-/** Text links on cloud, inside answers and on the map card: brick hover. */
+/** Text links inside answers and on the map card: underline hover. */
 const LINK = `${LINK_ON_CLOUD} underline underline-offset-4`
 
 /** Id of the map card, the target of the in-page "map" links. */
@@ -172,25 +170,25 @@ export function QuestionsSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <Section id="questions" labelledBy="questions-title" className="bg-cloud">
+    <Section id="questions" labelledBy="questions-title">
       <div className="grid gap-16 lg:grid-cols-2">
         <div>
           <Reveal>
             <SectionHeader
-              eyebrow="Hackathon FAQ"
+              eyebrow="Questions"
               titleId="questions-title"
-              title="Questions newcomers actually have."
+              title="FAQ"
             />
           </Reveal>
 
-          <RevealGroup className="border-frost mt-12 border-t">
+          <RevealGroup className="border-ink/20 mt-12 border-t">
             {QUESTIONS.map((item, index) => {
               const open = openIndex === index
               const panelId = `${baseId}-panel-${index}`
               const buttonId = `${baseId}-button-${index}`
 
               return (
-                <RevealItem key={item.question} className="border-frost border-b">
+                <RevealItem key={item.question} className="border-ink/20 border-b">
                   <h3>
                     <button
                       type="button"
@@ -198,7 +196,7 @@ export function QuestionsSection() {
                       aria-expanded={open}
                       aria-controls={panelId}
                       onClick={() => setOpenIndex(open ? null : index)}
-                      className="font-display text-display-md text-pine hover:text-brick focus-visible:outline-pine flex w-full cursor-pointer items-center justify-between gap-6 py-8 text-left font-semibold text-balance focus-visible:outline-2 focus-visible:outline-offset-4"
+                      className="font-display text-display-md text-ink hover:underline hover:underline-offset-4 focus-visible:outline-ink flex w-full cursor-pointer items-center justify-between gap-6 py-8 text-left font-semibold text-balance focus-visible:outline-2 focus-visible:outline-offset-4"
                     >
                       {item.question}
                       <DisclosureGlyph open={open} />
@@ -206,7 +204,7 @@ export function QuestionsSection() {
                   </h3>
                   <div className="faq-panel" data-open={open}>
                     <section id={panelId} aria-labelledby={buttonId}>
-                      <p className="faq-panel-body text-body text-pine max-w-2xl pb-8">
+                      <p className="faq-panel-body text-body text-ink max-w-2xl pb-8">
                         {item.answer}
                       </p>
                     </section>
@@ -240,7 +238,7 @@ export function QuestionsSection() {
 function VenueCard() {
   return (
     <div id={VENUE_ID} className="scroll-mt-24">
-      <div className="border-frost bg-frost overflow-hidden rounded-2xl border">
+      <div className="hud-panel overflow-hidden rounded-2xl border">
         <iframe
           title={`Google Map of the ${VENUE.name} at ${VENUE.campus}`}
           src={VENUE_MAP_EMBED_URL}
@@ -252,18 +250,18 @@ function VenueCard() {
 
       <div className="mt-6">
         <Eyebrow>Where it is</Eyebrow>
-        <h3 className="font-display text-display-md text-pine mt-3 font-semibold">
+        <h3 className="font-display text-display-md text-ink mt-3 font-semibold">
           {VENUE.name}, {VENUE.campus}
         </h3>
-        <p className="text-body text-pine mt-2">{VENUE.address}</p>
-        <p className="text-caption text-pine/90 mt-1">
+        <p className="text-body text-ink mt-2">{VENUE.address}</p>
+        <p className="text-caption text-ink mt-1">
           <time dateTime={HACKATHON_DATES.start}>{HACKATHON_DATES.long}</time>
         </p>
         <p className="text-lede mt-5 font-medium">
           <ExternalLink href={VENUE_DIRECTIONS_URL} className={LINK}>
             Get directions
           </ExternalLink>
-          <span aria-hidden="true" className="text-pine">
+          <span aria-hidden="true" className="text-ink">
             {' '}
             →
           </span>
@@ -285,7 +283,7 @@ function DisclosureGlyph({ open }: { open: boolean }) {
       viewBox="0 0 24 24"
       aria-hidden="true"
       focusable="false"
-      className="text-pine/90 h-6 w-6 shrink-0"
+      className="text-ink h-6 w-6 shrink-0"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.75"
