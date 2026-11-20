@@ -37,6 +37,7 @@ import {
   MeshPhysicalMaterial,
   MeshStandardMaterial,
   NoColorSpace,
+  PCFShadowMap,
   PerspectiveCamera,
   PlaneGeometry,
   PMREMGenerator,
@@ -84,10 +85,16 @@ const SHIFT = { x: 0.24, y: 0.3 } as const
 /**
  * How much of its depth the chosen block gives up while it is out. Clear of
  * the wall, its whole side shows, laid over the neighbour on the camera's
- * side; kept shallow, that side stays a thin edge that leaves the
- * neighbour's etched number and name uncovered.
+ * side: that side is what says the block has come out, but past about two
+ * thirds of the depth it would reach the neighbour's etched number.
  */
-const CHOSEN_SHALLOWING = 0.6
+const CHOSEN_SHALLOWING = 0.4
+/**
+ * How far the blocks close on where they are going in one 60 Hz frame (scaled
+ * to the real frame time): low enough that the chosen block's slide out of
+ * the wall is seen, about half a second at any refresh rate.
+ */
+const EASE = 0.09
 /** How far the blocks that are not chosen darken (0 none, 1 black). */
 const DIM_DEPTH = 0.38
 /** How much of that shade the chosen block keeps, so its pale ice is not white. */
@@ -263,6 +270,10 @@ export function createIceWall(
   renderer.setClearColor(colour.frost, 0)
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 0.95
+  // The chosen block casts a soft shadow onto the wall beside it (from `rim`
+  // below), which is what shows how far out it stands.
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = PCFShadowMap
 
   const scene = new Scene()
   const camera = new PerspectiveCamera(FOV, 1, 1, 10_000)
@@ -290,9 +301,24 @@ export function createIceWall(
   generator.dispose()
   bin.push(panelGeometry, environment)
 
-  scene.add(new HemisphereLight(colour.frost, colour.haze, 1.4))
-  const key = new DirectionalLight(colour.cloud, 2.6)
+  scene.add(new HemisphereLight(colour.frost, colour.haze, 0.8))
+  const key = new DirectionalLight(colour.cloud, 2.2)
   scene.add(key, key.target)
+  // The light the chosen block's shadow comes from. The key sits up and to
+  // the left, on the camera's side, so its shadows fall behind the blocks
+  // where they cannot be seen. This one is aimed per chosen block from the
+  // side away from the rest of the wall, so the shadow always falls across
+  // the neighbouring blocks it came out of (there is nothing else for it to
+  // land on). Only the chosen block casts, so the flush faces never shade
+  // themselves. It is soft and partial: the etched labels it falls on still
+  // read.
+  const rim = new DirectionalLight(colour.cloud, 1.8)
+  rim.castShadow = true
+  rim.shadow.mapSize.set(1024, 1024)
+  rim.shadow.radius = 4
+  rim.shadow.bias = -0.0005
+  rim.shadow.normalBias = 1
+  scene.add(rim, rim.target)
 
   const frost = buildFrost(bin)
   const geometry = new RoundedBoxGeometry(1, 1, 1, 4, 0.06)
@@ -427,6 +453,7 @@ export function createIceWall(
     }
     material.customProgramCacheKey = () => 'ice-wall-block'
     const body = new Mesh(geometry, material)
+    body.receiveShadow = true
     const group = new Group()
     group.add(body)
     let cap: Mesh | null = null
@@ -434,6 +461,7 @@ export function createIceWall(
     if (brick.capped) {
       ownCapMaterial = capMaterial.clone()
       cap = new Mesh(capGeometry, ownCapMaterial)
+      cap.receiveShadow = true
       group.add(cap)
       bin.push(ownCapMaterial)
     }
@@ -463,6 +491,9 @@ export function createIceWall(
   const eye = { x: 0, y: 0, distance: 1 }
   let chosen = 0
   let hovered: number | null = null
+  let lastSeconds: number | null = null
+  /** Where the rim light comes from, eased so it never jumps between choices. */
+  const rimFrom = { x: 1, y: 0.4 }
 
   const ready = document.fonts
     .load(`600 64px ${FAMILY}`)
@@ -507,6 +538,16 @@ export function createIceWall(
       camera.updateProjectionMatrix()
       key.position.set(-width * 0.2, height * 0.8, distance)
       key.target.position.set(width / 2, -height / 2, -distance * 0.2)
+      // The shadow map covers the whole wall, seen along the light.
+      const span = Math.max(width, height) * 0.8
+      const shadowCamera = rim.shadow.camera
+      shadowCamera.left = -span
+      shadowCamera.right = span
+      shadowCamera.top = span
+      shadowCamera.bottom = -span
+      shadowCamera.near = 1
+      shadowCamera.far = distance * 3
+      shadowCamera.updateProjectionMatrix()
     },
     layout(rects) {
       rects.forEach((rect, index) => {
@@ -543,6 +584,33 @@ export function createIceWall(
     },
     render(seconds) {
       let moving = false
+      const frames = lastSeconds === null ? 1 : Math.min(6, Math.max(0, (seconds - lastSeconds) * 60))
+      lastSeconds = seconds
+      const ease = animate ? 1 - (1 - EASE) ** frames : 1
+      // Aim the shadow light from the chosen block's side away from the rest
+      // of the wall, a little from above: its shadow falls toward the others.
+      const picked = blocks[chosen]
+      if (picked && blocks.length > 1) {
+        let towardX = 0
+        let towardY = 0
+        blocks.forEach((other, index) => {
+          if (index === chosen) return
+          towardX += other.home.x - picked.home.x
+          towardY += other.home.y - picked.home.y
+        })
+        const length = Math.hypot(towardX, towardY) || 1
+        const fromX = -towardX / length
+        const fromY = -towardY / length + 0.35
+        rimFrom.x += (fromX - rimFrom.x) * ease
+        rimFrom.y += (fromY - rimFrom.y) * ease
+        const reach = eye.distance * 0.9
+        rim.position.set(
+          picked.home.x + rimFrom.x * reach,
+          picked.home.y + rimFrom.y * reach,
+          eye.distance * 0.9,
+        )
+        rim.target.position.set(picked.home.x, picked.home.y, 0)
+      }
       blocks.forEach((block, index) => {
         const isChosen = index === chosen
         // Only the chosen block leaves the wall, and all the way: its back
@@ -554,7 +622,6 @@ export function createIceWall(
         // The chosen block keeps a little shade of its own, so its pale ice
         // does not read as white beside the dimmed rest.
         const dimTarget = isChosen ? CHOSEN_SHADE : index === hovered ? 0.55 : 1
-        const ease = animate ? 0.14 : 1
         block.z += (zTarget - block.z) * ease
         block.lit += (litTarget - block.lit) * ease
         block.dim += (dimTarget - block.dim) * ease
@@ -590,6 +657,13 @@ export function createIceWall(
         block.group.rotation.x = isChosen && animate ? Math.sin(seconds * 0.7 + 1) * TURN.x : 0
         block.uniforms.uLit.value = block.lit
         block.uniforms.uDim.value = block.dim
+        // Only the chosen block throws a shadow, and it does not take one.
+        block.body.castShadow = isChosen
+        block.body.receiveShadow = !isChosen
+        if (block.cap) {
+          block.cap.castShadow = isChosen
+          block.cap.receiveShadow = !isChosen
+        }
         if (block.capMaterial) {
           const shade = 1 - DIM_DEPTH * block.dim
           block.capMaterial.color.copy(colour.cloud).multiplyScalar(shade)
