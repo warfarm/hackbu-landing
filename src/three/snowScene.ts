@@ -1651,11 +1651,16 @@ function buildSnowCover(
  * colour, used here for the logo and nothing else), the strokes standing
  * proud of the face. The ice darkens in a soft halo around the letters, so
  * the glow always has a deep ground right behind it.
+ *
+ * The text etched into the snow (`buildEtching`) is engraved into the ice
+ * as well, glowing a pale ice-blue in its own darkened halo: brushing the
+ * snow off the facts uncovers them again, cut into the ice beneath.
  */
 function buildLogoSlab(
   logo: CanvasTexture,
+  etching: CanvasTexture,
   face: CanvasTexture,
-  colours: { glow: Color },
+  colours: { glow: Color; etchGlow: Color },
   bin: Disposable[],
 ) {
   // As wide as the snow blanket, so brushing anywhere finds ice; the logo
@@ -1688,14 +1693,31 @@ function buildLogoSlab(
     bumpScale: 6,
   })
   material.onBeforeCompile = (shader) => {
-    shader.fragmentShader = shader.fragmentShader.replace(
-      '#include <color_fragment>',
-      `#include <color_fragment>
-      // A blurred read of the logo (mip 5, about 0.2 units a texel): the
-      // ice deepens around every stroke.
-      float halo = textureLod(emissiveMap, vEmissiveMapUv, 5.0).r;
-      diffuseColor.rgb *= 1.0 - 0.6 * smoothstep(0.0, 0.3, halo);`,
-    )
+    shader.uniforms.uEtch = { value: etching }
+    shader.uniforms.uEtchGlow = { value: colours.etchGlow }
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+        uniform sampler2D uEtch;
+        uniform vec3 uEtchGlow;`,
+      )
+      .replace(
+        '#include <color_fragment>',
+        `#include <color_fragment>
+        // A blurred read of the logo (mip 5, about 0.2 units a texel): the
+        // ice deepens around every stroke. The engraved facts get the same,
+        // a little tighter.
+        float halo = textureLod(emissiveMap, vEmissiveMapUv, 5.0).r;
+        diffuseColor.rgb *= 1.0 - 0.6 * smoothstep(0.0, 0.3, halo);
+        float etchHalo = textureLod(uEtch, vEmissiveMapUv, 4.0).r;
+        diffuseColor.rgb *= 1.0 - 0.5 * smoothstep(0.0, 0.25, etchHalo);`,
+      )
+      .replace(
+        '#include <emissivemap_fragment>',
+        `#include <emissivemap_fragment>
+        totalEmissiveRadiance += uEtchGlow * texture2D(uEtch, vEmissiveMapUv).r;`,
+      )
   }
   material.customProgramCacheKey = () => 'hero-logo-slab'
   const mesh = new Mesh(geometry, material)
@@ -2138,6 +2160,7 @@ function createHero(
   bed.add(
     buildLogoSlab(
       logo.texture,
+      etching.texture,
       buildIceFace(
         {
           base: colour.ink.clone().lerp(colour.haze, 0.35),
@@ -2146,7 +2169,8 @@ function createHero(
         },
         bin,
       ),
-      { glow },
+      // Pale ice-blue, so the facts read apart from the green logo.
+      { glow, etchGlow: colour.cloud.clone().lerp(colour.horizon, 0.4).multiplyScalar(2.2) },
       bin,
     ),
   )

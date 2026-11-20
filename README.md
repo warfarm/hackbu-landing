@@ -30,7 +30,9 @@ No asset or code comes from it. The hero (`src/three/`) is the HackBU logo — t
 masks the header paints — lying under snow on a hillside. Moving a mouse anywhere over the
 snow brushes it away to ice — mottled, fractured, darkening in a halo around each letter — and
 the lettering glows through in `fern`. Above the logo the eyebrow line, and below it the
-dates, venue and countdown, are pressed into the snow; they clear with it and come back as it refills. Cleared snow
+dates, venue and countdown, are pressed into the snow; they clear with it and come back as it
+refills, and the facts are engraved in the ice beneath too, glowing a pale ice-blue, so
+brushing the snow off them uncovers them again. Cleared snow
 slumps soft at the edges first, then drifts back unevenly, half filled after about five
 seconds. The brush mask lives on the GPU in float targets (32-bit where the GPU supports
 it, so the refill runs every frame), which is what keeps both smooth. Touch
@@ -41,7 +43,9 @@ film finish. On load the scene washes in from the page ground while the camera s
 high above (about three seconds; phones and degraded quality tiers, which skip
 post-processing, get the settle without the wash); scrolling pulls it back toward the skyline, and in the
 last stretch a frost sheet with a diagonal "ice cut" edge rises over it, as igloo.inc cuts
-between scenes. A "Scroll down to discover" hint leaves on the first scroll. Below the hero,
+between scenes. A "Scroll down to discover" hint leaves on the first scroll, and on wide
+screens the facts panel beside the headline grows (up to 1.3x, as room allows) on its own
+solid frost. Below the hero,
 each section's giant blurred name and each divider's survey marks are scrubbed by the scroll
 (CSS scroll-driven animations, so they reverse on the way back up). None of this runs under
 reduced motion. Across the bottom, on a frost scrim, is the
