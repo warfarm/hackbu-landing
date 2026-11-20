@@ -8,8 +8,8 @@ import type { WallBrick } from '../../three/iceWall'
  * "Prize tracks" — last year's five categories as a wall of ice blocks, laid
  * the way an igloo's courses are: two blocks on top, three below, each top
  * block bridging the joint beneath it. Each block names a track; choosing one
- * pulls it forward a little and shows the track in full in the panel beside
- * the wall.
+ * brings it out in front of the wall, dims the others, and shows the track in
+ * full in the panel beside the wall.
  *
  * **What the copy is.** The five tracks and their wording come from HackBU
  * 2026 — the event-information post on hackbu.org
@@ -32,8 +32,9 @@ import type { WallBrick } from '../../three/iceWall'
  * **Look.** Where WebGL runs, the blocks are real 3D ice
  * (src/three/iceWall.ts, booted by <IceWallCanvas>): frosted blocks with
  * depth, lit like the section scenes, each track's icon, number and name
- * etched into its face, the chosen block sliding forward with its lettering
- * lit from inside. The buttons stay on top as the controls, their own look
+ * etched into its face, the chosen block out in front of the wall, its ice
+ * lit softly from inside (the lettering left dark), and the others dimmed.
+ * The buttons stay on top as the controls, their own look
  * dropped (`.ice-wall[data-3d]` in src/index.css) once the scene draws.
  * Before that, and without WebGL or under forced colours, the blocks are
  * pure CSS — layered gradients of `cloud`, `frost` and `horizon` for the

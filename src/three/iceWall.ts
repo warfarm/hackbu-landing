@@ -10,8 +10,10 @@
  * depth runs away from the viewer. The camera sits up and to the left of the
  * wall, looking straight in, with its lens shifted (`setViewOffset`) back
  * onto the canvas — so the perspective shows the blocks' tops and sides while
- * their faces stay exactly on the buttons. The chosen block slides forward out
- * of the wall and lights from inside.
+ * their faces stay exactly on the buttons. The chosen block comes out of the
+ * wall, clear of its neighbours (and shallower, so its side does not cover
+ * theirs) and lights softly from inside; the others dim. A hovered
+ * block dims less.
  *
  * The etching is a canvas mask per block (white strokes on black). The face
  * shader darkens the grooves to a deep, cool blue and bends the surface
@@ -79,6 +81,34 @@ const MASK_WIDTH = 1024
 const FOV = 46
 /** Where the camera sits off the wall's centre, as fractions of the canvas. */
 const SHIFT = { x: 0.24, y: 0.3 } as const
+/**
+ * How much of its depth the chosen block gives up while it is out. Clear of
+ * the wall, its whole side shows, laid over the neighbour on the camera's
+ * side; kept shallow, that side stays a thin edge that leaves the
+ * neighbour's etched number and name uncovered.
+ */
+const CHOSEN_SHALLOWING = 0.6
+/** How far the blocks that are not chosen darken (0 none, 1 black). */
+const DIM_DEPTH = 0.38
+/** How much of that shade the chosen block keeps, so its pale ice is not white. */
+const CHOSEN_SHADE = 0.35
+/** How far the chosen block turns as it is held up to the light, in radians. */
+const TURN = { y: 0.035, x: 0.02 } as const
+
+/**
+ * How far forward the chosen block has to come for all of it to clear the
+ * wall's face (z = 0), by a few pixels. It slides along the camera's line of
+ * sight and shrinks by `(distance - z) / distance` as it does (so its face
+ * stays on its button), gives up CHOSEN_SHALLOWING of its depth, and turns a
+ * little, which swings its back corners toward the wall; solved for z.
+ */
+function clearOfWall(block: Block, distance: number): number {
+  const width = block.body.scale.x
+  const height = block.body.scale.y
+  const swing = (width / 2) * TURN.y + (height / 2) * TURN.x
+  const back = block.depth * (1 - CHOSEN_SHALLOWING)
+  return (back + swing + 4) / (1 + back / distance)
+}
 
 /**
  * Draw one face's etching: icon top left, number top right, then "BEST" and
@@ -197,7 +227,10 @@ type Block = {
     uEtch: { value: CanvasTexture }
     uTexel: { value: Vector2 }
     uLit: { value: number }
+    uDim: { value: number }
   }
+  /** The block's own snow cap material, so the cap dims with the block. */
+  capMaterial: MeshStandardMaterial | null
   aspect: number
   /** The face's width on screen when it was last etched. */
   screenWidth: number
@@ -206,6 +239,8 @@ type Block = {
   depth: number
   z: number
   lit: number
+  /** 0 full brightness, 1 fully dimmed (the blocks that are not chosen). */
+  dim: number
 }
 
 export function createIceWall(
@@ -287,6 +322,7 @@ export function createIceWall(
       uEtch: { value: etch },
       uTexel: { value: new Vector2(1.5 / mask.width, 1.5 / mask.height) },
       uLit: { value: 0 },
+      uDim: { value: 0 },
     }
     const material = new MeshPhysicalMaterial({
       // Each block a slightly different ice, as cut blocks are.
@@ -336,6 +372,7 @@ export function createIceWall(
           uniform sampler2D uEtch;
           uniform vec2 uTexel;
           uniform float uLit;
+          uniform float uDim;
           uniform vec3 uEtchTint;
           uniform vec3 uGlow;
           uniform vec3 uDeep;
@@ -374,13 +411,17 @@ export function createIceWall(
           `#include <emissivemap_fragment>
           // Light caught inside the ice at the edges; the chosen block glows
           // through its body, the lettering left dark so it still reads.
-          totalEmissiveRadiance += uGlow * ((1.0 - front) * (0.06 + uLit * 0.8) + front * uLit * 0.38) * (1.0 - etch);`,
+          totalEmissiveRadiance += uGlow * ((1.0 - front) * (0.06 + uLit * 0.3) + front * uLit * 0.06) * (1.0 - etch);`,
         )
         .replace(
           '#include <opaque_fragment>',
           `// The grooves sit below the glossy surface: the clear coat's
           // reflection does not reach into them.
-          outgoingLight = mix(outgoingLight, outgoingLight * 0.32, etch);
+          // On a dimmed block the grooves go deeper still, so the lettering
+          // keeps its contrast against the darker ice.
+          outgoingLight = mix(outgoingLight, outgoingLight * 0.32 * (1.0 - 0.4 * uDim), etch);
+          // The blocks that are not chosen step back into the shade.
+          outgoingLight *= 1.0 - ${DIM_DEPTH.toFixed(2)} * uDim;
           #include <opaque_fragment>`,
         )
     }
@@ -389,9 +430,12 @@ export function createIceWall(
     const group = new Group()
     group.add(body)
     let cap: Mesh | null = null
+    let ownCapMaterial: MeshStandardMaterial | null = null
     if (brick.capped) {
-      cap = new Mesh(capGeometry, capMaterial)
+      ownCapMaterial = capMaterial.clone()
+      cap = new Mesh(capGeometry, ownCapMaterial)
       group.add(cap)
+      bin.push(ownCapMaterial)
     }
     scene.add(group)
     bin.push(material, etch)
@@ -402,12 +446,14 @@ export function createIceWall(
       mask,
       etch,
       uniforms,
+      capMaterial: ownCapMaterial,
       aspect: 0.6,
       screenWidth: 300,
       home: { x: 0, y: 0 },
       depth: 40,
       z: 0,
       lit: 0,
+      dim: 0,
     }
   })
 
@@ -499,30 +545,56 @@ export function createIceWall(
       let moving = false
       blocks.forEach((block, index) => {
         const isChosen = index === chosen
-        const zTarget = isChosen ? block.depth * 0.6 : index === hovered ? block.depth * 0.2 : 0
+        // Only the chosen block leaves the wall, and all the way: its back
+        // face (shrunk and grown with it, and turning a little) ends in front
+        // of the wall's face, so it never cuts into a neighbour. A hovered
+        // block stays put, only brightening, so it cannot meet the chosen one.
+        const zTarget = isChosen ? clearOfWall(block, eye.distance) : 0
         const litTarget = isChosen ? 1 : 0
+        // The chosen block keeps a little shade of its own, so its pale ice
+        // does not read as white beside the dimmed rest.
+        const dimTarget = isChosen ? CHOSEN_SHADE : index === hovered ? 0.55 : 1
         const ease = animate ? 0.14 : 1
         block.z += (zTarget - block.z) * ease
         block.lit += (litTarget - block.lit) * ease
-        if (Math.abs(zTarget - block.z) > 0.05 || Math.abs(litTarget - block.lit) > 0.005) {
+        block.dim += (dimTarget - block.dim) * ease
+        if (
+          Math.abs(zTarget - block.z) > 0.05 ||
+          Math.abs(litTarget - block.lit) > 0.005 ||
+          Math.abs(dimTarget - block.dim) > 0.005
+        ) {
           moving = true
         }
         // Slide toward the camera along the line of sight through the
-        // button's centre, shrinking to match: the face stays centred on its
-        // button (and its focus ring) at any depth, and only grows by the
-        // last 3% that says "chosen". Without this a block off the camera's
-        // axis would drift tens of pixels off its button, past the canvas.
+        // button's centre, shrinking to match: the face stays on its button
+        // (and its focus ring) at any depth, so the block slides out without
+        // growing. Without this a block off the camera's axis would drift
+        // tens of pixels off its button, past the canvas.
         const toward = (eye.distance - block.z) / eye.distance
         block.group.position.set(
           eye.x + (block.home.x - eye.x) * toward,
           eye.y + (block.home.y - eye.y) * toward,
           block.z,
         )
-        block.group.scale.setScalar(toward * (1 + block.lit * 0.03))
+        block.group.scale.setScalar(toward)
+        // Shallower as it comes out, from its face back.
+        const thickness = block.depth * (1 - CHOSEN_SHALLOWING * block.lit)
+        block.body.scale.z = thickness
+        block.body.position.z = -thickness / 2
+        if (block.cap) {
+          block.cap.scale.z = thickness * 0.92
+          block.cap.position.z = -thickness / 2
+        }
         // The chosen block turns a hair, as if held up to the light.
-        block.group.rotation.y = isChosen && animate ? Math.sin(seconds * 0.9) * 0.035 : 0
-        block.group.rotation.x = isChosen && animate ? Math.sin(seconds * 0.7 + 1) * 0.02 : 0
+        block.group.rotation.y = isChosen && animate ? Math.sin(seconds * 0.9) * TURN.y : 0
+        block.group.rotation.x = isChosen && animate ? Math.sin(seconds * 0.7 + 1) * TURN.x : 0
         block.uniforms.uLit.value = block.lit
+        block.uniforms.uDim.value = block.dim
+        if (block.capMaterial) {
+          const shade = 1 - DIM_DEPTH * block.dim
+          block.capMaterial.color.copy(colour.cloud).multiplyScalar(shade)
+          block.capMaterial.emissive.copy(colour.cloud).multiplyScalar(shade)
+        }
       })
       renderer.render(scene, camera)
       return moving || animate

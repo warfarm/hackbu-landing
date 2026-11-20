@@ -101,7 +101,7 @@ export function ComposedPart() {
         <Block title="Notes">
           <Rule>
             The hero above it carries the page’s <b>&lt;h1&gt;</b> — the
-            “HackBU 2027” lockup, on a frost scrim across the bottom of the 3D
+            “HackBU 2027” lockup, on the page’s frost ground across the bottom of the 3D
             scene — so this section’s heading
             is an <b>&lt;h2&gt;</b> and the outline runs h1 → h2 with no skipped
             level. (When the hero was an illustration, cloud text over its
@@ -181,7 +181,7 @@ export function ComposedPart() {
         <Block title="As rendered">
           <Stage
             label="PrizeTracksSection"
-            note="Live: click a block, or tab to the wall and use the arrow keys. With WebGL the chosen block slides out of the 3D wall and glows (at once, under reduced motion); in the CSS fallback it rises and gets an ink rim (the rim alone under reduced motion)."
+            note="Live: click a block, or tab to the wall and use the arrow keys. With WebGL the chosen block comes out in front of the 3D wall and glows while the others dim (at once, under reduced motion); in the CSS fallback it rises and gets an ink rim (the rim alone under reduced motion)."
           >
             <PrizeTracksSection />
           </Stage>

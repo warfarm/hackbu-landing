@@ -88,6 +88,13 @@ export function usePrefersReducedMotion(): boolean {
 export const HERO_PAN_EASE = cubicBezier(0.4, 0, 0.35, 1)
 
 /**
+ * How long the hero scene's intro runs from its first frame, in seconds: the
+ * camera settling onto its scroll pose (src/three/snowScene.ts). The hero's
+ * lockup waits this long before it rises in (src/components/Hero.tsx).
+ */
+export const HERO_INTRO_SECONDS = 3.1
+
+/**
  * Clamp to the 0..1 range. Module-private: `rangeProgress` is the only thing
  * that needs it, and every consumer of this module wants a window, not a clamp.
  */

@@ -232,7 +232,8 @@
 
 /*
  * Page-load intro. The fixed header slides down from above the viewport and
- * the hero's headline and lede rise into place a beat behind it. Keyframes,
+ * the hero's scroll hint rises into place a beat behind it (the hero's
+ * lockup has its own entrance, `hero-band-in` below). Keyframes,
  * not motion: the intro has to start at first paint, before hydration, and
  * both pages are prerendered (P5-1) — a header carrying motion's `initial`
  * as an inline style would ship translated off-screen until the JS arrived,
@@ -300,27 +301,73 @@
 
 
 /*
- * The hero scrim (`data-hero-scrim` in src/components/Hero.tsx): the ground the
- * HackBU 2027 lockup stands on. `frost`, fading in over `--hero-scrim-fade`
- * above the lockup and solid from the top of the lockup to the bottom of the
- * frame — so ink type on it is ink on frost (6.28:1) whatever the 3D scene is
- * doing behind, and the hero runs straight into the page's own ground below.
+ * The hero's ground and the lockup band's entrance (src/components/Hero.tsx).
  *
- * It is sized to the lockup, not to the viewport: the element is a child of
- * the copy block, pinned to its bottom and pulled up by the fade length.
+ * The scene is cut away, never painted over: behind the HackBU 2027 lockup
+ * (and below the ice cut) the stage is empty, so the page's own ground — the
+ * frost, its dot grid and tint on `body::before` — shows through, and the
+ * hero runs into the rest of the page without a seam. `data-hero-ground`
+ * masks the scene out from the band's top down, fading in over `--hero-fade`
+ * above it. Ink type on that ground is ink on frost (6.28:1) whatever the
+ * scene does. `--hero-copy-height` is the band's height, kept by Hero.tsx;
+ * the fallback only serves the prerender, before there is any scene.
+ *
+ * The band waits for the scene's intro, then rises into place and brings the
+ * hole in the scene with it: the band and the mask move up together while
+ * the mask's content moves down by as much, so the scene itself stays put.
+ * Transforms only, and only with motion allowed. Before hydration a timed
+ * fallback (the intro's length, `HERO_INTRO_SECONDS`) stands in; Hero.tsx
+ * then holds the band (`data-copy="wait"`) until the scene says its intro is
+ * over (`data-copy="in"`). Going from `none` to `hero-band-in` restarts it.
+ * The fill is backwards only: the band rests with no transform at all.
  */
-@utility hero-scrim {
-  --hero-scrim-fade: clamp(4rem, 12dvh, 8rem);
-  top: calc(-1 * var(--hero-scrim-fade));
-  background-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    color-mix(in srgb, var(--color-frost) 30%, transparent)
-      calc(var(--hero-scrim-fade) * 0.4),
-    color-mix(in srgb, var(--color-frost) 78%, transparent)
-      calc(var(--hero-scrim-fade) * 0.75),
-    var(--color-frost) var(--hero-scrim-fade)
+[data-hero-stage] {
+  --hero-fade: clamp(4rem, 12dvh, 8rem);
+  --hero-copy-height: 40dvh;
+  --hero-drop: calc(var(--hero-copy-height) + var(--hero-fade));
+}
+
+[data-hero-ground] {
+  mask-image: linear-gradient(
+    to top,
+    transparent var(--hero-copy-height),
+    rgb(0 0 0 / 0.22) calc(var(--hero-copy-height) + var(--hero-fade) * 0.25),
+    rgb(0 0 0 / 0.7) calc(var(--hero-copy-height) + var(--hero-fade) * 0.6),
+    black calc(var(--hero-copy-height) + var(--hero-fade))
   );
+}
+
+@keyframes hero-band-in {
+  from {
+    transform: translateY(var(--hero-drop));
+  }
+}
+
+@keyframes hero-band-in-counter {
+  from {
+    transform: translateY(calc(-1 * var(--hero-drop)));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is([data-hero-copy], [data-hero-ground]) {
+    animation: hero-band-in 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) 3.1s backwards;
+  }
+  [data-hero-ground-inner] {
+    animation: hero-band-in-counter 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) 3.1s
+      backwards;
+  }
+  [data-copy='wait'] :is([data-hero-copy], [data-hero-ground]) {
+    animation: none;
+    transform: translateY(var(--hero-drop));
+  }
+  [data-copy='wait'] [data-hero-ground-inner] {
+    animation: none;
+    transform: translateY(calc(-1 * var(--hero-drop)));
+  }
+  [data-copy='in'] :is([data-hero-copy], [data-hero-ground], [data-hero-ground-inner]) {
+    animation-delay: 0s;
+  }
 }
 
 /*
@@ -373,17 +420,6 @@
 }
 
 /*
- * The hero's "move over the snow" hint: shown only with a mouse, on a wide
- * screen, once the scene has drawn. Unlayered on purpose, so it outranks the
- * element's own `hidden` utility.
- */
-@media (width >= 64rem) and (hover: hover) and (pointer: fine) {
-  [data-hero-stage]:has([data-snow-scene][data-ready]) .hero-hint {
-    display: block;
-  }
-}
-
-/*
  * Scroll-scrubbed parallax, the way igloo.inc ties its moving parts to the
  * scroll position instead of playing them once: each section's giant blurred
  * name slides against the scroll, and each divider's survey marks drift along
@@ -431,10 +467,6 @@
  * - The logo is a `bg-fern` fill through a mask; forced colours swap the
  *   fill for the page ground and the logo vanishes. Paint it in the system
  *   text colour instead.
- * - The hero scrim is a gradient image, which forced colours drop, leaving
- *   the lockup straight over the scene. Give it a solid system ground — over
- *   the lockup only: its fade strip above would become an opaque block over
- *   the bottom of the scene.
  * - The headline's tight line-height lets the text backplate that forced
  *   colours draw behind it cover the eyebrow above; open the gap.
  */
@@ -443,10 +475,6 @@
   .brand-mark-wordmark {
     forced-color-adjust: none;
     background-color: CanvasText;
-  }
-  [data-hero-scrim] {
-    top: 0;
-    background-color: Canvas;
   }
   #hero-title {
     margin-top: 0.25em;

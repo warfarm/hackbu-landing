@@ -14,7 +14,7 @@ The landing page runs, top to bottom (see the doc comment in `src/App.tsx`):
    companies at the Sponsors page (`SponsorsPreviewSection.tsx`).
 3. **Prize tracks** — last year's five tracks as a wall of 3D ice blocks laid in igloo courses,
    each track's icon, number and name etched into its face (`src/three/iceWall.ts`);
-   choosing a block slides it forward, lit from inside, and shows the track in full beside the
+   choosing a block brings it out in front of the wall, lit from inside, dims the rest, and shows the track in full beside the
    wall (`PrizeTracksSection.tsx`). The blocks' buttons stay the controls; without WebGL they
    are CSS ice instead.
 4. **Registration** — the main Register button, and a link to My Application for people
@@ -42,14 +42,16 @@ the brush mask, a drift texture and the logo itself, lit by a low raking sun and
 film finish. On load the scene washes in from the page ground while the camera settles from
 high above (about three seconds; phones and degraded quality tiers, which skip
 post-processing, get the settle without the wash); scrolling pulls it back toward the skyline, and in the
-last stretch a frost sheet with a diagonal "ice cut" edge rises over it, as igloo.inc cuts
-between scenes. A "Scroll down to discover" hint leaves on the first scroll, and on wide
-screens the facts panel beside the headline grows (up to 1.3x, as room allows) on its own
-solid frost. Below the hero,
+last stretch a diagonal "ice cut" edge rises over it, as igloo.inc cuts between scenes,
+cutting the scene away so the page's own ground shows through. A "Scroll down to discover"
+hint leaves on the first scroll, and on wide screens the facts panel beside the headline
+grows (up to 1.8x, as room allows) into the cut, with the headline kept level with its
+middle. Below the hero,
 each section's giant blurred name and each divider's survey marks are scrubbed by the scroll
 (CSS scroll-driven animations, so they reverse on the way back up). None of this runs under
-reduced motion. Across the bottom, on a frost scrim, is the
-"HackBU 2027" lockup: eyebrow, headline, dates, venue, a days-to-go count and Register. The
+reduced motion. Across the bottom, on the page's ground, is the
+"HackBU 2027" lockup: eyebrow, headline, dates, venue, a days-to-go count and Register. It
+waits for the scene's intro and then rises in (at once under reduced motion). The
 registration section carries a block of ice with an igloo frozen inside it (`igloo`; `pine` is
 only on the component sheet now), turning as it scrolls past, set into the page with feathered edges
 (`SnowCanvas.tsx` and `.scene-feather` in `src/index.css`). Every page shares the same ice
@@ -333,7 +335,7 @@ palette colours, no `#000000`.
 | `sky` | `#4A96D2` | 3D scenes only — the blue in the shadows |
 | `horizon` | `#A8D0EB` | the accent — Register, the block behind the hero's year, divider wedges, hovers, and the ice blocks' glow |
 | `cloud` | `#F7F5EE` | 3D scenes only — snowflakes, sunlight, survey lines |
-| `frost` | `#DCE3EA` | the page ground, the header, panels (at 74%), the hero scrim, labels on ink |
+| `frost` | `#DCE3EA` | the page ground, the header, panels (at 74%), labels on ink |
 | `brick` | `#A2593A` | retired from the interface; only the bark of the frozen pine |
 | `stone` | `#C4B79E` | retired; hairlines are `ink` at 20–25% |
 | `ink` | `#295374` | the accent blue made dark enough to read: all text, hairlines, focus rings, solid buttons (6.28:1 on `frost`) |
@@ -371,7 +373,7 @@ brackets (`.hud-btn`): `ink` (solid, turning `horizon`), `register` (`horizon` w
 **Animation.** Only `transform` and `opacity` are ever animated — never `top`, `left`,
 `width`, `height`, `margin` or `background-position`. Animation driven from React is gated
 behind `usePrefersReducedMotion()` from `src/lib/motion.ts`; animation that lives in CSS
-(the intro rises, the hint's bob, and the scroll-driven `ghost-drift` / `mark-drift` in
+(the intro rises, the hero lockup's entrance, the hint's bob, and the scroll-driven `ghost-drift` / `mark-drift` in
 `src/index.css`) is gated by the `prefers-reduced-motion` media query instead, because the
 hook cannot answer before hydration and these run from the first paint. Under
 `prefers-reduced-motion: reduce` the hero's camera move, the snow scenes and the section
@@ -379,9 +381,10 @@ reveals all render at
 rest, and the hero's tall scroll track collapses so no dead scroll space is left
 behind.
 
-**Text over the hero scene.** The lockup and the facts beside it sit on the `hero-scrim`,
-which is solid `frost` behind the type, so `ink` text keeps 6.28:1 whatever the scene is doing
-and whether or not WebGL loaded. The reference site sets
+**Text over the hero scene.** The scene is masked out behind the lockup and the facts beside
+it (`data-hero-ground` in `src/index.css`), so the type sits on the page's own `frost`
+ground and `ink` keeps 6.28:1 whatever the scene is doing and whether or not WebGL loaded.
+The reference site sets
 pale text straight over its scene; this one deliberately does not.
 
 ## Layout

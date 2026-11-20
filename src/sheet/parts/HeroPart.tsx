@@ -58,7 +58,7 @@ export function HeroPart() {
       <Entry
         name="Hero"
         path="src/components/Hero.tsx"
-        use="The top of the landing page, and nothing else: the HackBU logo buried in snow, which the pointer brushes away, with the “HackBU 2027” lockup — the page’s <h1>, dates, venue, countdown and Register — on a frost scrim across the bottom."
+        use="The top of the landing page, and nothing else: the HackBU logo buried in snow, which the pointer brushes away, with the “HackBU 2027” lockup — the page’s <h1>, dates, venue, countdown and Register — on the page’s frost ground across the bottom, rising in once the scene’s intro is over."
       >
         <Block title="See it live">
           <p className="text-body text-ink">

@@ -1,6 +1,14 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { m, useScroll, useTransform } from 'motion/react'
 import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
+import { m, useMotionValue, useScroll, useTransform } from 'motion/react'
+import {
+  HERO_INTRO_SECONDS,
   HERO_PAN_EASE,
   rangeProgress,
   usePrefersReducedMotion,
@@ -29,26 +37,35 @@ import { ButtonLink } from './ButtonLink'
  *
  *   <section data-hero>            the scroll TRACK. Taller than the viewport
  *                                  purely to buy distance for the camera move.
- *     <div data-hero-stage>        sticky top-0, one viewport tall. Its CSS
- *                                  gradient is the fallback before and without
- *                                  WebGL.
- *       <SnowCanvas>               the scene. It is told where the header ends
- *                                  and the lockup begins, and frames the logo
- *                                  in the band between.
- *       <div data-hero-cut>        the exit: a frost sheet with a diagonal
- *                                  "ice cut" edge that rises over the scene in
- *                                  the last stretch of the track, the way
- *                                  igloo.inc cuts from one scene to the next.
+ *     <div data-hero-stage>        sticky top-0, one viewport tall, and empty:
+ *                                  wherever the scene is cut away, the page's
+ *                                  own ground (body::before) shows through.
+ *       cut window                 the exit, the way igloo.inc cuts from one
+ *                                  scene to the next: a clipping box whose
+ *                                  bottom is the diagonal "ice cut" edge,
+ *                                  rising in the last stretch of the track.
+ *                                  Its content is moved back by as much, so
+ *                                  the scene stays put and only the edge
+ *                                  moves (transforms only).
+ *         <div data-hero-ground>   masks the scene out behind the lockup band
+ *                                  (src/index.css), and rises with the band.
+ *           CSS sky + <SnowCanvas> the gradient is the fallback before and
+ *                                  without WebGL. The scene is told where the
+ *                                  header ends and the lockup begins, and
+ *                                  frames the logo in the band between.
+ *       <div data-hero-cut>        the cut edge's hairline.
  *       "Scroll down" hint         top right; fades out on the first scroll.
- *       <div data-hero-copy>       the lockup, on <div data-hero-scrim>. Its
- *                                  facts panel grows (up to 1.3x, as room
- *                                  allows, on wide screens) as the ice cut
- *                                  rises past it, on its own solid frost.
+ *       <div data-hero-copy>       the lockup band. It waits for the scene's
+ *                                  intro, then rises into place. Its facts
+ *                                  panel grows (up to 1.8x, as room allows, on
+ *                                  wide screens) as the ice cut rises past it,
+ *                                  and the headline keeps level with its
+ *                                  middle.
  *
  * The cut, the hint and the panel's growth are scrubbed by the scroll (motion
  * values, never a React render), so they reverse when the reader scrolls back
  * up. None of them moves under reduced motion, where the track collapses to
- * one screen.
+ * one screen and the lockup is there from the start.
  */
 
 /**
@@ -67,6 +84,18 @@ function cutFraction(progress: number): number {
  */
 const CUT_EDGE = { depth: 0.22, left: 0.78, right: 0.06 } as const
 
+/** Where the cut's edge is below the sheet's top at `x` (0 left, 1 right), as a share of the stage's height. */
+function cutEdgeAt(x: number): number {
+  return CUT_EDGE.depth * (CUT_EDGE.left - (CUT_EDGE.left - CUT_EDGE.right) * x)
+}
+
+/**
+ * How long the lockup waits for the scene to start its intro, in
+ * milliseconds. A scene that starts in time is waited for to the intro's end;
+ * one that is slower to arrive does not hold the band back.
+ */
+const INTRO_GRACE_MS = 2500
+
 /** Total height of the scroll track: the stage stays pinned for 80dvh. */
 const TRACK_HEIGHT = 'h-[180dvh]'
 
@@ -75,6 +104,13 @@ const TRACK_HEIGHT = 'h-[180dvh]'
  * (= 60dvh of scrolling); the remaining 20dvh is a hold on the finished frame.
  */
 const PAN_SCROLL_FRACTION = 0.75
+
+/**
+ * The most the facts panel grows by as the ice cut rises past it. The room
+ * beside the headline usually stops it sooner: about 1.7x at 1440px wide,
+ * 1.5x at 1280px, and 1.15x at 1024px.
+ */
+const PANEL_GROWTH_MAX = 1.8
 
 /** How much of the top of the stage the fixed header hides, in CSS pixels. */
 const HEADER_HEIGHT = 80
@@ -140,19 +176,39 @@ export function Hero() {
   const stageRef = useRef<HTMLDivElement>(null)
   const titleBlockRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const copyRef = useRef<HTMLDivElement>(null)
   /**
-   * How far the facts panel may grow as the hero scrolls: up to 30%, capped
-   * by the room it has — beside the headline to its left, and below the
-   * header above. 1 (no growth) where the lockup is stacked or short, and
-   * always in the prerender; measured in an effect.
+   * How far the facts panel may grow as the hero scrolls: up to
+   * PANEL_GROWTH_MAX, capped by the room it has — beside the headline to its
+   * left, and below the header above. 1 (no growth) where the lockup is
+   * stacked or short, and always in the prerender; measured in an effect.
    */
   const [panelRoom, setPanelRoom] = useState(1)
   /**
-   * The stage and panel geometry the growth is fitted to, in stage pixels:
-   * written by the measuring effect, read by `panelScale` on every scroll
-   * step (a ref, so no React render).
+   * The stage, panel and headline geometry the growth is fitted to, in stage
+   * pixels: written by the measuring effect, read on every scroll step (a
+   * ref, so no React render). `edge` and `titleEdge` are the cut's edge below
+   * the sheet's top at the grown panel's left side and at the headline's.
    */
-  const panelFit = useRef({ stageHeight: 0, foot: 0, height: 1, edge: 0 })
+  const panelFit = useRef({
+    stageHeight: 0,
+    foot: 0,
+    height: 1,
+    edge: 0,
+    titleTop: 0,
+    bandTop: 0,
+    titleEdge: 0,
+  })
+  /** The stage's size, for the cut window's slant (set in an effect). */
+  const stageWidth = useMotionValue(0)
+  const stageHeight = useMotionValue(0)
+  /**
+   * The lockup band's entrance, on the stage as `data-copy` (src/index.css).
+   * Unset in the prerender, where a timed fallback stands in; 'wait' holds
+   * the band below the frame while the scene's intro plays; 'in' lets it rise.
+   */
+  const [copyState, setCopyState] = useState<'wait' | 'in'>()
+  const introGrace = useRef(0)
   const reducedMotion = usePrefersReducedMotion()
   const daysToGo = useDaysToGo()
   const hydrated = useHydrated()
@@ -196,7 +252,7 @@ export function Hero() {
   const hintOpacity = useTransform(progress, (p) => 1 - rangeProgress(p, 0, 0.05))
   /**
    * The facts panel grows from its bottom-right corner only into the ice
-   * cut's frost: it eases up over the last quarter of the track, and its top
+   * cut, where the scene is cut away: it eases up over the last quarter of the track, and its top
    * is held a little below the cut's diagonal edge, so it never spreads over
    * the snow scene. Until the cut has risen past the panel's top, it does not
    * grow at all. (Tracking the edge alone would pack the whole growth into a
@@ -210,19 +266,102 @@ export function Hero() {
     const eased = 1 + (panelRoom - 1) * HERO_PAN_EASE(rangeProgress(p, 0.75, 1))
     return Math.max(1, Math.min(eased, fits))
   })
-  /** The brushing hint goes as the ice cut starts to cover the snow. */
-  const brushHintOpacity = useTransform(progress, (p) =>
-    reducedMotion ? 1 : 1 - rangeProgress(p, 0.6, 0.75),
-  )
+  /**
+   * The headline keeps level with the middle of the growing panel: it rises
+   * by half the panel's growth. It never rises past the top of the band's
+   * ground while the cut is still below it, so it stays off the scene.
+   */
+  const titleY = useTransform([progress, panelScale], ([p = 0, scale = 1]: number[]) => {
+    if (scale <= 1) return 0
+    const { stageHeight: tall, height, titleTop, bandTop, titleEdge } = panelFit.current
+    const highest = Math.min(bandTop, tall * (cutFraction(p) + titleEdge) + 12)
+    return Math.min(0, Math.max((-(scale - 1) * height) / 2, highest - titleTop))
+  })
   /** The ice cut rises over the last third of the track, to just above the lockup. */
   const cutY = useTransform(progress, (p) => `${cutFraction(p) * 100}%`)
+  /**
+   * The cut window: a box whose bottom edge lies on the cut's edge, slanted
+   * with a skew to the edge's slope on this stage and moved up with the cut.
+   * Its content gets the inverse (a vertical move and a vertical skew
+   * commute), so the scene inside stays exactly where it was.
+   */
+  const cutWindowY = useTransform([progress, stageHeight], ([p = 0, tall = 0]: number[]) =>
+    reducedMotion ? 0 : tall * (cutFraction(p) + cutEdgeAt(0.5) - 1),
+  )
+  const cutWindowSkew = useTransform([stageWidth, stageHeight], ([wide = 0, tall = 0]: number[]) =>
+    reducedMotion || wide < 1
+      ? 0
+      : (-Math.atan(((cutEdgeAt(0) - cutEdgeAt(1)) * tall) / wide) * 180) / Math.PI,
+  )
+  const cutBackY = useTransform(cutWindowY, (y) => -y)
+  const cutBackSkew = useTransform(cutWindowSkew, (skew) => -skew)
+
+  /**
+   * The scene tells the band when its intro starts and ends. Only a band
+   * being held is let go: one the prerender's fallback is already moving
+   * keeps that animation's timing.
+   */
+  const release = useCallback(() => {
+    window.clearTimeout(introGrace.current)
+    setCopyState((state) => (state === 'wait' ? 'in' : state))
+  }, [])
+  const onIntro = useCallback(
+    (phase: 'start' | 'end') => {
+      if (phase === 'end') release()
+      else window.clearTimeout(introGrace.current)
+    },
+    [release],
+  )
+
+  useEffect(() => {
+    const copy = copyRef.current
+    const stage = stageRef.current
+    if (!copy || !stage) return
+    // The prerender's fallback rises after the intro's length on its own. If
+    // it has already begun (a slow hydration), it is left to finish;
+    // otherwise the band is held until the scene's intro is over.
+    const fallback = copy
+      .getAnimations()
+      .find(
+        (animation) =>
+          animation instanceof CSSAnimation && animation.animationName === 'hero-band-in',
+      )
+    if (!fallback || Number(fallback.currentTime ?? 0) >= HERO_INTRO_SECONDS * 1000) return
+    setCopyState('wait')
+    introGrace.current = window.setTimeout(release, INTRO_GRACE_MS)
+    // Someone tabbing to the headline or to Register gets the band at once,
+    // never a focus ring out of sight below the frame.
+    copy.addEventListener('focusin', release)
+    return () => {
+      window.clearTimeout(introGrace.current)
+      copy.removeEventListener('focusin', release)
+    }
+  }, [release])
 
   useEffect(() => {
     const stage = stageRef.current
+    const copy = copyRef.current
+    if (!stage || !copy) return
+    // The band's height sizes the hole in the scene behind it (src/index.css).
+    const measure = () => {
+      stageWidth.set(stage.offsetWidth)
+      stageHeight.set(stage.offsetHeight)
+      stage.style.setProperty('--hero-copy-height', `${copy.offsetHeight}px`)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(stage)
+    observer.observe(copy)
+    return () => observer.disconnect()
+  }, [stageWidth, stageHeight])
+
+  useEffect(() => {
+    const stage = stageRef.current
+    const copy = copyRef.current
     const lockup = lockupRef.current
     const title = titleBlockRef.current
     const panel = panelRef.current
-    if (!stage || !lockup || !title || !panel) return
+    if (!stage || !copy || !lockup || !title || !panel) return
     // Only where the panel stands beside the headline with height to spare.
     const query = window.matchMedia('(width >= 64rem) and (height >= 40rem)')
     const measure = () => {
@@ -230,29 +369,36 @@ export function Hero() {
         setPanelRoom(1)
         return
       }
-      // Layout boxes, which the panel's own scale does not change.
+      // Layout offsets, in stage pixels: neither the band's entrance nor the
+      // panel's own scale moves them.
       const width = panel.offsetWidth
       const height = panel.offsetHeight
+      const stageWide = Math.max(stage.offsetWidth, 1)
+      const top = copy.offsetTop + lockup.offsetTop
+      const left = copy.offsetLeft + lockup.offsetLeft
       const gap = panel.offsetLeft - (title.offsetLeft + title.offsetWidth) - 32
       // The panel's foot stays put (it grows from its bottom edge), so the
       // room above is from the header to that foot.
-      const foot =
-        panel.getBoundingClientRect().bottom - stage.getBoundingClientRect().top
+      const foot = top + panel.offsetTop + height
       const sideways = 1 + Math.max(0, gap) / Math.max(width, 1)
       const upwards = (foot - HEADER_HEIGHT - 24) / Math.max(height, 1)
-      const room = Math.max(1, Math.min(1.3, sideways, upwards))
-      // Where the cut's edge is, as a share of the stage's height below the
-      // sheet's top, at the grown panel's left side (the edge falls toward
-      // the left, so that is where it is lowest across the panel).
-      // The panel grows from its right edge, so that edge never moves.
-      const stageBox = stage.getBoundingClientRect()
-      const right = panel.getBoundingClientRect().right - stageBox.left
-      const left = (right - width * room) / Math.max(stageBox.width, 1)
+      const room = Math.max(1, Math.min(PANEL_GROWTH_MAX, sideways, upwards))
+      // The cut's edge falls toward the left, so across the grown panel it is
+      // lowest at its left side. The panel grows from its right edge, so that
+      // edge never moves.
+      const right = left + panel.offsetLeft + width
       panelFit.current = {
         stageHeight: stage.offsetHeight,
         foot,
         height: Math.max(height, 1),
-        edge: CUT_EDGE.depth * (CUT_EDGE.left - (CUT_EDGE.left - CUT_EDGE.right) * left),
+        edge: cutEdgeAt((right - width * room) / stageWide),
+        // The top of the eyebrow, which hangs above the headline block.
+        titleTop:
+          top +
+          title.offsetTop +
+          Math.min(0, title.firstElementChild instanceof HTMLElement ? title.firstElementChild.offsetTop : 0),
+        bandTop: copy.offsetTop,
+        titleEdge: cutEdgeAt((left + title.offsetLeft) / stageWide),
       }
       setPanelRoom(room)
     }
@@ -287,16 +433,42 @@ export function Hero() {
       <div
         ref={stageRef}
         data-hero-stage
-        className="from-haze/60 via-horizon/40 to-frost sticky top-0 h-dvh w-full overflow-hidden bg-gradient-to-b"
+        data-copy={copyState}
+        className="sticky top-0 h-dvh w-full overflow-clip"
       >
-        <SnowCanvas
-          variant="hero"
-          progress={pan}
-          frameTop={HEADER_HEIGHT}
-          frameAbove={lockupRef}
-          etching={etching}
-          className="absolute inset-0"
-        />
+        {/*
+         * The cut window, a quarter of the stage taller at the top so its
+         * slanted top edge never shows. It and its content share a transform
+         * origin (the stage's bottom centre) so the two transforms cancel.
+         */}
+        <m.div
+          aria-hidden="true"
+          style={{ y: cutWindowY, skewY: cutWindowSkew }}
+          className="pointer-events-none absolute inset-x-0 top-[-25%] bottom-0 origin-bottom overflow-clip"
+        >
+          <m.div
+            style={{ y: cutBackY, skewY: cutBackSkew }}
+            className="absolute inset-x-0 bottom-0 h-[80%] origin-bottom"
+          >
+            {/* Twice the stage's height, so it can rise with the band. */}
+            <div data-hero-ground className="absolute inset-x-0 top-[-100%] bottom-0">
+              <div
+                data-hero-ground-inner
+                className="from-haze/60 via-horizon/40 to-frost absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b"
+              >
+                <SnowCanvas
+                  variant="hero"
+                  progress={pan}
+                  frameTop={HEADER_HEIGHT}
+                  frameAbove={lockupRef}
+                  etching={etching}
+                  onIntro={onIntro}
+                  className="absolute inset-0"
+                />
+              </div>
+            </div>
+          </m.div>
+        </m.div>
 
         <m.div
           aria-hidden="true"
@@ -310,7 +482,6 @@ export function Hero() {
             focusable="false"
             className="absolute inset-x-0 top-0 block h-[22%] w-full"
           >
-            <path d="M0,100 V78 L1440,6 V100 Z" className="fill-frost" />
             <path
               d="M0,78 L1440,6"
               vectorEffect="non-scaling-stroke"
@@ -318,7 +489,6 @@ export function Hero() {
               strokeWidth="1"
             />
           </svg>
-          <div className="bg-frost absolute inset-x-0 top-[22%] bottom-0" />
         </m.div>
 
         <m.div
@@ -333,71 +503,50 @@ export function Hero() {
         </m.div>
 
         {/*
-         * The lockup, on the frost scrim (the `hero-scrim` utility in
-         * src/index.css): ink type on frost, 6.28:1, whatever the scene does
-         * behind it. Side by side wherever there is width (`lockup-wide`),
+         * The lockup band, on the page's own ground: the scene is masked out
+         * behind it (`data-hero-ground`), so it is ink on frost, 6.28:1,
+         * whatever the scene does. Side by side wherever there is width
+         * (`lockup-wide`), the headline level with the panel's middle;
          * stacked on portrait phones. All spacing shrinks with the screen's
          * height, so a phone on its side keeps it below the header.
          */}
         <div
+          ref={copyRef}
           data-hero-copy
           className="absolute inset-x-0 bottom-0 z-10 px-6 pb-[clamp(0.875rem,4dvh,2.25rem)] sm:px-8"
         >
           <div
-            aria-hidden="true"
-            data-hero-scrim
-            className="hero-scrim absolute inset-x-0 bottom-0"
-          />
-          <div
             ref={lockupRef}
-            className="lockup-wide:flex-row lockup-wide:items-end lockup-wide:justify-between relative mx-auto flex max-w-[116rem] flex-col gap-[min(1.25rem,2.4dvh)]"
+            className="lockup-wide:flex-row lockup-wide:items-center lockup-wide:justify-between relative mx-auto flex max-w-[116rem] flex-col gap-[min(1.25rem,2.4dvh)]"
           >
-            <div ref={titleBlockRef}>
-              <p className="hud-label text-ink animate-intro-rise motion-reduce:animate-none text-[0.6875rem] font-medium tracking-[0.12em] uppercase [animation-delay:0.35s] sm:text-[0.75rem]">
+            {/*
+             * Side by side, the eyebrow hangs above the headline out of flow,
+             * so the row centres the headline itself on the panel.
+             */}
+            <m.div ref={titleBlockRef} style={{ y: titleY }} className="relative">
+              <p className="hud-label text-ink lockup-wide:absolute lockup-wide:bottom-full lockup-wide:left-0 lockup-wide:mb-[min(0.75rem,1.6dvh)] lockup-wide:whitespace-nowrap text-[0.6875rem] font-medium tracking-[0.12em] uppercase sm:text-[0.75rem]">
                 {EYEBROW}
               </p>
-              {/*
-               * The one thing to do here, so say so — but only where it can be
-               * done: a mouse, a wide screen, and a scene that has drawn
-               * (`.hero-hint` in src/index.css). On solid frost, so it keeps
-               * 6.28:1 whatever is cleared behind it.
-               */}
-              {/* The wrapper fades it as the ice cut covers the snow; the
-                  intro animation on the <p> would override an opacity set
-                  on the <p> itself. */}
-              <m.div
-                aria-hidden="true"
-                style={{ opacity: brushHintOpacity }}
-                className="absolute bottom-full -left-2 mb-2"
-              >
-                <p className="hero-hint text-ink bg-frost animate-intro-rise motion-reduce:animate-none hidden px-2 py-1 text-[0.6875rem] font-medium tracking-[0.12em] uppercase [animation-delay:1s]">
-                  {'// Move over the snow to uncover the logo'}
-                </p>
-              </m.div>
               <h1
                 id="hero-title"
-                className="font-display text-display-hero lockup-wide:text-display-hero-wide text-ink animate-intro-rise motion-reduce:animate-none mt-[min(0.75rem,1.6dvh)] font-semibold whitespace-nowrap [animation-delay:0.45s]"
+                className="font-display text-display-hero lockup-wide:text-display-hero-wide text-ink lockup-wide:mt-0 mt-[min(0.75rem,1.6dvh)] font-semibold whitespace-nowrap"
               >
                 <span className="lockup-wide:inline block">HackBU</span>{' '}
                 <span className="bg-horizon lockup-wide:inline-block block w-fit px-[0.1em]">
                   {EVENT_YEAR}
                 </span>
               </h1>
-            </div>
+            </m.div>
 
             {/*
-             * The scale sits on this wrapper: the intro animation on the
-             * panel inside would override a transform set on the panel.
-             * It carries its own solid frost, so the grown panel's top rows,
-             * which rise above the scrim's solid part into its fade, keep
-             * ink on frost (6.28:1) over whatever the scene shows.
+             * It grows only below the cut's edge, where the scene is cut away,
+             * so it stays ink on the page's ground (6.28:1) at any size.
              */}
             <m.div
               ref={panelRef}
               style={{ scale: panelScale, originX: 1, originY: 1 }}
-              className="bg-frost lockup-wide:w-[min(22rem,36vw)] w-full shrink-0"
+              className="lockup-wide:w-[min(22rem,36vw)] w-full shrink-0"
             >
-            <div className="animate-intro-rise motion-reduce:animate-none [animation-delay:0.6s]">
               <dl>
                 <div className={FACT_ROW}>
                   <dt className={FACT_TERM}>Dates</dt>
@@ -430,7 +579,6 @@ export function Hero() {
               >
                 Register now
               </ButtonLink>
-            </div>
             </m.div>
           </div>
         </div>

@@ -64,7 +64,7 @@ const TOKENS: readonly Token[] = [
     swatch: 'bg-frost',
     role: 'The page ground.',
     usage:
-      'The body, the header, every panel (at 74%), the hero scrim, and the label on an ink button.',
+      'The body (and the hero lockup’s ground), the header, every panel (at 74%), and the label on an ink button.',
   },
   {
     name: 'brick',

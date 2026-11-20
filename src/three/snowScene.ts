@@ -53,6 +53,7 @@ import {
   WebGLRenderTarget,
 } from 'three'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
+import { HERO_INTRO_SECONDS } from '../lib/motion'
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
@@ -2315,7 +2316,7 @@ function createHero(
     if (animate) {
       if (introStart === null) introStart = seconds
       const t = seconds - introStart
-      intro = easeInOutCubic(clamp01((t - 0.1) / 3))
+      intro = easeInOutCubic(clamp01((t - 0.1) / (HERO_INTRO_SECONDS - 0.1)))
       wash = 1 - easeInOutCubic(clamp01(t / 1.1))
     }
     const washUniform = finish.uniforms.uWash

@@ -177,7 +177,7 @@ export function IceWallCanvas({
     }
     document.addEventListener('visibilitychange', onVisibility)
 
-    // Hover lifts a block a little; read from the buttons, not the canvas.
+    // Hover brightens a block a little; read from the buttons, not the canvas.
     const indexOf = (target: EventTarget | null) => {
       const tab = target instanceof Element ? target.closest('[role="tab"]') : null
       return tab ? tabs().indexOf(tab as HTMLElement) : -1

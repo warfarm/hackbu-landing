@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import type { MotionValue } from 'motion/react'
-import { usePrefersReducedMotion } from '../lib/motion'
+import { HERO_INTRO_SECONDS, usePrefersReducedMotion } from '../lib/motion'
 import { readPalette } from './palette'
 import type { SnowEtching, SnowSceneHandle, SnowVariant } from './snowScene'
 
@@ -48,6 +48,19 @@ const MAX_DPR = 1.75
 
 const NO_ETCHING: SnowEtching = { facts: [] }
 
+/**
+ * An element's top in the page's layout, from its offsets: unlike a bounding
+ * box, it ignores transforms, so the hero's lockup reads where it rests even
+ * while it is moved out of the way for its entrance.
+ */
+function layoutTop(element: HTMLElement): number {
+  let top = 0
+  for (let node: Element | null = element; node instanceof HTMLElement; node = node.offsetParent) {
+    top += node.offsetTop
+  }
+  return top
+}
+
 export function SnowCanvas({
   variant,
   progress,
@@ -56,6 +69,7 @@ export function SnowCanvas({
   frameAbove,
   callouts,
   etching,
+  onIntro,
   className = '',
 }: {
   variant: SnowVariant
@@ -83,6 +97,13 @@ export function SnowCanvas({
    * object (memoised): each new one redraws the etching.
    */
   etching?: SnowEtching
+  /**
+   * Hero only: told 'start' when the scene draws its first frame (its intro
+   * begins) and 'end' once the intro is over, or at once when there is no
+   * intro (reduced motion) or no scene (no WebGL, a failed chunk, a lost
+   * context). Read through a ref, so a new function does not rebuild the scene.
+   */
+  onIntro?: (phase: 'start' | 'end') => void
   className?: string
 }) {
   const reducedMotion = usePrefersReducedMotion()
@@ -100,16 +121,26 @@ export function SnowCanvas({
     etchingRef.current = etching
     etchRef.current?.(etching ?? NO_ETCHING)
   }, [etching])
+  const onIntroRef = useRef(onIntro)
+  useEffect(() => {
+    onIntroRef.current = onIntro
+  }, [onIntro])
 
   useEffect(() => {
     const wrap = wrapRef.current
     const canvas = canvasRef.current
     if (!wrap || !canvas) return
+    /** No scene after all: show the fallback, and there is no intro to wait for. */
+    const giveUp = () => {
+      setUnavailable(true)
+      onIntroRef.current?.('end')
+    }
     const palette = readPalette(wrap)
     if (!palette) {
-      setUnavailable(true)
+      giveUp()
       return
     }
+    let introTimer = 0
 
     let handle: SnowSceneHandle | null = null
     let disposed = false
@@ -169,9 +200,7 @@ export function SnowCanvas({
         Math.min(window.devicePixelRatio || 1, MAX_DPR),
       )
       const cover = frameAbove?.current
-      const bottom = cover
-        ? cover.getBoundingClientRect().top - box.top
-        : box.height
+      const bottom = cover ? layoutTop(cover) - layoutTop(wrap) : box.height
       handle?.setBand(frameTop, Math.max(frameTop + 40, bottom))
     }
 
@@ -207,7 +236,7 @@ export function SnowCanvas({
         failIfMajorPerformanceCaveat: true,
       })
       if (!context) {
-        setUnavailable(true)
+        giveUp()
         return
       }
       try {
@@ -233,13 +262,23 @@ export function SnowCanvas({
       } catch {
         // The chunk did not arrive (or the scene could not be built). The
         // scene is décor: fall back to the empty box rather than reject.
-        if (!disposed) setUnavailable(true)
+        if (!disposed) giveUp()
         return
       }
       resize()
       draw(performance.now())
       setReady(true)
       play()
+      // The scene timed its intro from the frame just drawn.
+      if (!reducedMotion && !atRest) {
+        onIntroRef.current?.('start')
+        introTimer = window.setTimeout(
+          () => onIntroRef.current?.('end'),
+          HERO_INTRO_SECONDS * 1000,
+        )
+      } else {
+        onIntroRef.current?.('end')
+      }
     }
 
     const onIntersect: IntersectionObserverCallback = (entries) => {
@@ -277,7 +316,8 @@ export function SnowCanvas({
     // to be rebuilt. Fall back to the empty box instead of a broken scene.
     const onContextLost = () => {
       pause()
-      setUnavailable(true)
+      window.clearTimeout(introTimer)
+      giveUp()
     }
     canvas.addEventListener('webglcontextlost', onContextLost)
 
@@ -335,6 +375,7 @@ export function SnowCanvas({
     return () => {
       disposed = true
       etchRef.current = null
+      window.clearTimeout(introTimer)
       pause()
       intersection.disconnect()
       resizeObserver.disconnect()
