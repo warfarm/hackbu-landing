@@ -11,6 +11,8 @@
  * up `email` and `firstName` by key to address the emails.
  */
 
+import { COUNTRIES } from './countries'
+
 type BaseField = {
   key: string
   label: string
@@ -28,7 +30,7 @@ export type Field =
     })
   | (BaseField & { type: 'select'; options: readonly string[] })
   | (BaseField & { type: 'textarea'; placeholder?: string })
-  | (BaseField & { type: 'checkbox'; link?: { label: string; href: string } })
+  | (BaseField & { type: 'checkbox'; links?: readonly { label: string; href: string }[] })
   /**
    * Uploaded with the registration and saved to the organizers' Google Drive;
    * the sheet cell links to it. Keep `accept` in step with the script's
@@ -46,6 +48,7 @@ export const FIELD_GROUPS: readonly FieldGroup[] = [
       { key: 'lastName', label: 'Last name', type: 'text', required: true, autoComplete: 'family-name' },
       { key: 'email', label: 'Email', type: 'email', required: true, autoComplete: 'email', help: 'We send your confirmation and acceptance here.' },
       { key: 'phone', label: 'Phone number', type: 'tel', required: true, autoComplete: 'tel' },
+      { key: 'countryOfResidence', label: 'Country of residence', type: 'select', required: true, options: COUNTRIES, wide: true },
       { key: 'age18', label: 'Will you be 18 or older on the day of the hackathon?', type: 'select', required: true, options: ['Yes', 'No'], wide: true },
       { key: 'gender', label: 'Gender', type: 'select', options: ['Woman', 'Man', 'Non-binary', 'Prefer to self-describe', 'Prefer not to say'] },
       { key: 'shirtSize', label: 'T-shirt size', type: 'select', required: true, options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
@@ -87,7 +90,18 @@ export const FIELD_GROUPS: readonly FieldGroup[] = [
         type: 'checkbox',
         required: true,
         wide: true,
-        link: { label: 'Read the code of conduct', href: 'https://mlh.io/code-of-conduct' },
+        links: [{ label: 'Read the code of conduct', href: 'https://mlh.io/code-of-conduct' }],
+      },
+      {
+        key: 'mlhPolicies',
+        label: 'I agree to the MLH Contest Terms and Conditions and Privacy Policy.',
+        type: 'checkbox',
+        required: true,
+        wide: true,
+        links: [
+          { label: 'Read the MLH Contest Terms and Conditions', href: 'https://github.com/MLH/mlh-policies/blob/main/contest-terms.md' },
+          { label: 'Read the MLH Privacy Policy', href: 'https://www.mlh.com/privacy' },
+        ],
       },
     ],
   },

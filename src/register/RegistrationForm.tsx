@@ -467,16 +467,16 @@ function FieldControl({ field }: { field: Field }) {
             {field.label}
             {field.required ? <RequiredMark /> : null}
           </label>
-          {field.link ? (
-            <p className="text-caption mt-1">
+          {field.links?.map((link) => (
+            <p key={link.href} className="text-caption mt-1">
               <ExternalLink
-                href={field.link.href}
+                href={link.href}
                 className={`${LINK_ON_FROST} underline underline-offset-4`}
               >
-                {field.link.label}
+                {link.label}
               </ExternalLink>
             </p>
-          ) : null}
+          ))}
         </div>
       </div>
     )
